@@ -111,5 +111,5 @@ $ curl 'https://api.color.pizza/v1/?values=0d0d0f,f39d91,d4d4d7'
       "distance":0.23432
     }
   ]
-}⏎⏎
+}
 ```
