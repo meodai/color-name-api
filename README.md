@@ -114,4 +114,27 @@ $ curl 'https://api.color.pizza/v1/?values=0d0d0f,f39d91,d4d4d7'
 }
 ```
 
-The response now contains 3 objects in the `colors` array. 
+The response now contains 3 objects in the `colors` array. The API will return the closest color names if can find for each requested color.
+The come from a [large collection](https://github.com/meodai/color-names). If for some reason you don't like the names, there are several other lists to choose from. So lets get the same names from a differet `list`.  
+
+```shell
+$ curl 'https://api.color.pizza/v1/?values=0d0d0f,f39d91,d4d4d7&list=wikipedia'
+```
+
+Now when some of the requested colors are very similar you might get some duplicate names:
+
+```shell
+$ curl 'https://api.color.pizza/v1/?values=1b2b11,1c2f11,2e3f24&list=wikipedia'
+```
+
+Notice how `Phthalo Green` was returned twice. 
+What makes this API unique is that you can ask to return a color name only once. So if you ask for similar colors the api will make sure to return a unique color name per requested color.
+
+```shell
+$ curl 'https://api.color.pizza/v1/?values=1b2b11,1c2f11,2e3f24&list=wikipedia&noduplicates=true'
+```
+
+In smaller color name lists. This can lead to strage results. So we suggest using this feature with some the larger lists: `default`, `bestOf`, `wikipedia`, `ntc`, `ral`, `ridgway` or `xkcd`
+
+
+
