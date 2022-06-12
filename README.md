@@ -27,7 +27,7 @@ $ curl https://api.color.pizza/v1/?colors=aaffcc
 ➜       }
 ➜    ], 
 ➜    "paletteTitle":"Neo Mint"
-➜  }⏎
+➜  }
 ```
 
 The response will be a a JSON Object containing two keys: `colors` and `paletteTitle` 
