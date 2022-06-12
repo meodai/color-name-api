@@ -124,8 +124,7 @@ export class FindColors {
     let lastResult = null;
 
     const colorResp = colorArr.map((hex) => {
-      // calculate RGB values for passed color
-      const rgb = lib.hexToRgb(hex);
+      // parse color
       const parsed = parse(hex);
 
       // get the closest named colors
@@ -151,7 +150,7 @@ export class FindColors {
     if (unique) {
       localClosest.clearCache();
     }
-    
+
     return colorResp;
   };
 }
