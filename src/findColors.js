@@ -1,6 +1,15 @@
 import {lib} from './lib.js';
-import ClosestVector from  'closestvector';
-import { differenceCiede2000 } from 'culori';
+import ClosestColor from './closestColor.js';
+
+import {
+  parse,
+  converter,
+  wcagLuminance,
+  differenceCiede2000,
+} from 'culori';
+
+const distanceMetric = differenceCiede2000();
+
 
 /**
  * enriches color object and fills RGB color arrays
@@ -9,17 +18,45 @@ import { differenceCiede2000 } from 'culori';
  * @param   {array} rgbColorArrRef reference to RGB color array
  * @return  {object} enriched color object
  */
-const enrichColorObj = (colorObj, rgbColorArrRef) => {
-  const rgb = lib.hexToRgb(colorObj.hex);
+const enrichColorObj = (colorObj, colorListParedRef) => {
+  const currentColor = parse(colorObj.hex);
+  const lab = converter('lab');
+  const rgb = converter('rgb');
+  const hsl = converter('hsl');
+
+  const ccLab = lab(currentColor);
+
+  const rgbFloat = rgb(currentColor);
+  const rgbInt = {
+    r: Math.round(rgbFloat.r * 255),
+    g: Math.round(rgbFloat.g * 255),
+    b: Math.round(rgbFloat.b * 255),
+  };
+  const hslFloat = hsl(currentColor);
+  const hslInt = {
+    h: Math.round(hslFloat.h || 0),
+    s: parseFloat((100 * hslFloat.s).toFixed(5)),
+    l: parseFloat((100 * hslFloat.l).toFixed(5)),
+  };
+
+
   // populates array needed for ClosestVector()
-  rgbColorArrRef.push([rgb.r, rgb.g, rgb.b]);
+  colorListParedRef.push(currentColor);
   // transform hex to RGB
-  colorObj.rgb = rgb;
+  colorObj.rgb = rgbInt;
   // get hsl color value
-  colorObj.hsl = lib.rgbToHsl(...Object.values(rgb));
+  colorObj.hsl = hslInt;
+  
+  colorObj.lab = {
+    l: parseFloat(ccLab.l.toFixed(5)),
+    a: parseFloat(ccLab.a.toFixed(5)),
+    b: parseFloat(ccLab.b.toFixed(5)),
+  };
 
   // calculate luminancy for each color
-  colorObj.luminance = lib.luminance(rgb);
+  
+  colorObj.luminance = parseFloat(lib.luminance(rgbInt).toFixed(5));
+  colorObj.luminanceWCAG = parseFloat(wcagLuminance(currentColor).toFixed(5));
 
   return colorObj;
 };
@@ -29,20 +66,20 @@ export class FindColors {
     this.colorLists = colorsListsObj;
 
     // object containing the name:hex pairs for nearestColor()
-    this.colorListsRGBArrays = {};
+    this.colorListsParsed = {};
     this.closestInstances = {};
 
     // prepare color array
     Object.keys(this.colorLists).forEach((listName) => {
-      this.colorListsRGBArrays[listName] = [];
+      this.colorListsParsed[listName] = [];
 
       this.colorLists[listName].forEach(c => {
-        enrichColorObj(c, this.colorListsRGBArrays[listName]);
+        enrichColorObj(c, this.colorListsParsed[listName]);
       });
 
       Object.freeze(this.colorLists[listName]);
-      this.closestInstances[listName] = new ClosestVector(
-        this.colorListsRGBArrays[listName]
+      this.closestInstances[listName] = new ClosestColor(
+        this.colorListsParsed[listName]
       );
     });
   }
@@ -78,8 +115,8 @@ export class FindColors {
     let localClosest = this.closestInstances[listKey];
 
     if (unique) {
-      localClosest = new ClosestVector(
-        this.colorListsRGBArrays[listKey],
+      localClosest = new ClosestColor(
+        this.colorListsParsed[listKey],
         true
       );
     }
@@ -89,9 +126,12 @@ export class FindColors {
     const colorResp = colorArr.map((hex) => {
       // calculate RGB values for passed color
       const rgb = lib.hexToRgb(hex);
+      const parsed = parse(hex);
 
       // get the closest named colors
-      let closestColor = localClosest.get([rgb.r, rgb.g, rgb.b]);
+      
+      let closestColor = localClosest.get(parsed);
+
       if (closestColor && unique) {
         lastResult = closestColor;
       } else if (unique) {
@@ -102,10 +142,8 @@ export class FindColors {
       return {
         ...color,
         requestedHex: `#${hex}`,
-        distance: Math.sqrt(
-          Math.pow(color.rgb.r - rgb.r, 2) +
-          Math.pow(color.rgb.g - rgb.g, 2) +
-          Math.pow(color.rgb.b - rgb.b, 2)
+        distance: parseFloat(
+          distanceMetric(color.hex, parsed).toFixed(5)
         ),
       }
     });
@@ -113,7 +151,7 @@ export class FindColors {
     if (unique) {
       localClosest.clearCache();
     }
-
+    
     return colorResp;
   };
 }

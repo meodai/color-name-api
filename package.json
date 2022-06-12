@@ -35,7 +35,6 @@
   },
   "homepage": "https://github.com/meodai/color-name-api#readme",
   "dependencies": {
-    "closestvector": "^0.6.1",
     "color-name-list": "^9.17.0",
     "color-name-lists": "^3.2.0",
     "culori": "^2.0.3"
