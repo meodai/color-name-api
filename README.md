@@ -113,3 +113,5 @@ $ curl 'https://api.color.pizza/v1/?values=0d0d0f,f39d91,d4d4d7'
   ]
 }
 ```
+
+The response now contains 3 objects in the `colors` array. 
