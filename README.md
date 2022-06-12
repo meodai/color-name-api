@@ -2,7 +2,7 @@
 
 Rest API that returns a bunch of color names for a given color-value.
 
-##.Getting started with the REST API
+## Getting started with the REST API
 
 ### Hello World
 
