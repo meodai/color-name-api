@@ -1,0 +1,46 @@
+{
+  "name": "color-name-api",
+  "version": "0.1.0",
+  "description": "Rest API that returns a bunch of color names for a given color-value",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "test": "",
+    "start": "node src/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/meodai/color-name-api.git"
+  },
+  "keywords": [
+    "color",
+    "palette",
+    "naming",
+    "colors",
+    "colour",
+    "colours",
+    "rest",
+    "api",
+    "api",
+    "node"
+  ],
+  "author": "meodai@gmail.com",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.3.0",
+    "npm": ">=8.11.0"
+  },
+  "bugs": {
+    "url": "https://github.com/meodai/color-name-api/issues"
+  },
+  "homepage": "https://github.com/meodai/color-name-api#readme",
+  "dependencies": {
+    "closestvector": "^0.6.1",
+    "color-name-list": "^9.17.0",
+    "color-name-lists": "^3.2.0",
+    "culori": "^2.0.3"
+  },
+  "devDependencies": {
+    "seedrandom": "^3.0.5"
+  }
+}
