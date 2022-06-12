@@ -6,26 +6,36 @@ Rest API that returns a bunch of color names for a given color-value.
 
 ### Hello World
 
-Let's start by testing our setup. Open up a command prompt and enter the following command:
+Let's start by testing the API. Open up a command prompt and enter the following command:
 
 ```shell
-$ curl https://api.color.pizza/v1/aaffcc
+$ curl https://api.color.pizza/v1/?colors=aaffcc
 
 ➜ {
-  "colors":
-    [
-      {
-        "name":"Neo Mint",
-        "hex":"#aaffcc",
-        "rgb":{"r":170,"g":255,"b":204},
-        "hsl":{"h":144,"s":100,"l":83.33333},
-        "lab":{"l":93.57729,"a":-34.63514,"b":15.94209},
-        "luminance":159.78151,
-        "luminanceWCAG":0.84426,
-        "requestedHex":"#aaffcc",
-        "distance":0
-       }
-    ], 
-    "paletteTitle":"Neo Mint"
-  }⏎
+➜   "colors":
+➜    [
+➜      {
+➜        "name":"Neo Mint",
+➜        "hex":"#aaffcc",
+➜        "rgb":{"r":170,"g":255,"b":204},
+➜        "hsl":{"h":144,"s":100,"l":83.33333},
+➜        "lab":{"l":93.57729,"a":-34.63514,"b":15.94209},
+➜        "luminance":159.78151,
+➜        "luminanceWCAG":0.84426,
+➜        "requestedHex":"#aaffcc",
+➜        "distance":0
+➜       }
+➜    ], 
+➜    "paletteTitle":"Neo Mint"
+➜  }⏎
+```
+
+The response will be a a JSON Object containing two keys: `colors` and `paletteTitle` 
+*colors* will contain an array of all the colors you have asked for, with some useful information like `name` or `hsl`.
+
+Now, let's `GET` the names for multiple colors:
+```shell
+$ curl 'https://api.color.pizza/v1/?values=0d0d0f,f39d91,d4d4d7'
+
+➜ {"paletteTitle":"Ruined Amber","colors":[{"name":"Ruined Smores","hex":"#0f1012","rgb":{"r":15,"g":16,"b":18},"hsl":{"h":220,"s":9.09091,"l":6.47059},"lab":{"l":4.64662,"a":-0.0655,"b":-1.21669},"luminance":10.60828,"luminanceWCAG":0.00516,"requestedHex":"#0d0d0f","distance":0.7732},{"name":"Peach Amber","hex":"#fb9f93","rgb":{"r":251,"g":159,"b":147},"hsl":{"h":7,"s":92.85714,"l":78.03922},"lab":{"l":74.88027,"a":34.17564,"b":21.39099},"luminance":120.93069,"luminanceWCAG":0.47412,"requestedHex":"#f39d91","distance":1.39432},{"name":"Nimbus Cloud","hex":"#d5d5d8","rgb":{"r":213,"g":213,"b":216},"hsl":{"h":240,"s":3.7037,"l":84.11765},"lab":{"l":85.33592,"a":0.40788,"b":-1.48475},"luminance":142.46096,"luminanceWCAG":0.66693,"requestedHex":"#d4d4d7","distance":0.23432}]}⏎
 ```
