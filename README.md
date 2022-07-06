@@ -1,3 +1,4 @@
+![Color Name API Logo](logo.png "Color Name API")
 # Color Name API
 
 Rest API that returns a bunch of color names for a given color-value.
