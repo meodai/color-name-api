@@ -10,7 +10,7 @@ Rest API that returns a bunch of color names for a given color-value.
 Let's start by testing the API. Open up a command prompt and enter the following command:
 
 ```shell
-$ curl https://api.color.pizza/v1/?colors=aaffcc
+$ curl https://api.color.pizza/v1/?values=aaffcc
 
 ➜ {
 ➜   "colors":
