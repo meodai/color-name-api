@@ -37,6 +37,7 @@
   "dependencies": {
     "color-name-list": "^9.21.0",
     "color-name-lists": "^3.4.0",
+    "color-standards-and-color-nomenclature": "^1.1.0",
     "culori": "^2.0.3"
   },
   "devDependencies": {
