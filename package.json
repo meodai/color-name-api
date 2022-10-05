@@ -1,6 +1,6 @@
 {
   "name": "color-name-api",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Rest API that returns a bunch of color names for a given color-value",
   "main": "src/index.js",
   "type": "module",
@@ -36,8 +36,7 @@
   "homepage": "https://github.com/meodai/color-name-api#readme",
   "dependencies": {
     "color-name-list": "^9.21.0",
-    "color-name-lists": "^3.4.0",
-    "color-standards-and-color-nomenclature": "^1.1.0",
+    "color-name-lists": "^3.5.0",
     "culori": "^2.0.3"
   },
   "devDependencies": {
