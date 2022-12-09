@@ -1,11 +1,11 @@
 {
   "name": "color-name-api",
-  "version": "0.3.3",
+  "version": "0.5.0",
   "description": "Rest API that returns a bunch of color names for a given color-value",
   "main": "src/index.js",
   "type": "module",
   "scripts": {
-    "test": "",
+    "test": "node test/test.js",
     "start": "node src/server.js"
   },
   "repository": {
@@ -20,7 +20,6 @@
     "colour",
     "colours",
     "rest",
-    "api",
     "api",
     "node"
   ],
@@ -37,9 +36,12 @@
   "dependencies": {
     "color-name-list": "^9.30.0",
     "color-name-lists": "^3.9.1",
-    "culori": "^2.0.3"
+    "culori": "^2.0.3",
+    "seedrandom": "^3.0.5"
   },
   "devDependencies": {
-    "seedrandom": "^3.0.5"
+    "eslint": "^8.29.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.26.0"
   }
 }

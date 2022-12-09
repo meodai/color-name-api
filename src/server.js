@@ -1,11 +1,13 @@
 import http from 'http';
-import url from 'url';
+// import url from 'url';
+import url from 'node:url';
 import zlib from 'zlib';
 import colorNameLists from 'color-name-lists';
 import colors from 'color-name-list/dist/colornames.esm.mjs';
 import colorsBestOf from 'color-name-list/dist/colornames.bestof.esm.mjs';
-import {FindColors} from './findColors.js';
-import {getPaletteTitle} from './generatePaletteName.js';
+import { FindColors } from './findColors.js';
+import { getPaletteTitle } from './generatePaletteName.js';
+import { svgTemplate } from './colorSwatchSVG.js';
 
 const port = process.env.PORT || 8080;
 const currentVersion = 'v1';
@@ -14,6 +16,7 @@ const APIurl = ''; // subfolder for the API
 const baseUrl = `${APIurl}${currentVersion}/`;
 const baseUrlNames = `${baseUrl}${urlNameSubpath}/`;
 const urlColorSeparator = ',';
+
 const responseHeaderObj = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET',
@@ -23,12 +26,17 @@ const responseHeaderObj = {
   'Content-Type': 'application/json; charset=utf-8',
 };
 
+const responseHandlerSVG = {
+  ...responseHeaderObj,
+  'Content-Type': 'image/svg+xml',
+};
+
 // accepts encoding
 
 // [{name: 'red', value: '#f00'}, ...]
 const colorsLists = {
   default: colors,
-  colors: colors,
+  colors,
   bestOf: colorsBestOf,
 };
 
@@ -36,16 +44,58 @@ Object.assign(colorsLists, colorNameLists.lists);
 
 const avalibleColorNameLists = Object.keys(colorsLists);
 
+const colorNameListMeta = {
+  title: 'Handpicked Color Names',
+  description: 'A handpicked list of 29891 unique color names from various sources and thousands of curated user submissions.',
+  source: 'https://github.com/meodai/color-names',
+  key: 'colors',
+};
+
+colorNameLists.meta.default = { ...colorNameListMeta, key: 'default' };
+colorNameLists.meta.colors = { ...colorNameListMeta, key: 'colors' };
+colorNameLists.meta.bestOf = {
+  title: 'Best of Color Names',
+  source: 'https://github.com/meodai/color-names',
+  description: 'Best Of SubsetBest of of 29891 unique color names from various sources and thousands of curated user submissions.',
+  key: 'bestOf',
+};
+
 const findColors = new FindColors(colorsLists);
 
 /**
  * validates a hex color
  * @param   {string} color hex representation of color
- * @return  {boolen}
+ * @return  {boolean}
  */
 const validateColor = (color) => (
   /^[0-9A-F]{3}([0-9A-F]{3})?$/i.test(color)
 );
+
+/**
+ * validates a list of hex colors separated by a comma
+ * @param   {string} colors list of hex colors
+ * @return  {boolean}
+ */
+const validateColors = (colors) => (
+  colors.split(urlColorSeparator).every(validateColor)
+);
+
+/**
+ * gets the list key from the search params
+ * @param   {object} searchParams
+ * @return  {string|null} list key
+ */
+const getListKey = (searchParams) => {
+  const goodNamesMode = searchParams.has('goodnamesonly')
+                        && searchParams.get('goodnamesonly') === 'true';
+
+  let listKey = searchParams.has('list')
+                && searchParams.get('list');
+
+  listKey = listKey || (goodNamesMode ? 'bestOf' : 'default');
+
+  return listKey && avalibleColorNameLists.includes(listKey) ? listKey : null;
+};
 
 /**
  * responds to the client
@@ -54,13 +104,14 @@ const validateColor = (color) => (
  * @param {*} statusCode         HTTP status code
  */
 const httpRespond = (
-    response,
-    responseObj = {},
-    statusCode = 200,
-    responseHeader = responseHeaderObj
+  response,
+  responseObj = {},
+  statusCode = 200,
+  responseHeader = responseHeaderObj,
+  type = 'json',
 ) => {
   response.writeHead(statusCode, responseHeader);
-  const stringifiedResponse = JSON.stringify(responseObj);
+  const stringifiedResponse = type === 'json' ? JSON.stringify(responseObj) : responseObj;
 
   if (responseHeader['Content-Encoding'] === 'gzip') {
     // ends the response with the gziped API answer
@@ -73,33 +124,36 @@ const httpRespond = (
 };
 
 const respondNameSearch = (
-    searchParams = new URLSearchParams(''),
-    listKey = 'default',
-    requestUrl,
-    request,
-    response,
-    responseHeader,
+  searchParams,
+  requestUrl,
+  request,
+  response,
+  responseHeader,
 ) => {
   const nameQuery = request.url.replace(requestUrl.search, '')
   // splits the base url from everything
   // after the API URL
-      .split(baseUrlNames)[1] || '';
+    .split(baseUrlNames)[1] || '';
+
+  const listKey = getListKey(searchParams);
 
   // gets the name
   const nameString = searchParams.has('name')
-                     ? searchParams.get('name') : '';
+    ? searchParams.get('name') : '';
 
   const searchString = decodeURI(nameString || nameQuery);
 
   if (searchString.length < 3) {
     return httpRespond(
-        response,
-        {error: {
+      response,
+      {
+        error: {
           status: 404,
-          message: `the color name your are looking for must be at least 3 characters long.`,
-        }},
-        404,
-        responseHeader
+          message: 'the color name your are looking for must be at least 3 characters long.',
+        },
+      },
+      404,
+      responseHeader,
     );
   }
 
@@ -109,28 +163,29 @@ const respondNameSearch = (
 };
 
 const respondValueSearch = (
-    searchParams = new URLSearchParams(''),
-    listKey = 'default',
-    requestUrl,
-    request,
-    response,
-    responseHeader
+  searchParams,
+  requestUrl,
+  request,
+  response,
+  responseHeader,
 ) => {
   const uniqueMode = searchParams.has('noduplicates')
                     && searchParams.get('noduplicates') === 'true';
 
+  const listKey = getListKey(searchParams);
+
   const colorQuery = request.url.replace(requestUrl.search, '')
   // splits the base url from everything
   // after the API URL
-      .split(baseUrl)[1] || '';
+    .split(baseUrl)[1] || '';
 
   const colorListString = searchParams.has('values')
-                          ? searchParams.get('values') : '';
+    ? searchParams.get('values') : '';
 
   // gets all the colors after
   const urlColorList = (colorQuery || colorListString).toLowerCase()
-      .split(urlColorSeparator)
-      .filter((hex) => hex);
+    .split(urlColorSeparator)
+    .filter((hex) => hex);
 
   // creates a list of invalid colors
   const invalidColors = urlColorList.filter((hex) => (
@@ -144,10 +199,10 @@ const respondValueSearch = (
         error: {
           status: 404,
           message: `'${invalidColors.join(', ')}' is not a valid HEX color`,
-        }
+        },
       },
       404,
-      responseHeader
+      responseHeader,
     );
   }
 
@@ -155,9 +210,7 @@ const respondValueSearch = (
   let colorsResponse;
 
   if (urlColorList[0]) {
-    colorsResponse = findColors.getNamesForValues(
-        urlColorList, uniqueMode, listKey
-    );
+    colorsResponse = findColors.getNamesForValues(urlColorList, uniqueMode, listKey);
   } else {
     colorsResponse = colorsLists[listKey];
   }
@@ -180,6 +233,88 @@ const respondValueSearch = (
   }, 200, responseHeader);
 };
 
+const respondLists = (
+  searchParams,
+  requestUrl,
+  request,
+  response,
+  responseHeader,
+) => {
+  const avalibleColorNameLists = Object.keys(colorsLists);
+  const listDescriptions = { ...colorNameLists.meta };
+  return httpRespond(response, {
+    avalibleColorNameLists,
+    listDescriptions,
+  }, 200, responseHeader);
+};
+
+const routes = [
+  {
+    path: '/names/',
+    handler: respondNameSearch,
+  },
+  {
+    path: '/meta/lists/',
+    handler: respondLists,
+  },
+  {
+    path: '/swatch/',
+    handler: (
+      searchParams,
+      requestUrl,
+      request,
+      response,
+      responseHeader,
+    ) => {
+      const color = searchParams.has('color') ? searchParams.get('color') : null;
+      const colorName = searchParams.has('name') ? searchParams.get('name') : null;
+
+      if (!color) {
+        return httpRespond(
+          response,
+          {
+            error: {
+              status: 404,
+              message: 'you need to provide at least a color',
+            },
+          },
+          404,
+          responseHeader,
+        );
+      }
+
+      return httpRespond(
+        response,
+        svgTemplate(`#${color}`, colorName),
+        200,
+        responseHandlerSVG,
+        'svg',
+      );
+    },
+  },
+  {
+    path: '/',
+    handler: respondValueSearch,
+  },
+];
+
+const getHandlerForPath = (path) => {
+  const route = routes.find((route) => route.path === path);
+
+  if (route) {
+    return route.handler;
+  }
+
+  // if the path is not a route, check if it is a color
+  // not super happy about this, but I don't want to
+  // break compatibility with the old API
+  if (validateColors(path.slice(1))) {
+    return respondValueSearch;
+  }
+
+  return null;
+};
+
 /**
  * Paths:
  *
@@ -192,25 +327,26 @@ const respondValueSearch = (
  */
 
 const requestHandler = (request, response) => {
-  const requestUrl = url.parse(request.url);
+  const requestUrl = new URL(request.url, 'http://localhost');
   const isAPI = requestUrl.pathname.includes(baseUrl);
-  const isNamesAPI = requestUrl.pathname.includes(urlNameSubpath + '/');
-  const responseHeader = {...responseHeaderObj};
+  const path = requestUrl.pathname.replace(baseUrl, '');
+  const responseHeader = { ...responseHeaderObj };
+  const responseHandler = getHandlerForPath(path);
 
   // understanding where requests come from
   console.info(
-      'request from',
-      request.headers.origin
+    'request from',
+    request.headers.origin || request.headers.host || request.headers.referer,
   );
 
   if (request.headers['accept-encoding']) {
     const accepts = request.headers['accept-encoding'];
-    if (accepts.toLowerCase().includes("gzip")) {
+    if (accepts.toLowerCase().includes('gzip')) {
       responseHeader['Content-Encoding'] = 'gzip';
     }
   }
 
-  let accpets = request.headers['accept-encoding'];
+  const accpets = request.headers['accept-encoding'];
 
   // makes sure the API is beeing requested
   if (!isAPI) {
@@ -220,59 +356,50 @@ const requestHandler = (request, response) => {
         error: {
           status: 404,
           message: 'invalid URL: make sure to provide the API version',
-        }
+        },
       },
       404,
-      responseHeader
+      responseHeader,
+    );
+  }
+
+  if (responseHandler === null) {
+    return httpRespond(
+      response,
+      {
+        error: {
+          status: 404,
+          message: `invalid URL: you provided '${path}', available endpoints are ${routes.map((route) => `'${route.path}'`).join(', ')}`,
+        },
+      },
+      404,
+      responseHeader,
     );
   }
 
   // const search = requestUrl.search || '';
   const searchParams = new URLSearchParams(requestUrl.search);
 
-  const goodNamesMode = searchParams.has('goodnamesonly')
-                        && searchParams.get('goodnamesonly') === 'true';
-
-  let listKey = searchParams.has('list')
-                && searchParams.get('list');
-
-  listKey = goodNamesMode ? 'bestOf' : listKey;
-  listKey = listKey || 'default';
-
-  const isValidListKey = listKey && avalibleColorNameLists.includes(listKey);
-
-  if (!isValidListKey) {
+  if (!getListKey(searchParams)) {
     return httpRespond(
       response,
       {
         error: {
           status: 404,
-          message: `invalid list key: '${listKey}, available keys are: ${avalibleColorNameLists.join(', ')}`,
-        }
+          message: `invalid list key: '${searchParams.get('list')}, available keys are: ${avalibleColorNameLists.join(', ')} check /meta/lists for more info`,
+        },
       },
-      404
+      404,
     );
   }
 
-  if (!isNamesAPI) {
-    return respondValueSearch(
-        searchParams,
-        listKey,
-        requestUrl,
-        request,
-        response,
-        responseHeader,
-    );
-  } else {
-    return respondNameSearch(
-        searchParams,
-        listKey,
-        requestUrl,
-        request,
-        response,
-        responseHeader,
-    );
-  }
+  return responseHandler(
+    searchParams,
+    requestUrl,
+    request,
+    response,
+    responseHeader,
+  );
 };
 
 const server = http.createServer(requestHandler);

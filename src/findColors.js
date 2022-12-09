@@ -1,6 +1,3 @@
-import {lib} from './lib.js';
-import ClosestColor from './closestColor.js';
-
 import {
   parse,
   converter,
@@ -8,8 +5,10 @@ import {
   differenceCiede2000,
 } from 'culori';
 
-const distanceMetric = differenceCiede2000();
+import { lib } from './lib.js';
+import ClosestColor from './closestColor.js';
 
+const distanceMetric = differenceCiede2000();
 
 /**
  * enriches color object and fills RGB color arrays
@@ -39,14 +38,13 @@ const enrichColorObj = (colorObj, colorListParedRef) => {
     l: parseFloat((100 * hslFloat.l).toFixed(5)),
   };
 
-
   // populates array needed for ClosestVector()
   colorListParedRef.push(currentColor);
   // transform hex to RGB
   colorObj.rgb = rgbInt;
   // get hsl color value
   colorObj.hsl = hslInt;
-  
+
   colorObj.lab = {
     l: parseFloat(ccLab.l.toFixed(5)),
     a: parseFloat(ccLab.a.toFixed(5)),
@@ -54,9 +52,14 @@ const enrichColorObj = (colorObj, colorListParedRef) => {
   };
 
   // calculate luminancy for each color
-  
+
   colorObj.luminance = parseFloat(lib.luminance(rgbInt).toFixed(5));
   colorObj.luminanceWCAG = parseFloat(wcagLuminance(currentColor).toFixed(5));
+
+  colorObj.swatchImg = {
+    svgNamed: `/v1/swatch/?color=${colorObj.hex.slice(1)}&name=${encodeURI(colorObj.name)}`,
+    svg: `/v1/swatch/?color=${colorObj.hex.slice(1)}`,
+  };
 
   return colorObj;
 };
@@ -73,18 +76,18 @@ export class FindColors {
     Object.keys(this.colorLists).forEach((listName) => {
       this.colorListsParsed[listName] = [];
 
-      this.colorLists[listName].forEach(c => {
+      this.colorLists[listName].forEach((c) => {
         enrichColorObj(c, this.colorListsParsed[listName]);
       });
 
       Object.freeze(this.colorLists[listName]);
       this.closestInstances[listName] = new ClosestColor(
-        this.colorListsParsed[listName]
+        this.colorListsParsed[listName],
       );
     });
   }
 
-  _validateListKey (listKey) {
+  _validateListKey(listKey) {
     if (!this.colorLists[listKey]) {
       throw new Error(`List key "${listKey}" is not valid.`);
     } else {
@@ -97,10 +100,10 @@ export class FindColors {
    * @param {string} searchStr search term
    * @param {boolen} bestOf    if set only returns good names
    */
-  searchNames (searchStr, listKey = 'default') {
+  searchNames(searchStr, listKey = 'default') {
     this._validateListKey(listKey);
     return this.colorLists[listKey].filter(
-      color => color.name.toLowerCase().includes(searchStr.toLowerCase())
+      (color) => color.name.toLowerCase().includes(searchStr.toLowerCase()),
     );
   }
 
@@ -117,7 +120,7 @@ export class FindColors {
     if (unique) {
       localClosest = new ClosestColor(
         this.colorListsParsed[listKey],
-        true
+        true,
       );
     }
 
@@ -128,7 +131,7 @@ export class FindColors {
       const parsed = parse(hex);
 
       // get the closest named colors
-      
+
       let closestColor = localClosest.get(parsed);
 
       if (closestColor && unique) {
@@ -141,10 +144,14 @@ export class FindColors {
       return {
         ...color,
         requestedHex: `#${hex}`,
+        swatchImg: {
+          svgNamed: `/v1/swatch/?color=${hex}&name=${encodeURI(color.name)}`,
+          svg: `/v1/swatch/?color=${hex}`,
+        },
         distance: parseFloat(
-          distanceMetric(color.hex, parsed).toFixed(5)
+          distanceMetric(color.hex, parsed).toFixed(5),
         ),
-      }
+      };
     });
 
     if (unique) {
@@ -152,7 +159,5 @@ export class FindColors {
     }
 
     return colorResp;
-  };
+  }
 }
-
-
