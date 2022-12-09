@@ -1,5 +1,6 @@
 import http from 'http';
-import url from 'url';
+//import url from 'url';
+import url from 'node:url';
 import zlib from 'zlib';
 import colorNameLists from 'color-name-lists';
 import colors from 'color-name-list/dist/colornames.esm.mjs';
@@ -14,6 +15,7 @@ const APIurl = ''; // subfolder for the API
 const baseUrl = `${APIurl}${currentVersion}/`;
 const baseUrlNames = `${baseUrl}${urlNameSubpath}/`;
 const urlColorSeparator = ',';
+
 const responseHeaderObj = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET',
@@ -22,6 +24,8 @@ const responseHeaderObj = {
   'Access-Control-Allow-Headers': 'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept',
   'Content-Type': 'application/json; charset=utf-8',
 };
+
+// image/svg+xml
 
 // accepts encoding
 
@@ -180,6 +184,35 @@ const respondValueSearch = (
   }, 200, responseHeader);
 };
 
+const routes = [
+  {
+    path: '/names/',
+    handler: respondNameSearch,
+  },
+  {
+    path: '/meta/lists/',
+    handler: (request, response) => {},
+  },
+  {
+    path: '/swatch/',
+      handler: (request, response) => {},
+  },
+  {
+    path: '/',
+    handler: respondValueSearch,
+  }
+];
+
+
+const getHandlerForPath = (path) => {
+  const route = routes.find((route) => route.path === path);
+  if (route) {
+    return route.handler;
+  } else {
+    return null;
+  }
+}
+
 /**
  * Paths:
  *
@@ -192,15 +225,16 @@ const respondValueSearch = (
  */
 
 const requestHandler = (request, response) => {
-  const requestUrl = url.parse(request.url);
+  const requestUrl = new URL(request.url, 'http://localhost');
   const isAPI = requestUrl.pathname.includes(baseUrl);
+  const path = requestUrl.pathname.replace(baseUrl, '');
   const isNamesAPI = requestUrl.pathname.includes(urlNameSubpath + '/');
   const responseHeader = {...responseHeaderObj};
 
   // understanding where requests come from
   console.info(
       'request from',
-      request.headers.origin
+      request.headers.origin || request.headers.host || request.headers.referer
   );
 
   if (request.headers['accept-encoding']) {
@@ -253,6 +287,8 @@ const requestHandler = (request, response) => {
       404
     );
   }
+
+  console.log(path, getHandlerForPath(path))
 
   if (!isNamesAPI) {
     return respondValueSearch(
