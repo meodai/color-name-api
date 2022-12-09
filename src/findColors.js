@@ -56,6 +56,11 @@ const enrichColorObj = (colorObj, colorListParedRef) => {
   colorObj.luminance = parseFloat(lib.luminance(rgbInt).toFixed(5));
   colorObj.luminanceWCAG = parseFloat(wcagLuminance(currentColor).toFixed(5));
 
+  colorObj.swatchImg = {
+    svgNamed: `/v1/swatch/?color=${colorObj.hex.slice(1)}&name=${encodeURI(colorObj.name)}`,
+    svg: `/v1/swatch/?color=${colorObj.hex.slice(1)}`,
+  };
+
   return colorObj;
 };
 
@@ -139,6 +144,10 @@ export class FindColors {
       return {
         ...color,
         requestedHex: `#${hex}`,
+        swatchImg: {
+          svgNamed: `/v1/swatch/?color=${hex}&name=${encodeURI(color.name)}`,
+          svg: `/v1/swatch/?color=${hex}`,
+        },
         distance: parseFloat(
           distanceMetric(color.hex, parsed).toFixed(5),
         ),

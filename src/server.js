@@ -7,6 +7,7 @@ import colors from 'color-name-list/dist/colornames.esm.mjs';
 import colorsBestOf from 'color-name-list/dist/colornames.bestof.esm.mjs';
 import { FindColors } from './findColors.js';
 import { getPaletteTitle } from './generatePaletteName.js';
+import { svgTemplate } from './colorSwatchSVG.js';
 
 const port = process.env.PORT || 8080;
 const currentVersion = 'v1';
@@ -25,7 +26,10 @@ const responseHeaderObj = {
   'Content-Type': 'application/json; charset=utf-8',
 };
 
-// image/svg+xml
+const responseHandlerSVG = {
+  ...responseHeaderObj,
+  'Content-Type': 'image/svg+xml',
+};
 
 // accepts encoding
 
@@ -68,6 +72,15 @@ const validateColor = (color) => (
 );
 
 /**
+ * validates a list of hex colors separated by a comma
+ * @param   {string} colors list of hex colors
+ * @return  {boolean}
+ */
+const validateColors = (colors) => (
+  colors.split(urlColorSeparator).every(validateColor)
+);
+
+/**
  * gets the list key from the search params
  * @param   {object} searchParams
  * @return  {string|null} list key
@@ -95,9 +108,10 @@ const httpRespond = (
   responseObj = {},
   statusCode = 200,
   responseHeader = responseHeaderObj,
+  type = 'json',
 ) => {
   response.writeHead(statusCode, responseHeader);
-  const stringifiedResponse = JSON.stringify(responseObj);
+  const stringifiedResponse = type === 'json' ? JSON.stringify(responseObj) : responseObj;
 
   if (responseHeader['Content-Encoding'] === 'gzip') {
     // ends the response with the gziped API answer
@@ -245,7 +259,38 @@ const routes = [
   },
   {
     path: '/swatch/',
-    handler: (request, response) => {},
+    handler: (
+      searchParams,
+      requestUrl,
+      request,
+      response,
+      responseHeader,
+    ) => {
+      const color = searchParams.has('color') ? searchParams.get('color') : null;
+      const colorName = searchParams.has('name') ? searchParams.get('name') : null;
+
+      if (!color) {
+        return httpRespond(
+          response,
+          {
+            error: {
+              status: 404,
+              message: 'you need to provide at least a color',
+            },
+          },
+          404,
+          responseHeader,
+        );
+      }
+
+      return httpRespond(
+        response,
+        svgTemplate(`#${color}`, colorName),
+        200,
+        responseHandlerSVG,
+        'svg',
+      );
+    },
   },
   {
     path: '/',
@@ -255,9 +300,18 @@ const routes = [
 
 const getHandlerForPath = (path) => {
   const route = routes.find((route) => route.path === path);
+
   if (route) {
     return route.handler;
   }
+
+  // if the path is not a route, check if it is a color
+  // not super happy about this, but I don't want to
+  // break compatibility with the old API
+  if (validateColors(path.slice(1))) {
+    return respondValueSearch;
+  }
+
   return null;
 };
 
