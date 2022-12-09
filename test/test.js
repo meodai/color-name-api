@@ -91,6 +91,24 @@ const routesToTest = {
   '/000000,notahex': (response) => {
     errorResponseTest(response);
   },
+  '/000000,000000?noduplicates=true': (response) => {
+    colorResponseBasicTest(response);
+    if (response.colors.length !== 2) {
+      throw new Error('response contains more colors than expected');
+    }
+    if (response.colors[0].name === response.colors[1].name) {
+      throw new Error('response contains duplicate colors');
+    }
+  },
+  '/?values=000000,000000&noduplicates=true': (response) => {
+    colorResponseBasicTest(response);
+    if (response.colors.length !== 2) {
+      throw new Error('response contains more colors than expected');
+    }
+    if (response.colors[0].name === response.colors[1].name) {
+      throw new Error('response contains duplicate colors');
+    }
+  },
   '/meta/lists/': (response) => {
     if (typeof response !== 'object') {
       throw new Error('response is not an object');
@@ -120,6 +138,10 @@ Object.keys(routesToTest).forEach((route) => {
     .then(
       testFn,
     ).catch((err) => {
-      console.log(err)
+      console.log(err);
+      console.log('Make sure the server is running on port', port);
+      process.exit(1);
     });
 });
+
+process.exit(0);
