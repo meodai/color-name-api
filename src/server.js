@@ -330,7 +330,6 @@ const requestHandler = (request, response) => {
   const requestUrl = new URL(request.url, 'http://localhost');
   const isAPI = requestUrl.pathname.includes(baseUrl);
   const path = requestUrl.pathname.replace(baseUrl, '');
-  const isNamesAPI = requestUrl.pathname.includes(`${urlNameSubpath}/`);
   const responseHeader = { ...responseHeaderObj };
   const responseHandler = getHandlerForPath(path);
 
@@ -387,7 +386,7 @@ const requestHandler = (request, response) => {
       {
         error: {
           status: 404,
-          message: `invalid list key: '${searchParams.get('list')}, available keys are: ${avalibleColorNameLists.join(', ')}`,
+          message: `invalid list key: '${searchParams.get('list')}, available keys are: ${avalibleColorNameLists.join(', ')} check /meta/lists for more info`,
         },
       },
       404,
