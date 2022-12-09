@@ -3,23 +3,25 @@ import seedrandom from 'seedrandom';
 /**
  * getPaletteTitle
  * @param {string[]} namesArr
- * @param {int(0-1)} rnd1
- * @param {int(0-1)} rnd2
- * @param {int(0-1)} longPartFirst
  * @param {RegExp} separatorRegex
- * @returns {string}
+ * @return {string}
  */
-
 export function getPaletteTitle(
-    namesArr, // array of names
-    separatorRegex = /(\s|-)+/g
+  namesArr, // array of names
+  separatorRegex = /(\s|-)+/g,
 ) {
-  let localnames = [...namesArr];
+  // remove duplicates
+  const localnames = [...new Set(namesArr)];
+
+  // if there is only one name, return it
+  if (localnames.length === 1) {
+    return localnames[0];
+  }
 
   const rng = seedrandom(namesArr.join('-'));
   const rnd1 = rng();
   const rnd2 = rng();
-  const longPartFirst = rng() < .5;
+  const longPartFirst = rng() < 0.5;
 
   // select a random name from the list for the first word in the palette title
   const indexFirst = Math.round(rnd1 * (localnames.length - 1));
@@ -35,14 +37,19 @@ export function getPaletteTitle(
   const partsLast = lastName.split(separatorRegex);
 
   if (longPartFirst) {
-    partsFirst.length > 1 ?
-      partsFirst.pop() :
+    if (partsFirst.length > 1) {
+      partsFirst.pop();
+    } else {
       partsFirst[0] = `${partsFirst[0]} `;
+    }
     return partsFirst.join('') + partsLast.pop();
-  } else {
-    partsLast.length > 1 ?
-      partsLast.shift() :
-      partsLast[0] = ` ${partsLast[0]}`;
-    return partsFirst.shift() + partsLast.join('');
   }
+
+  if (partsLast.length > 1) {
+    partsLast.shift();
+  } else {
+    partsLast[0] = ` ${partsLast[0]}`;
+  }
+
+  return partsFirst.shift() + partsLast.join('');
 }

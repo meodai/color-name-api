@@ -40,16 +40,49 @@ Object.assign(colorsLists, colorNameLists.lists);
 
 const avalibleColorNameLists = Object.keys(colorsLists);
 
+const colorNameListMeta = {
+  title: 'Handpicked Color Names',
+  description: 'A handpicked list of 29891 unique color names from various sources and thousands of curated user submissions.',
+  source: 'https://github.com/meodai/color-names',
+  key: 'colors',
+};
+
+colorNameLists.meta.default = { ...colorNameListMeta, key: 'default' };
+colorNameLists.meta.colors = { ...colorNameListMeta, key: 'colors' };
+colorNameLists.meta.bestOf = {
+  title: 'Best of Color Names',
+  source: 'https://github.com/meodai/color-names',
+  description: 'Best Of SubsetBest of of 29891 unique color names from various sources and thousands of curated user submissions.',
+  key: 'bestOf',
+};
+
 const findColors = new FindColors(colorsLists);
 
 /**
  * validates a hex color
  * @param   {string} color hex representation of color
- * @return  {boolen}
+ * @return  {boolean}
  */
 const validateColor = (color) => (
   /^[0-9A-F]{3}([0-9A-F]{3})?$/i.test(color)
 );
+
+/**
+ * gets the list key from the search params
+ * @param   {object} searchParams
+ * @return  {string|null} list key
+ */
+const getListKey = (searchParams) => {
+  const goodNamesMode = searchParams.has('goodnamesonly')
+                        && searchParams.get('goodnamesonly') === 'true';
+
+  let listKey = searchParams.has('list')
+                && searchParams.get('list');
+
+  listKey = listKey || (goodNamesMode ? 'bestOf' : 'default');
+
+  return listKey && avalibleColorNameLists.includes(listKey) ? listKey : null;
+};
 
 /**
  * responds to the client
@@ -77,8 +110,7 @@ const httpRespond = (
 };
 
 const respondNameSearch = (
-  searchParams = new URLSearchParams(''),
-  listKey = 'default',
+  searchParams,
   requestUrl,
   request,
   response,
@@ -88,6 +120,8 @@ const respondNameSearch = (
   // splits the base url from everything
   // after the API URL
     .split(baseUrlNames)[1] || '';
+
+  const listKey = getListKey(searchParams);
 
   // gets the name
   const nameString = searchParams.has('name')
@@ -115,8 +149,7 @@ const respondNameSearch = (
 };
 
 const respondValueSearch = (
-  searchParams = new URLSearchParams(''),
-  listKey = 'default',
+  searchParams,
   requestUrl,
   request,
   response,
@@ -124,6 +157,8 @@ const respondValueSearch = (
 ) => {
   const uniqueMode = searchParams.has('noduplicates')
                     && searchParams.get('noduplicates') === 'true';
+
+  const listKey = getListKey(searchParams);
 
   const colorQuery = request.url.replace(requestUrl.search, '')
   // splits the base url from everything
@@ -184,6 +219,21 @@ const respondValueSearch = (
   }, 200, responseHeader);
 };
 
+const respondLists = (
+  searchParams,
+  requestUrl,
+  request,
+  response,
+  responseHeader,
+) => {
+  const avalibleColorNameLists = Object.keys(colorsLists);
+  const listDescriptions = { ...colorNameLists.meta };
+  return httpRespond(response, {
+    avalibleColorNameLists,
+    listDescriptions,
+  }, 200, responseHeader);
+};
+
 const routes = [
   {
     path: '/names/',
@@ -191,7 +241,7 @@ const routes = [
   },
   {
     path: '/meta/lists/',
-    handler: (request, response) => {},
+    handler: respondLists,
   },
   {
     path: '/swatch/',
@@ -228,6 +278,7 @@ const requestHandler = (request, response) => {
   const path = requestUrl.pathname.replace(baseUrl, '');
   const isNamesAPI = requestUrl.pathname.includes(`${urlNameSubpath}/`);
   const responseHeader = { ...responseHeaderObj };
+  const responseHandler = getHandlerForPath(path);
 
   // understanding where requests come from
   console.info(
@@ -259,48 +310,38 @@ const requestHandler = (request, response) => {
     );
   }
 
-  // const search = requestUrl.search || '';
-  const searchParams = new URLSearchParams(requestUrl.search);
-
-  const goodNamesMode = searchParams.has('goodnamesonly')
-                        && searchParams.get('goodnamesonly') === 'true';
-
-  let listKey = searchParams.has('list')
-                && searchParams.get('list');
-
-  listKey = goodNamesMode ? 'bestOf' : listKey;
-  listKey = listKey || 'default';
-
-  const isValidListKey = listKey && avalibleColorNameLists.includes(listKey);
-
-  if (!isValidListKey) {
+  if (responseHandler === null) {
     return httpRespond(
       response,
       {
         error: {
           status: 404,
-          message: `invalid list key: '${listKey}, available keys are: ${avalibleColorNameLists.join(', ')}`,
+          message: `invalid URL: you provided '${path}', available endpoints are ${routes.map((route) => `'${route.path}'`).join(', ')}`,
+        },
+      },
+      404,
+      responseHeader,
+    );
+  }
+
+  // const search = requestUrl.search || '';
+  const searchParams = new URLSearchParams(requestUrl.search);
+
+  if (!getListKey(searchParams)) {
+    return httpRespond(
+      response,
+      {
+        error: {
+          status: 404,
+          message: `invalid list key: '${searchParams.get('list')}, available keys are: ${avalibleColorNameLists.join(', ')}`,
         },
       },
       404,
     );
   }
 
-  console.log(path, getHandlerForPath(path));
-
-  if (!isNamesAPI) {
-    return respondValueSearch(
-      searchParams,
-      listKey,
-      requestUrl,
-      request,
-      response,
-      responseHeader,
-    );
-  }
-  return respondNameSearch(
+  return responseHandler(
     searchParams,
-    listKey,
     requestUrl,
     request,
     response,
