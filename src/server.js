@@ -44,6 +44,7 @@ Object.assign(colorsLists, colorNameLists.lists);
 
 const avalibleColorNameLists = Object.keys(colorsLists);
 
+// add meta data to the color lists that are not in the color-name-lists package
 const colorNameListMeta = {
   title: 'Handpicked Color Names',
   description: 'A handpicked list of 29891 unique color names from various sources and thousands of curated user submissions.',
@@ -61,6 +62,13 @@ colorNameLists.meta.bestOf = {
   key: 'bestOf',
   colorCount: colorsBestOf.length,
 };
+
+// add endpoint urls to the meta data
+Object.keys(colorNameLists.meta).forEach(
+  (key) => {
+    colorNameLists.meta[key].url = `/${baseUrl}?list=${key}`;
+  },
+);
 
 const findColors = new FindColors(colorsLists);
 
@@ -243,10 +251,9 @@ const respondLists = (
   responseHeader,
 ) => {
   const avalibleColorNameLists = Object.keys(colorsLists);
-  const listDescriptions = { ...colorNameLists.meta };
   return httpRespond(response, {
     avalibleColorNameLists,
-    listDescriptions,
+    listDescriptions: colorNameLists.meta,
   }, 200, responseHeader);
 };
 
