@@ -49,6 +49,7 @@ const colorNameListMeta = {
   description: 'A handpicked list of 29891 unique color names from various sources and thousands of curated user submissions.',
   source: 'https://github.com/meodai/color-names',
   key: 'colors',
+  colorCount: colors.length,
 };
 
 colorNameLists.meta.default = { ...colorNameListMeta, key: 'default' };
@@ -58,6 +59,7 @@ colorNameLists.meta.bestOf = {
   source: 'https://github.com/meodai/color-names',
   description: 'Best Of SubsetBest of of 29891 unique color names from various sources and thousands of curated user submissions.',
   key: 'bestOf',
+  colorCount: colorsBestOf.length,
 };
 
 const findColors = new FindColors(colorsLists);
