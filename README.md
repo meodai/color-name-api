@@ -3,6 +3,11 @@
 
 Rest API that returns a bunch of color names for a given color-value.
 
+Introducing the a comprehensive and easy to use color-naming API!
+Easily retrieve the color name for any hexadecimal color value, using a variety 
+of different color name lists. Whether you're working on a design project or 
+building a color-themed application, our API has you covered.
+
 ## Getting started with the REST API
 
 ### Hello World
