@@ -109,7 +109,7 @@ const routesToTest = {
       throw new Error('response contains duplicate colors');
     }
   },
-  '/meta/lists/': (response) => {
+  '/lists/': (response) => {
     if (typeof response !== 'object') {
       throw new Error('response is not an object');
     }

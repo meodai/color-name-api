@@ -263,7 +263,7 @@ const routes = [
     handler: respondNameSearch,
   },
   {
-    path: '/meta/lists/',
+    path: '/lists/',
     handler: respondLists,
   },
   {
