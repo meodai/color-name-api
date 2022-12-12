@@ -395,7 +395,7 @@ const requestHandler = (request, response) => {
       {
         error: {
           status: 404,
-          message: `invalid list key: '${searchParams.get('list')}, available keys are: ${avalibleColorNameLists.join(', ')} check /meta/lists for more info`,
+          message: `invalid list key: '${searchParams.get('list')}, available keys are: ${avalibleColorNameLists.join(', ')} check /lists/ for more info`,
         },
       },
       404,
