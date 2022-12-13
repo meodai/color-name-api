@@ -42,7 +42,7 @@ const colorsLists = {
 
 Object.assign(colorsLists, colorNameLists.lists);
 
-const avalibleColorNameLists = Object.keys(colorsLists);
+const availableColorNameLists = Object.keys(colorsLists);
 
 // add meta data to the color lists that are not in the color-name-lists package
 const colorNameListMeta = {
@@ -104,7 +104,7 @@ const getListKey = (searchParams) => {
 
   listKey = listKey || (goodNamesMode ? 'bestOf' : 'default');
 
-  return listKey && avalibleColorNameLists.includes(listKey) ? listKey : null;
+  return listKey && availableColorNameLists.includes(listKey) ? listKey : null;
 };
 
 /**
@@ -250,9 +250,9 @@ const respondLists = (
   response,
   responseHeader,
 ) => {
-  const avalibleColorNameLists = Object.keys(colorsLists);
+  const availableColorNameLists = Object.keys(colorsLists);
   return httpRespond(response, {
-    avalibleColorNameLists,
+    availableColorNameLists,
     listDescriptions: colorNameLists.meta,
   }, 200, responseHeader);
 };
@@ -395,7 +395,7 @@ const requestHandler = (request, response) => {
       {
         error: {
           status: 404,
-          message: `invalid list key: '${searchParams.get('list')}, available keys are: ${avalibleColorNameLists.join(', ')} check /lists/ for more info`,
+          message: `invalid list key: '${searchParams.get('list')}, available keys are: ${availableColorNameLists.join(', ')} check /lists/ for more info`,
         },
       },
       404,
