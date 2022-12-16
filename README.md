@@ -127,6 +127,40 @@ The come from a [large collection](https://github.com/meodai/color-names). If fo
 $ curl 'https://api.color.pizza/v1/?values=0d0d0f,f39d91,d4d4d7&list=wikipedia'
 ```
 
+### Get supported color name lists
+
+```shell
+$ curl 'https://api.color.pizza/v1/lists/'
+
+➜
+{
+  availableColorNameLists: [
+    "defaults",
+    "colors",
+    "bestOf",
+    "basic"
+    // ... //
+  ],
+  listDescriptions: {
+    "basic": {
+      "title": "Basic",
+      "description": "A set of basic colors. Red, Green, Blue...",
+      "source": "https://github.com/colorjs/color-namer/tree/master/lib/colors",
+      "key": "basic"
+      "colorCount": 21,
+      "url": "/v1/?list=basic"
+    },
+    // ... //
+  }
+}
+```
+
+The response contains two keys: `availableColorNameLists` and `listDescriptions`.
+
+`availableColorNameLists` is an array of all the color name lists currently supported by Color Names, such as Wikipedia, HTML color lists, traditional Japanese colors etc.
+
+`listdescriptions`is an object whose keys are the name of the color lists with values containing useful information such as `title`, `description`, `source` etc.
+
 Now when some of the requested colors are very similar you might get some duplicate names:
 
 ```shell
