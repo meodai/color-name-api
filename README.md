@@ -161,6 +161,8 @@ The response contains two keys: `availableColorNameLists` and `listDescriptions`
 
 `listdescriptions`is an object whose keys are the name of the color lists with values containing useful information such as `title`, `description`, `source` etc.
 
+In this [demo](https://codepen.io/bytrangle/full/jOpOrdv), you can preview names of common colors given by each list. You can also change the input colors and the corresponding names in each list will be updated on the spot.
+
 Now when some of the requested colors are very similar you might get some duplicate names:
 
 ```shell
