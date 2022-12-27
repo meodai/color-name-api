@@ -93,16 +93,17 @@ const validateColors = (colors) => (
 /**
  * gets the list key from the search params
  * @param   {object} searchParams
+ * @param   {boolean} returnDefault whether to return the default list key
  * @return  {string|null} list key
  */
-const getListKey = (searchParams) => {
+const getListKey = (searchParams, returnDefault = true) => {
   const goodNamesMode = searchParams.has('goodnamesonly')
                         && searchParams.get('goodnamesonly') === 'true';
 
   let listKey = searchParams.has('list')
                 && searchParams.get('list');
 
-  listKey = listKey || (goodNamesMode ? 'bestOf' : 'default');
+  listKey = listKey || (returnDefault && (goodNamesMode ? 'bestOf' : 'default'));
 
   return listKey && availableColorNameLists.includes(listKey) ? listKey : null;
 };
@@ -250,6 +251,17 @@ const respondLists = (
   response,
   responseHeader,
 ) => {
+  const listKey = getListKey(searchParams, false);
+
+  if (listKey) {
+    return httpRespond(
+      response, 
+      colorNameLists.meta[listKey],
+      200,
+      responseHeader,
+    );
+  }
+
   const availableColorNameLists = Object.keys(colorsLists);
   return httpRespond(response, {
     availableColorNameLists,
