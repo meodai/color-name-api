@@ -36,7 +36,6 @@ const responseHandlerSVG = {
 // [{name: 'red', value: '#f00'}, ...]
 const colorsLists = {
   default: colors,
-  colors,
   bestOf: colorsBestOf,
 };
 
@@ -47,18 +46,18 @@ const availableColorNameLists = Object.keys(colorsLists);
 // add meta data to the color lists that are not in the color-name-lists package
 const colorNameListMeta = {
   title: 'Handpicked Color Names',
-  description: 'A handpicked list of 29891 unique color names from various sources and thousands of curated user submissions.',
+  description: `A large hand-picked list of ${colors.length} unique color names from various sources and thousands of curated user submissions.`,
   source: 'https://github.com/meodai/color-names',
   key: 'colors',
   colorCount: colors.length,
 };
 
 colorNameLists.meta.default = { ...colorNameListMeta, key: 'default' };
-colorNameLists.meta.colors = { ...colorNameListMeta, key: 'colors' };
+
 colorNameLists.meta.bestOf = {
   title: 'Best of Color Names',
   source: 'https://github.com/meodai/color-names',
-  description: 'Best Of SubsetBest of of 29891 unique color names from various sources and thousands of curated user submissions.',
+  description: 'Best color names selected from various sources.',
   key: 'bestOf',
   colorCount: colorsBestOf.length,
 };
