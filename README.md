@@ -2,7 +2,7 @@
 # Color Name API
 
 [![github sponsor count](https://img.shields.io/github/sponsors/meodai)](https://github.com/sponsors/meodai)
-[![npm version](https://img.shields.io/npm/v/palette-aldente.svg)](https://www.npmjs.com/package/color-name-api)
+[![npm version](https://img.shields.io/npm/v/color-name-api.svg)](https://www.npmjs.com/package/color-name-api)
 
 Rest API that returns a bunch of color names for a given color-value.
 
