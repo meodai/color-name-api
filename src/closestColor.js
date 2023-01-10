@@ -1,4 +1,5 @@
 import { differenceCiede2000 } from 'culori';
+import { hasOwnProperty } from './lib.js';
 
 /**
  * Return closest color from a given list
@@ -63,7 +64,7 @@ export default class Closest {
     const colorUID = JSON.stringify(color);
 
     // returns previously found match
-    if (!this.unique && this.cache.hasOwnProperty(colorUID)) {
+    if (!this.unique && hasOwnProperty(this.cache, colorUID)) {
       return this.cache[colorUID];
     }
 
@@ -75,7 +76,7 @@ export default class Closest {
       return null;
     }
 
-    for (let i = 0; i < this.list.length; i++) {
+    for (let i = 0; i < this.list.length; i += 1) {
       // skip if set to unique and color was returned previously
       if (!(this.unique && this.previouslyReturnedIndexes.indexOf(i) > -1)) {
         const distance = this.metric(color, this.list[i]);
@@ -92,10 +93,13 @@ export default class Closest {
       this.previouslyReturnedIndexes.push(index);
     }
 
-    // return and save in cache
-    return this.cache[colorUID] = {
+    // save to cache
+    this.cache[colorUID] = {
       closest,
-      index
+      index,
     };
+
+    // return result
+    return this.cache[colorUID];
   }
 }

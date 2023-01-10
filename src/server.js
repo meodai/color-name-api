@@ -1,21 +1,33 @@
+/* eslint-disable no-console */
+
 import http from 'http';
-// import url from 'url';
-import url from 'node:url';
 import zlib from 'zlib';
 import colorNameLists from 'color-name-lists';
 import colors from 'color-name-list/dist/colornames.esm.mjs';
 import colorsBestOf from 'color-name-list/dist/colornames.bestof.esm.mjs';
+import { Server } from 'socket.io';
+import * as dotenv from 'dotenv';
+
 import { FindColors } from './findColors.js';
 import { getPaletteTitle } from './generatePaletteName.js';
 import { svgTemplate } from './colorSwatchSVG.js';
 
+dotenv.config();
+
 const port = process.env.PORT || 8080;
+const socket = process.env.SOCKET || false;
+const allowedSocketOrigins = (
+  process.env.ALLOWED_SOCKET_ORIGINS
+  && process.env.ALLOWED_SOCKET_ORIGINS.split(',')
+) || `http://localhost:${port}`;
 const currentVersion = 'v1';
 const urlNameSubpath = 'names';
 const APIurl = ''; // subfolder for the API
 const baseUrl = `${APIurl}${currentVersion}/`;
 const baseUrlNames = `${baseUrl}${urlNameSubpath}/`;
 const urlColorSeparator = ',';
+
+let io;
 
 const responseHeaderObj = {
   'Access-Control-Allow-Origin': '*',
@@ -82,11 +94,11 @@ const validateColor = (color) => (
 
 /**
  * validates a list of hex colors separated by a comma
- * @param   {string} colors list of hex colors
+ * @param   {string} hexColors list of hex colors
  * @return  {boolean}
  */
-const validateColors = (colors) => (
-  colors.split(urlColorSeparator).every(validateColor)
+const validateColors = (hexColors) => (
+  hexColors.split(urlColorSeparator).every(validateColor)
 );
 
 /**
@@ -236,6 +248,15 @@ const respondValueSearch = (
     paletteTitle = `All the ${listKey} names`;
   }
 
+  // emits the response with the colors on socket.io
+  if (socket) {
+    io.emit('colors', {
+      paletteTitle,
+      colors: colorsResponse,
+      list: listKey,
+    });
+  }
+
   // actual http response
   return httpRespond(response, {
     paletteTitle,
@@ -254,16 +275,16 @@ const respondLists = (
 
   if (listKey) {
     return httpRespond(
-      response, 
+      response,
       colorNameLists.meta[listKey],
       200,
       responseHeader,
     );
   }
 
-  const availableColorNameLists = Object.keys(colorsLists);
+  const localAvailableColorNameLists = Object.keys(colorsLists);
   return httpRespond(response, {
-    availableColorNameLists,
+    localAvailableColorNameLists,
     listDescriptions: colorNameLists.meta,
   }, 200, responseHeader);
 };
@@ -319,7 +340,7 @@ const routes = [
 ];
 
 const getHandlerForPath = (path) => {
-  const route = routes.find((route) => route.path === path);
+  const route = routes.find((currentRoute) => currentRoute.path === path);
 
   if (route) {
     return route.handler;
@@ -366,7 +387,7 @@ const requestHandler = (request, response) => {
     }
   }
 
-  const accpets = request.headers['accept-encoding'];
+  // const accpets = request.headers['accept-encoding'];
 
   // makes sure the API is beeing requested
   if (!isAPI) {
@@ -423,10 +444,23 @@ const requestHandler = (request, response) => {
 };
 
 const server = http.createServer(requestHandler);
+
+if (socket) {
+  io = new Server(server, {
+    port,
+    cors: {
+      origin: allowedSocketOrigins,
+      methods: ['GET'],
+    },
+  });
+}
+
 server.listen(port, '0.0.0.0', (error) => {
   if (error) {
     return console.log(`something terrible happened: ${error}`);
   }
   console.log(`Server running and listening on port ${port}`);
   console.log(`http://localhost:${port}/${baseUrl}`);
+
+  return null;
 });
