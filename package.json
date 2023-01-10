@@ -37,7 +37,9 @@
     "color-name-list": "^10.1.0",
     "color-name-lists": "^3.16.2",
     "culori": "^2.0.3",
-    "seedrandom": "^3.0.5"
+    "dotenv": "^16.0.3",
+    "seedrandom": "^3.0.5",
+    "socket.io": "^4.5.4"
   },
   "devDependencies": {
     "eslint": "^8.29.0",

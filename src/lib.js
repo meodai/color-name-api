@@ -6,3 +6,11 @@ export const lib = {
       + (0.114 * rgb.b) ** 2,
   )),
 };
+
+/**
+ * Check if an object has a property
+ * @param {Object} obj
+ * @param {String} prop
+ * @return {Boolean}
+ */
+export const hasOwnProperty = (obj, prop) => Object.prototype.hasOwnProperty.call(obj, prop);

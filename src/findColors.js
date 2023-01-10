@@ -18,6 +18,7 @@ const distanceMetric = differenceCiede2000();
  * @return  {object} enriched color object
  */
 const enrichColorObj = (colorObj, colorListParedRef) => {
+  const localColorObj = { ...colorObj };
   const currentColor = parse(colorObj.hex);
   const lab = converter('lab');
   const rgb = converter('rgb');
@@ -41,11 +42,11 @@ const enrichColorObj = (colorObj, colorListParedRef) => {
   // populates array needed for ClosestVector()
   colorListParedRef.push(currentColor);
   // transform hex to RGB
-  colorObj.rgb = rgbInt;
+  localColorObj.rgb = rgbInt;
   // get hsl color value
-  colorObj.hsl = hslInt;
+  localColorObj.hsl = hslInt;
 
-  colorObj.lab = {
+  localColorObj.lab = {
     l: parseFloat(ccLab.l.toFixed(5)),
     a: parseFloat(ccLab.a.toFixed(5)),
     b: parseFloat(ccLab.b.toFixed(5)),
@@ -53,15 +54,15 @@ const enrichColorObj = (colorObj, colorListParedRef) => {
 
   // calculate luminancy for each color
 
-  colorObj.luminance = parseFloat(lib.luminance(rgbInt).toFixed(5));
-  colorObj.luminanceWCAG = parseFloat(wcagLuminance(currentColor).toFixed(5));
+  localColorObj.luminance = parseFloat(lib.luminance(rgbInt).toFixed(5));
+  localColorObj.luminanceWCAG = parseFloat(wcagLuminance(currentColor).toFixed(5));
 
-  colorObj.swatchImg = {
-    svgNamed: `/v1/swatch/?color=${colorObj.hex.slice(1)}&name=${encodeURI(colorObj.name)}`,
-    svg: `/v1/swatch/?color=${colorObj.hex.slice(1)}`,
+  localColorObj.swatchImg = {
+    svgNamed: `/v1/swatch/?color=${localColorObj.hex.slice(1)}&name=${encodeURI(localColorObj.name)}`,
+    svg: `/v1/swatch/?color=${localColorObj.hex.slice(1)}`,
   };
 
-  return colorObj;
+  return localColorObj;
 };
 
 export class FindColors {
@@ -76,8 +77,8 @@ export class FindColors {
     Object.keys(this.colorLists).forEach((listName) => {
       this.colorListsParsed[listName] = [];
 
-      this.colorLists[listName].forEach((c) => {
-        enrichColorObj(c, this.colorListsParsed[listName]);
+      this.colorLists[listName].forEach((c, i) => {
+        this.colorLists[listName][i] = enrichColorObj(c, this.colorListsParsed[listName]);
       });
 
       Object.freeze(this.colorLists[listName]);
@@ -87,7 +88,7 @@ export class FindColors {
     });
   }
 
-  _validateListKey(listKey) {
+  validateListKey(listKey) {
     if (!this.colorLists[listKey]) {
       throw new Error(`List key "${listKey}" is not valid.`);
     } else {
@@ -101,7 +102,7 @@ export class FindColors {
    * @param {boolen} bestOf    if set only returns good names
    */
   searchNames(searchStr, listKey = 'default') {
-    this._validateListKey(listKey);
+    this.validateListKey(listKey);
     return this.colorLists[listKey].filter(
       (color) => color.name.toLowerCase().includes(searchStr.toLowerCase()),
     );

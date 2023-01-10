@@ -55,7 +55,7 @@ function errorResponseTest(reponseObj) {
   }
 }
 
-function testBlackColor (response) {
+function testBlackColor(response) {
   colorResponseBasicTest(response);
   if (response.colors.length !== 1) {
     throw new Error('response contains more colors than expected');
@@ -69,7 +69,7 @@ function testBlackColor (response) {
   if (response.colors[0].name !== 'Black') {
     throw new Error('response does not return the expected color name');
   }
-};
+}
 
 const routesToTest = {
   '/': (response) => {
