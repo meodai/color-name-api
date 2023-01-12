@@ -6,6 +6,7 @@ import colorNameLists from 'color-name-lists';
 import colors from 'color-name-list/dist/colornames.esm.mjs';
 import colorsBestOf from 'color-name-list/dist/colornames.bestof.esm.mjs';
 import { Server } from 'socket.io';
+import requestIp from 'request-ip';
 import * as dotenv from 'dotenv';
 
 import { FindColors } from './findColors.js';
@@ -373,12 +374,13 @@ const requestHandler = (request, response) => {
   const path = requestUrl.pathname.replace(baseUrl, '');
   const responseHeader = { ...responseHeaderObj };
   const responseHandler = getHandlerForPath(path);
+  const isSocket = request.headers.upgrade === 'websocket';
 
-  // understanding where requests come from
-  console.info(
-    'request from',
-    request.headers.origin || request.headers.host || request.headers.referer,
-  );
+  // if the request is a socket, we don't want to respond
+  // with the http response
+  if (isSocket) {
+    return true;
+  }
 
   if (request.headers['accept-encoding']) {
     const accepts = request.headers['accept-encoding'];
@@ -432,6 +434,18 @@ const requestHandler = (request, response) => {
       },
       404,
     );
+  }
+
+  const from = request.headers.origin || request.headers.host || request.headers.referer;
+  // understanding where requests come from
+  if (from) {
+    console.info('request from', from);
+  }
+
+  const clientIp = requestIp.getClientIp(request);
+
+  if (clientIp) {
+    console.info('client ip', clientIp);
   }
 
   return responseHandler(

@@ -38,6 +38,7 @@
     "color-name-lists": "^3.16.2",
     "culori": "^2.0.3",
     "dotenv": "^16.0.3",
+    "request-ip": "^3.3.0",
     "seedrandom": "^3.0.5",
     "socket.io": "^4.5.4"
   },
