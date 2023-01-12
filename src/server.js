@@ -164,7 +164,7 @@ const respondNameSearch = (
   const nameString = searchParams.has('name')
     ? searchParams.get('name') : '';
 
-  const searchString = decodeURI(nameString || nameQuery);
+  const searchString = decodeURI(nameString || nameQuery).trim();
 
   if (searchString.length < 3) {
     return httpRespond(

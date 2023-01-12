@@ -86,6 +86,13 @@ export class FindColors {
         this.colorListsParsed[listName],
       );
     });
+
+    // prepare color name response cache
+    this.colorNameCache = {};
+    // add a key for each color list
+    Object.keys(this.colorLists).forEach((listName) => {
+      this.colorNameCache[listName] = {};
+    });
   }
 
   validateListKey(listKey) {
@@ -103,9 +110,16 @@ export class FindColors {
    */
   searchNames(searchStr, listKey = 'default') {
     this.validateListKey(listKey);
-    return this.colorLists[listKey].filter(
+
+    if (this.colorNameCache[listKey][searchStr]) {
+      return this.colorNameCache[listKey][searchStr];
+    }
+
+    this.colorNameCache[listKey][searchStr] = this.colorLists[listKey].filter(
       (color) => color.name.toLowerCase().includes(searchStr.toLowerCase()),
     );
+
+    return this.colorNameCache[listKey][searchStr];
   }
 
   /**
