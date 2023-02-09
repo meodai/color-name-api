@@ -16,7 +16,9 @@ export async function addResponseToTable({ paletteTitle, list, parsedColors }) {
       throw error;
     }
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.log('⚠️ Failed to update the table');
+    // eslint-disable-next-line no-console
     console.log(error.message);
   }
 }
