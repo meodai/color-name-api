@@ -14,3 +14,16 @@ export const lib = {
  * @return {Boolean}
  */
 export const hasOwnProperty = (obj, prop) => Object.prototype.hasOwnProperty.call(obj, prop);
+
+export function createColorRecord({ paletteTitle, colors, list }) {
+  const parsedColors = [];
+  // Check if colors is array
+  if (Array.isArray(colors)) {
+    colors.forEach((color) => {
+      // Check if requestedHex is part of the color object
+      const { name, hex, requestedHex = '' } = color;
+      parsedColors.push({ name, hex, requestedHex });
+    });
+  }
+  return { paletteTitle, list, parsedColors };
+}

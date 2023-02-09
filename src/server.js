@@ -12,8 +12,12 @@ import * as dotenv from 'dotenv';
 import { FindColors } from './findColors.js';
 import { getPaletteTitle } from './generatePaletteName.js';
 import { svgTemplate } from './colorSwatchSVG.js';
+import { createColorRecord } from './lib.js';
+import { initDatabase, addResponseToTable } from './database.js';
 
 dotenv.config();
+
+initDatabase(process.env.SUPRABASEURL, process.env.SUPRABASEKEY);
 
 const port = process.env.PORT || 8080;
 const socket = process.env.SOCKET || false;
@@ -257,6 +261,10 @@ const respondValueSearch = (
       list: listKey,
     });
   }
+
+  // Save response to database
+  const record = createColorRecord({ paletteTitle, colors: colorsResponse, list: listKey });
+  addResponseToTable(record);
 
   // actual http response
   return httpRespond(response, {
