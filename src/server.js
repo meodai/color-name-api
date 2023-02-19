@@ -17,8 +17,6 @@ import { initDatabase, addResponseToTable } from './database.js';
 
 dotenv.config();
 
-initDatabase(process.env.SUPRABASEURL, process.env.SUPRABASEKEY);
-
 const port = process.env.PORT || 8080;
 const socket = process.env.SOCKET || false;
 const allowedSocketOrigins = (
@@ -33,6 +31,15 @@ const baseUrlNames = `${baseUrl}${urlNameSubpath}/`;
 const urlColorSeparator = ',';
 
 let io;
+let hasDb = false;
+
+if (process.env.SUPRABASEURL && process.env.SUPRABASEKEY) {
+  console.log('Initializing database...');
+  hasDb = true;
+  initDatabase(process.env.SUPRABASEURL, process.env.SUPRABASEKEY);
+} else {
+  console.log('No database connection configured.');
+}
 
 const responseHeaderObj = {
   'Access-Control-Allow-Origin': '*',
@@ -263,8 +270,10 @@ const respondValueSearch = (
   }
 
   // Save response to database
-  const record = createColorRecord({ paletteTitle, colors: colorsResponse, list: listKey });
-  addResponseToTable(record);
+  if (hasDb) {
+    const record = createColorRecord({ paletteTitle, colors: colorsResponse, list: listKey });
+    addResponseToTable(record);
+  }
 
   // actual http response
   return httpRespond(response, {
