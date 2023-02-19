@@ -1,0 +1,304 @@
+openapi: 3.0.3
+info:
+  title: Color Name API
+  description: An API that provides names for colors based on their hex value
+  version: 1.0.0
+  license:
+    name: MIT
+    url: https://github.com/meodai/color-name-api/blob/main/LICENSE
+  contact:
+    name: meodai
+    url: https://elastiq.ch/
+    email: color-name-api@elastiq.click
+servers:
+  - url: https://api.color.pizza/v1/
+components:
+  schemas:
+    listDescription:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        url:
+          type: string
+        source:
+          type: string
+        key: 
+          type: string
+        license:
+          type: string
+        colorCount:
+          type: integer
+    colorBase:
+      type: object
+      properties:
+        name:
+          type: string
+        hex:
+          type: string
+        rgb:
+          type: object
+          properties:
+            r:
+              type: integer
+            g:
+              type: integer
+            b:
+              type: integer
+        hsl:
+          type: object
+          properties:
+            h:
+              type: number
+            s:
+              type: number
+            l:
+              type: number
+        lab:
+          type: object
+          properties:
+            l:
+              type: number
+            a:
+              type: number
+            b:
+              type: number
+        luminance:
+          type: number
+        luminanceWCAG:
+          type: number
+        swatchImg:
+          type: object
+          properties:
+            svgNamed:
+              type: string
+            svg:
+              type: string
+    color:
+      $ref: '#/components/schemas/colorBase'
+      requestedHex:
+        type: string
+      distance:
+        type: number
+    possibleLists:
+      type: string
+      enum:
+        - default
+        - bestOf
+        - wikipedia
+        - french
+        - ridgway
+        - risograph
+        - basic
+        - chineseTraditional
+        - html
+        - japaneseTraditional
+        - leCorbusier
+        - nbsIscc
+        - ntc
+        - osxcrayons
+        - ral
+        - sanzoWadaI
+        - thesaurus
+        - werner
+        - windows
+        - x11
+        - xkcd
+    error:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+
+paths:
+  /:
+    get:
+      summary: Get all colors of the default color name list
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  colors:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/color'
+                  paletteTitle:
+                    type: string
+        '404':
+          description: NOT FOUND
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+
+    parameters:
+      - name: list
+        in: query
+        description: The name of the color name list to use
+        schema:
+          $ref: '#/components/schemas/possibleLists'
+        style: form
+        explode: false
+      
+      - name: values
+        in: query
+        description: The hex values of the colors to retrieve without '#' 
+        schema:
+          type: string
+      
+      - name: noduplicates
+        in: query
+        description: Allow duplicate names or not 
+        schema:
+          type: boolean
+  /names/:
+    get:
+      summary: Get all colors of the default color name list
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  colors:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/color'
+                  paletteTitle:
+                    type: string
+        '404':
+          description: NOT FOUND
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+
+    parameters:
+      - name: name
+        in: query
+        description: The name of the color to retrieve (min 3 characters)
+        schema:
+          type: string
+        style: form
+        explode: false
+        required: true
+      - name: list
+        in: query
+        description: The name of the color name list to use
+        schema:
+          $ref: '#/components/schemas/possibleLists'
+        style: form
+        explode: false
+
+  /lists/:
+    get:
+      summary: Get all colors of the default color name list
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  localAvailableColorNameLists:
+                    type: array
+                    items:
+                      type: string
+                  listDescriptions:
+                    type: object
+                    properties:
+                      default:
+                        $ref: '#/components/schemas/listDescription'
+                      bestOf:
+                        $ref: '#/components/schemas/listDescription'
+                      wikipedia:
+                        $ref: '#/components/schemas/listDescription'
+                      french:
+                        $ref: '#/components/schemas/listDescription'
+                      ridgway:
+                        $ref: '#/components/schemas/listDescription'
+                      risograph:
+                        $ref: '#/components/schemas/listDescription'
+                      basic:
+                        $ref: '#/components/schemas/listDescription'
+                      chineseTraditional:
+                        $ref: '#/components/schemas/listDescription'
+                      html:
+                        $ref: '#/components/schemas/listDescription'
+                      japaneseTraditional:
+                        $ref: '#/components/schemas/listDescription'
+                      leCorbusier:
+                        $ref: '#/components/schemas/listDescription'
+                      nbsIscc:
+                        $ref: '#/components/schemas/listDescription'
+                      ntc:
+                        $ref: '#/components/schemas/listDescription'
+                      osxcrayons:
+                        $ref: '#/components/schemas/listDescription'
+                      ral:
+                        $ref: '#/components/schemas/listDescription'
+                      sanzoWadaI:
+                        $ref: '#/components/schemas/listDescription'
+                      thesaurus:
+                        $ref: '#/components/schemas/listDescription'
+                      werner:
+                        $ref: '#/components/schemas/listDescription'
+                      windows:
+                        $ref: '#/components/schemas/listDescription'
+                      x11:
+                        $ref: '#/components/schemas/listDescription'
+                      xkcd:
+                        $ref: '#/components/schemas/listDescription'
+
+        '404':
+          description: NOT FOUND
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+    
+  /swatch/:
+    get:
+      summary: Generate a color swatch for any color
+      parameters:
+        - name: color
+          in: query
+          description: The hex value of the color to retrieve without '#' 
+          schema:
+            type: string
+          style: form
+          explode: false
+          required: true
+        - name: name
+          in: query
+          description: The name of the color
+          schema:
+            type: string
+          style: form
+          explode: false
+          required: false
+      responses:
+        '200':
+          description: OK
+          content:
+            image/svg+xml:
+              schema:
+                type: string
+        '404':
+          description: NOT FOUND
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        

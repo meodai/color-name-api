@@ -374,6 +374,8 @@ const getHandlerForPath = (path) => {
  * /v1/212121,222,f02f123 => array with 3 color
  * /v1/names/             => all colors
  * /v1/names/red          => all colors containing the word red
+ * /v1/lists/             => all available lists
+ * /v1/swatch/?color=212121&name=red => svg with color and name
  */
 
 const requestHandler = (request, response) => {
