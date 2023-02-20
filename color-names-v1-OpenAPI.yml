@@ -76,12 +76,16 @@ components:
               type: string
             svg:
               type: string
+
     color:
       $ref: '#/components/schemas/colorBase'
-      requestedHex:
-        type: string
-      distance:
-        type: number
+      type: object
+      properties:
+        requestedHex:
+          type: string
+        distance:
+          type: number
+
     possibleLists:
       type: string
       enum:
