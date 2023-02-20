@@ -78,9 +78,49 @@ components:
               type: string
 
     color:
-      $ref: '#/components/schemas/colorBase'
       type: object
       properties:
+        name:
+          type: string
+        hex:
+          type: string
+        rgb:
+          type: object
+          properties:
+            r:
+              type: integer
+            g:
+              type: integer
+            b:
+              type: integer
+        hsl:
+          type: object
+          properties:
+            h:
+              type: number
+            s:
+              type: number
+            l:
+              type: number
+        lab:
+          type: object
+          properties:
+            l:
+              type: number
+            a:
+              type: number
+            b:
+              type: number
+        luminance:
+          type: number
+        luminanceWCAG:
+          type: number
+        swatchImg:
+          type: object
+        svgNamed:
+          type: string
+        svg:
+          type: string
         requestedHex:
           type: string
         distance:
