@@ -15,6 +15,8 @@ import { svgTemplate } from './colorSwatchSVG.js';
 import { createColorRecord } from './lib.js';
 import { initDatabase, addResponseToTable } from './database.js';
 
+import fs from 'fs';
+
 dotenv.config();
 
 const port = process.env.PORT || 8080;
@@ -30,10 +32,15 @@ const baseUrl = `${APIurl}${currentVersion}/`;
 const baseUrlNames = `${baseUrl}${urlNameSubpath}/`;
 const urlColorSeparator = ',';
 
+const docsHTML = fs.readFileSync('./docs/index.html', 'utf8');
+
 let io;
 let hasDb = false;
 
-if (process.env.SUPRABASEURL && process.env.SUPRABASEKEY) {
+if (
+  !process.env.NODB
+  && (process.env.SUPRABASEURL && process.env.SUPRABASEKEY)
+) {
   console.log('Initializing database...');
   hasDb = true;
   initDatabase(process.env.SUPRABASEURL, process.env.SUPRABASEKEY);
@@ -53,6 +60,11 @@ const responseHeaderObj = {
 const responseHandlerSVG = {
   ...responseHeaderObj,
   'Content-Type': 'image/svg+xml',
+};
+
+const responseHandlerHTML = {
+  ...responseHeaderObj,
+  'Content-Type': 'text/html; charset=utf-8',
 };
 
 // accepts encoding
@@ -309,6 +321,21 @@ const respondLists = (
 
 const routes = [
   {
+    path: '/docs/',
+    handler: (
+      searchParams,
+      requestUrl,
+      request,
+      response,
+    ) => httpRespond(
+      response,
+      docsHTML,
+      200,
+      responseHandlerHTML,
+      'html',
+    ),
+  },
+  {
     path: '/names/',
     handler: respondNameSearch,
   },
@@ -324,6 +351,7 @@ const routes = [
       request,
       response,
       responseHeader,
+    
     ) => {
       const color = searchParams.has('color') ? searchParams.get('color') : null;
       const colorName = searchParams.has('name') ? searchParams.get('name') : null;
