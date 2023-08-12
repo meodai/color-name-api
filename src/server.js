@@ -314,7 +314,7 @@ const respondLists = (
 
   const localAvailableColorNameLists = Object.keys(colorsLists);
   return httpRespond(response, {
-    localAvailableColorNameLists,
+    availableColorNameLists: localAvailableColorNameLists,
     listDescriptions: colorNameLists.meta,
   }, 200, responseHeader);
 };

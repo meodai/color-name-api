@@ -255,7 +255,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  localAvailableColorNameLists:
+                  availableColorNameLists:
                     type: array
                     items:
                       type: string
