@@ -3,6 +3,7 @@ import {
   converter,
   wcagLuminance,
   differenceCiede2000,
+  wcagContrast,
 } from 'culori';
 
 import { lib } from './lib.js';
@@ -56,6 +57,8 @@ const enrichColorObj = (colorObj, colorListParedRef) => {
 
   localColorObj.luminance = parseFloat(lib.luminance(rgbInt).toFixed(5));
   localColorObj.luminanceWCAG = parseFloat(wcagLuminance(currentColor).toFixed(5));
+
+  localColorObj.bestContrast = wcagContrast(currentColor, '#000') > wcagContrast(currentColor, '#fff') ? 'black' : 'white';
 
   localColorObj.swatchImg = {
     svgNamed: `/v1/swatch/?color=${localColorObj.hex.slice(1)}&name=${encodeURI(localColorObj.name)}`,

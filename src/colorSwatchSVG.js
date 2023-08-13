@@ -1,6 +1,6 @@
 /**
  * @param {string} colorValue color value in a CSS compatible format
- * @param {string} colorName color na,e
+ * @param {string} colorName color name
  * @return {string} svg string
  */
 export const svgTemplate = (colorValue, colorName) => {

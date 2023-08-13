@@ -69,6 +69,10 @@ function testBlackColor(response) {
   if (response.colors[0].name !== 'Black') {
     throw new Error('response does not return the expected color name');
   }
+
+  if (response.colors[0].bestContrast !== 'white') {
+    throw new Error('response does not return the correct bestContrast value');
+  }
 }
 
 const routesToTest = {
