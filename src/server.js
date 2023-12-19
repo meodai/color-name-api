@@ -2,6 +2,7 @@
 
 import http from 'http';
 import zlib from 'zlib';
+import fs from 'fs';
 import colorNameLists from 'color-name-lists';
 import colors from 'color-name-list/dist/colornames.esm.mjs';
 import colorsBestOf from 'color-name-list/dist/colornames.bestof.esm.mjs';
@@ -14,8 +15,6 @@ import { getPaletteTitle } from './generatePaletteName.js';
 import { svgTemplate } from './colorSwatchSVG.js';
 import { createColorRecord } from './lib.js';
 import { initDatabase, addResponseToTable } from './database.js';
-
-import fs from 'fs';
 
 dotenv.config();
 
