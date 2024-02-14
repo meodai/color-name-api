@@ -1,0 +1,12 @@
+services:
+  server:
+    build:
+      context: .
+    environment:
+      NODE_ENV: production
+      SOCKET: true
+      PORT: 8080
+      ALLOWED_SOCKET_ORIGINS: https://cdpn.io,http://localhost
+      NODB: true
+    ports:
+      - 8080:8080
