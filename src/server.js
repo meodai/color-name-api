@@ -354,6 +354,7 @@ const routes = [
     ) => {
       const color = searchParams.has('color') ? searchParams.get('color') : null;
       const colorName = searchParams.has('name') ? searchParams.get('name') : null;
+      const size = searchParams.has('size') ? searchParams.get('size') : "100x100";
 
       if (!color) {
         return httpRespond(
@@ -371,7 +372,7 @@ const routes = [
 
       return httpRespond(
         response,
-        svgTemplate(`#${color}`, colorName),
+        svgTemplate(`#${color}`, colorName, size),
         200,
         responseHandlerSVG,
         'svg',
