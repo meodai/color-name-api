@@ -102,7 +102,7 @@ colorNameLists.meta.bestOf = {
 colorNameLists.meta.short = {
   title: 'Short Color Names',
   source: 'https://github.com/meodai/color-names',
-  description: 'A list of short color names. (One word less than 12 characters)',
+  description: 'A list of short color names. (12 characters max)',
   key: 'short',
   colorCount: colorsShort.length,
 };
