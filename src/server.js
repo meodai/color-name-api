@@ -6,6 +6,7 @@ import fs from 'fs';
 import colorNameLists from 'color-name-lists';
 import colors from 'color-name-list/dist/colornames.esm.mjs';
 import colorsBestOf from 'color-name-list/dist/colornames.bestof.esm.mjs';
+import colorsShort from 'color-name-list/dist/colornames.short.esm.mjs';
 import { Server } from 'socket.io';
 import requestIp from 'request-ip';
 import * as dotenv from 'dotenv';
@@ -72,6 +73,7 @@ const responseHandlerHTML = {
 const colorsLists = {
   default: colors,
   bestOf: colorsBestOf,
+  short: colorsShort,
 };
 
 Object.assign(colorsLists, colorNameLists.lists);
@@ -95,6 +97,14 @@ colorNameLists.meta.bestOf = {
   description: 'Best color names selected from various sources.',
   key: 'bestOf',
   colorCount: colorsBestOf.length,
+};
+
+colorNameLists.meta.short = {
+  title: 'Short Color Names',
+  source: 'https://github.com/meodai/color-names',
+  description: 'A list of short color names. (One word less than 12 characters)',
+  key: 'short',
+  colorCount: colorsShort.length,
 };
 
 // add endpoint urls to the meta data
