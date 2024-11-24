@@ -19,120 +19,145 @@ components:
       properties:
         title:
           type: string
+          description: The title of the color name list
         description:
           type: string
+          description: A description of the color name list
         url:
           type: string
+          description: API endpoint to get the colors of the list
         source:
           type: string
+          description: URL to the source of the color name list
         key: 
           type: string
+          description: Reference key of the color name list in the API
         license:
           type: string
+          description: License of the given color name list
         colorCount:
           type: integer
-    colorBase:
+          description: Amount of colors in the list
+
+    colorBasic:
       type: object
+      required:
+        - name
+        - hex
+        - rgb
+        - hsl
+        - lab
+        - luminance
+        - luminanceWCAG
+        - swatchImg
       properties:
         name:
           type: string
+          description: Name of the closest color relative to the hex value provided
+          minLength: 1
         hex:
           type: string
+          description: Hex value of the color (can differ from the requested hex value)
+          pattern: '^#?([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$'
         rgb:
           type: object
+          description: RGB values
+          required: [r, g, b]
           properties:
             r:
               type: integer
+              minimum: 0
+              maximum: 255
             g:
               type: integer
+              minimum: 0
+              maximum: 255
             b:
               type: integer
+              minimum: 0
+              maximum: 255
         hsl:
           type: object
+          description: HSL values. All percentages are represented as integers (e.g., 50% as `50`).
+          required: [h, s, l]
           properties:
             h:
               type: number
+              minimum: 0
+              maximum: 360
             s:
               type: number
+              minimum: 0
+              maximum: 100
             l:
               type: number
+              minimum: 0
+              maximum: 100
         lab:
           type: object
+          description: LAB values
+          required: [l, a, b]
           properties:
             l:
               type: number
+              minimum: 0
+              maximum: 100
             a:
               type: number
+              minimum: -128
+              maximum: 127
             b:
               type: number
+              minimum: -128
+              maximum: 127
         luminance:
           type: number
+          description: Luminance value
+          minimum: 0
         luminanceWCAG:
           type: number
+          description: Luminance value according to WCAG
+          minimum: 0
         swatchImg:
           type: object
+          description: SVG representation of the color
+          required: [svgNamed, svg]
           properties:
             svgNamed:
               type: string
+              description: SVG representation of the color with the name
+              format: svg
             svg:
               type: string
+              description: SVG representation of the color without the name
+              format: svg
 
     color:
-      type: object
-      properties:
-        name:
-          type: string
-        hex:
-          type: string
-        rgb:
-          type: object
-          properties:
-            r:
-              type: integer
-            g:
-              type: integer
-            b:
-              type: integer
-        hsl:
-          type: object
-          properties:
-            h:
-              type: number
-            s:
-              type: number
-            l:
-              type: number
-        lab:
-          type: object
-          properties:
-            l:
-              type: number
-            a:
-              type: number
-            b:
-              type: number
-        luminance:
-          type: number
-        luminanceWCAG:
-          type: number
-        swatchImg:
-          type: object
-        svgNamed:
-          type: string
-        svg:
-          type: string
+      allOf:
+        - $ref: '#/components/schemas/colorBasic'
+        - type: object
+        - required:
+            - distance
+            - requestedHex
+      properties:        
         requestedHex:
           type: string
+          description: The hex value that was requested by the user
         distance:
           type: number
+          description: The distance between the requested hex value and the closest color (0 = exact match)
 
     possibleLists:
       type: string
+      description: Predefined color lists. Names are case-sensitive.
       enum:
         - default
         - bestOf
+        - short
         - wikipedia
         - french
+        - spanish
+        - german
         - ridgway
         - risograph
         - basic
@@ -154,14 +179,21 @@ components:
       type: object
       properties:
         status:
-          type: string
+          type: number
         message:
           type: string
+      example:
+        status: 404
+        message: 'Not Found'
 
 paths:
   /:
     get:
       summary: Get all colors of the default color name list
+      description: |
+        Returns an array of colors from the specified list, with distance calculations 
+        to show how close each match is to the requested colors. When providing multiple 
+        values, the endpoint will find the closest match for each color.
       responses:
         '200':
           description: OK
@@ -176,6 +208,22 @@ paths:
                       $ref: '#/components/schemas/color'
                   paletteTitle:
                     type: string
+              example:
+                paletteTitle: 'Default color list'
+                colors:
+                  - name: 'red'
+                    hex: 'FF0000'
+                    rgb: {r: 255, g: 0, b: 0}
+                    hsl: {h: 0, s: 100, l: 50}
+                    lab: {l: 53.24, a: 80.09, b: 67.2}
+                    luminance: 0.2126
+                    luminanceWCAG: 0.2126
+                    distance: 0
+                    requestedHex: 'FF0000'
+                    swatchImg: {
+                      svgNamed: '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="...',
+                      svg: '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="...',
+                    }
         '404':
           description: NOT FOUND
           content: 
@@ -186,7 +234,7 @@ paths:
     parameters:
       - name: list
         in: query
-        description: The name of the color name list to use
+        description: The name of the color name list to use (case-insensitive)
         schema:
           $ref: '#/components/schemas/possibleLists'
         style: form
@@ -194,7 +242,7 @@ paths:
       
       - name: values
         in: query
-        description: The hex values of the colors to retrieve without '#' 
+        description: A comma-separated list of hex values (e.g., `FF0000,00FF00` do not include the `#`)
         schema:
           type: string
       
@@ -217,9 +265,8 @@ paths:
                   colors:
                     type: array
                     items:
-                      $ref: '#/components/schemas/color'
-                  paletteTitle:
-                    type: string
+                      $ref: '#/components/schemas/colorBasic'
+
         '404':
           description: NOT FOUND
           content: 
@@ -236,6 +283,7 @@ paths:
         style: form
         explode: false
         required: true
+          
       - name: list
         in: query
         description: The name of the color name list to use
@@ -247,6 +295,9 @@ paths:
   /lists/:
     get:
       summary: Get all colors of the default color name list
+      description: |
+        Returns a list of available color name lists with descriptions and URLs to
+        the color list endpoints.
       responses:
         '200':
           description: OK
@@ -269,6 +320,10 @@ paths:
                       wikipedia:
                         $ref: '#/components/schemas/listDescription'
                       french:
+                        $ref: '#/components/schemas/listDescription'
+                      spanish:
+                        $ref: '#/components/schemas/listDescription'
+                      german:
                         $ref: '#/components/schemas/listDescription'
                       ridgway:
                         $ref: '#/components/schemas/listDescription'
@@ -315,6 +370,10 @@ paths:
   /swatch/:
     get:
       summary: Generate a color swatch for any color
+      description: |
+        Generates an SVG swatch representation of a color. The swatch can include 
+        the color name if provided. The SVG is designed to be visually appealing 
+        and readable across different backgrounds.
       parameters:
         - name: color
           in: query
