@@ -847,137 +847,158 @@ ul.nav-tabs {
     // Script section to load models into a JS Var
     var defs = {}
     defs["color"] = {
-  "type" : "object",
   "properties" : {
-    "name" : {
-      "type" : "string"
-    },
-    "hex" : {
-      "type" : "string"
-    },
-    "rgb" : {
-      "$ref" : "#/components/schemas/colorBase_rgb"
-    },
-    "hsl" : {
-      "$ref" : "#/components/schemas/colorBase_hsl"
-    },
-    "lab" : {
-      "$ref" : "#/components/schemas/colorBase_lab"
-    },
-    "luminance" : {
-      "type" : "number"
-    },
-    "luminanceWCAG" : {
-      "type" : "number"
-    },
-    "swatchImg" : {
-      "type" : "object"
-    },
-    "svgNamed" : {
-      "type" : "string"
-    },
-    "svg" : {
-      "type" : "string"
-    },
     "requestedHex" : {
-      "type" : "string"
+      "type" : "string",
+      "description" : "The hex value that was requested by the user"
     },
     "distance" : {
-      "type" : "number"
+      "type" : "number",
+      "description" : "The distance between the requested hex value and the closest color (0 = exact match)"
     }
-  }
+  },
+  "allOf" : [ {
+    "$ref" : "#/components/schemas/colorBasic"
+  }, {
+    "type" : "object"
+  }, {
+    "required" : [ "distance", "requestedHex" ]
+  } ]
 };
-    defs["colorBase"] = {
+    defs["colorBasic"] = {
+  "required" : [ "hex", "hsl", "lab", "luminance", "luminanceWCAG", "name", "rgb", "swatchImg" ],
   "type" : "object",
   "properties" : {
     "name" : {
-      "type" : "string"
+      "minLength" : 1,
+      "type" : "string",
+      "description" : "Name of the closest color relative to the hex value provided"
     },
     "hex" : {
-      "type" : "string"
+      "pattern" : "^#?([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$",
+      "type" : "string",
+      "description" : "Hex value of the color (can differ from the requested hex value)"
     },
     "rgb" : {
-      "$ref" : "#/components/schemas/colorBase_rgb"
+      "$ref" : "#/components/schemas/colorBasic_rgb"
     },
     "hsl" : {
-      "$ref" : "#/components/schemas/colorBase_hsl"
+      "$ref" : "#/components/schemas/colorBasic_hsl"
     },
     "lab" : {
-      "$ref" : "#/components/schemas/colorBase_lab"
+      "$ref" : "#/components/schemas/colorBasic_lab"
     },
     "luminance" : {
-      "type" : "number"
+      "minimum" : 0,
+      "type" : "number",
+      "description" : "Luminance value"
     },
     "luminanceWCAG" : {
-      "type" : "number"
+      "minimum" : 0,
+      "type" : "number",
+      "description" : "Luminance value according to WCAG"
     },
     "swatchImg" : {
-      "$ref" : "#/components/schemas/colorBase_swatchImg"
+      "$ref" : "#/components/schemas/colorBasic_swatchImg"
     }
   }
 };
-    defs["colorBase_hsl"] = {
+    defs["colorBasic_hsl"] = {
+  "required" : [ "h", "l", "s" ],
   "type" : "object",
   "properties" : {
     "h" : {
+      "maximum" : 360,
+      "minimum" : 0,
       "type" : "number"
     },
     "s" : {
+      "maximum" : 100,
+      "minimum" : 0,
       "type" : "number"
     },
     "l" : {
+      "maximum" : 100,
+      "minimum" : 0,
       "type" : "number"
     }
-  }
+  },
+  "description" : "HSL values. All percentages are represented as integers (e.g., 50% as `50`)."
 };
-    defs["colorBase_lab"] = {
+    defs["colorBasic_lab"] = {
+  "required" : [ "a", "b", "l" ],
   "type" : "object",
   "properties" : {
     "l" : {
+      "maximum" : 100,
+      "minimum" : 0,
       "type" : "number"
     },
     "a" : {
+      "maximum" : 127,
+      "minimum" : -128,
       "type" : "number"
     },
     "b" : {
+      "maximum" : 127,
+      "minimum" : -128,
       "type" : "number"
     }
-  }
+  },
+  "description" : "LAB values"
 };
-    defs["colorBase_rgb"] = {
+    defs["colorBasic_rgb"] = {
+  "required" : [ "b", "g", "r" ],
   "type" : "object",
   "properties" : {
     "r" : {
+      "maximum" : 255,
+      "minimum" : 0,
       "type" : "integer"
     },
     "g" : {
+      "maximum" : 255,
+      "minimum" : 0,
       "type" : "integer"
     },
     "b" : {
+      "maximum" : 255,
+      "minimum" : 0,
       "type" : "integer"
     }
-  }
+  },
+  "description" : "RGB values"
 };
-    defs["colorBase_swatchImg"] = {
+    defs["colorBasic_swatchImg"] = {
+  "required" : [ "svg", "svgNamed" ],
   "type" : "object",
   "properties" : {
     "svgNamed" : {
-      "type" : "string"
+      "type" : "string",
+      "description" : "SVG representation of the color with the name",
+      "format" : "svg"
     },
     "svg" : {
-      "type" : "string"
+      "type" : "string",
+      "description" : "SVG representation of the color without the name",
+      "format" : "svg"
     }
-  }
+  },
+  "description" : "SVG representation of the color"
 };
     defs["error"] = {
   "type" : "object",
   "properties" : {
     "status" : {
-      "type" : "string"
+      "type" : "number"
     },
     "message" : {
       "type" : "string"
     }
+  },
+  "example" : {
+    "status" : 404,
+    "message" : "Not Found"
   }
 };
     defs["__get_200_response"] = {
@@ -998,25 +1019,32 @@ ul.nav-tabs {
   "type" : "object",
   "properties" : {
     "title" : {
-      "type" : "string"
+      "type" : "string",
+      "description" : "The title of the color name list"
     },
     "description" : {
-      "type" : "string"
+      "type" : "string",
+      "description" : "A description of the color name list"
     },
     "url" : {
-      "type" : "string"
+      "type" : "string",
+      "description" : "API endpoint to get the colors of the list"
     },
     "source" : {
-      "type" : "string"
+      "type" : "string",
+      "description" : "URL to the source of the color name list"
     },
     "key" : {
-      "type" : "string"
+      "type" : "string",
+      "description" : "Reference key of the color name list in the API"
     },
     "license" : {
-      "type" : "string"
+      "type" : "string",
+      "description" : "License of the given color name list"
     },
     "colorCount" : {
-      "type" : "integer"
+      "type" : "integer",
+      "description" : "Amount of colors in the list"
     }
   }
 };
@@ -1047,6 +1075,12 @@ ul.nav-tabs {
       "$ref" : "#/components/schemas/listDescription"
     },
     "french" : {
+      "$ref" : "#/components/schemas/listDescription"
+    },
+    "spanish" : {
+      "$ref" : "#/components/schemas/listDescription"
+    },
+    "german" : {
       "$ref" : "#/components/schemas/listDescription"
     },
     "ridgway" : {
@@ -1102,9 +1136,21 @@ ul.nav-tabs {
     }
   }
 };
+    defs["_names__get_200_response"] = {
+  "type" : "object",
+  "properties" : {
+    "colors" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/components/schemas/colorBasic"
+      }
+    }
+  }
+};
     defs["possibleLists"] = {
   "type" : "string",
-  "enum" : [ "default", "bestOf", "wikipedia", "french", "ridgway", "risograph", "basic", "chineseTraditional", "html", "japaneseTraditional", "leCorbusier", "nbsIscc", "ntc", "osxcrayons", "ral", "sanzoWadaI", "thesaurus", "werner", "windows", "x11", "xkcd" ]
+  "description" : "Predefined color lists. Names are case-sensitive.",
+  "enum" : [ "default", "bestOf", "short", "wikipedia", "french", "spanish", "german", "ridgway", "risograph", "basic", "chineseTraditional", "html", "japaneseTraditional", "leCorbusier", "nbsIscc", "ntc", "osxcrayons", "ral", "sanzoWadaI", "thesaurus", "werner", "windows", "x11", "xkcd" ]
 };
 
     var errs = {};
@@ -1169,7 +1215,9 @@ ul.nav-tabs {
                         <div class="pull-right"></div>
                         <div class="clearfix"></div>
                         <p></p>
-                        <p class="marked"></p>
+                        <p class="marked">Returns a list of available color name lists with descriptions and URLs to
+the color list endpoints.
+</p>
                         <p></p>
                         <br />
                         <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/lists/</span></code></pre>
@@ -1575,7 +1623,7 @@ public class DefaultApiExample {
         PossibleLists list = ; // PossibleLists | The name of the color name list to use
 
         try {
-            __get_200_response result = apiInstance.namesGet(name, list);
+            _names__get_200_response result = apiInstance.namesGet(name, list);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling DefaultApi#namesGet");
@@ -1596,7 +1644,7 @@ public class DefaultApiExample {
         PossibleLists list = ; // PossibleLists | The name of the color name list to use
 
         try {
-            __get_200_response result = apiInstance.namesGet(name, list);
+            _names__get_200_response result = apiInstance.namesGet(name, list);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling DefaultApi#namesGet");
@@ -1620,7 +1668,7 @@ PossibleLists *list = ; // The name of the color name list to use (optional) (de
 // Get all colors of the default color name list
 [apiInstance namesGetWith:name
     list:list
-              completionHandler: ^(__get_200_response output, NSError* error) {
+              completionHandler: ^(_names__get_200_response output, NSError* error) {
     if (output) {
         NSLog(@"%@", output);
     }
@@ -1676,7 +1724,7 @@ namespace Example
 
             try {
                 // Get all colors of the default color name list
-                __get_200_response result = apiInstance.namesGet(name, list);
+                _names__get_200_response result = apiInstance.namesGet(name, list);
                 Debug.WriteLine(result);
             } catch (Exception e) {
                 Debug.Print("Exception when calling DefaultApi.namesGet: " + e.Message );
@@ -1959,7 +2007,10 @@ The name of the color name list to use
                         <div class="pull-right"></div>
                         <div class="clearfix"></div>
                         <p></p>
-                        <p class="marked"></p>
+                        <p class="marked">Returns an array of colors from the specified list, with distance calculations 
+to show how close each match is to the requested colors. When providing multiple 
+values, the endpoint will find the closest match for each color.
+</p>
                         <p></p>
                         <br />
                         <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/</span></code></pre>
@@ -2002,8 +2053,8 @@ public class DefaultApiExample {
 
         // Create an instance of the API class
         DefaultApi apiInstance = new DefaultApi();
-        PossibleLists list = ; // PossibleLists | The name of the color name list to use
-        String values = values_example; // String | The hex values of the colors to retrieve without '#'
+        PossibleLists list = ; // PossibleLists | The name of the color name list to use (case-insensitive)
+        String values = values_example; // String | A comma-separated list of hex values (e.g., `FF0000,00FF00` do not include the `#`)
         Boolean noduplicates = true; // Boolean | Allow duplicate names or not
 
         try {
@@ -2024,8 +2075,8 @@ public class DefaultApiExample {
 public class DefaultApiExample {
     public static void main(String[] args) {
         DefaultApi apiInstance = new DefaultApi();
-        PossibleLists list = ; // PossibleLists | The name of the color name list to use
-        String values = values_example; // String | The hex values of the colors to retrieve without '#'
+        PossibleLists list = ; // PossibleLists | The name of the color name list to use (case-insensitive)
+        String values = values_example; // String | A comma-separated list of hex values (e.g., `FF0000,00FF00` do not include the `#`)
         Boolean noduplicates = true; // Boolean | Allow duplicate names or not
 
         try {
@@ -2047,8 +2098,8 @@ public class DefaultApiExample {
 
 // Create an instance of the API class
 DefaultApi *apiInstance = [[DefaultApi alloc] init];
-PossibleLists *list = ; // The name of the color name list to use (optional) (default to null)
-String *values = values_example; // The hex values of the colors to retrieve without '#' (optional) (default to null)
+PossibleLists *list = ; // The name of the color name list to use (case-insensitive) (optional) (default to null)
+String *values = values_example; // A comma-separated list of hex values (e.g., `FF0000,00FF00` do not include the `#`) (optional) (default to null)
 Boolean *noduplicates = true; // Allow duplicate names or not (optional) (default to null)
 
 // Get all colors of the default color name list
@@ -2072,8 +2123,8 @@ Boolean *noduplicates = true; // Allow duplicate names or not (optional) (defaul
 // Create an instance of the API class
 var api = new ColorNameApi.DefaultApi()
 var opts = {
-  'list': , // {PossibleLists} The name of the color name list to use
-  'values': values_example, // {String} The hex values of the colors to retrieve without '#'
+  'list': , // {PossibleLists} The name of the color name list to use (case-insensitive)
+  'values': values_example, // {String} A comma-separated list of hex values (e.g., `FF0000,00FF00` do not include the `#`)
   'noduplicates': true // {Boolean} Allow duplicate names or not
 };
 
@@ -2107,8 +2158,8 @@ namespace Example
 
             // Create an instance of the API class
             var apiInstance = new DefaultApi();
-            var list = new PossibleLists(); // PossibleLists | The name of the color name list to use (optional)  (default to null)
-            var values = values_example;  // String | The hex values of the colors to retrieve without '#' (optional)  (default to null)
+            var list = new PossibleLists(); // PossibleLists | The name of the color name list to use (case-insensitive) (optional)  (default to null)
+            var values = values_example;  // String | A comma-separated list of hex values (e.g., `FF0000,00FF00` do not include the `#`) (optional)  (default to null)
             var noduplicates = true;  // Boolean | Allow duplicate names or not (optional)  (default to null)
 
             try {
@@ -2130,8 +2181,8 @@ require_once(__DIR__ . '/vendor/autoload.php');
 
 // Create an instance of the API class
 $api_instance = new OpenAPITools\Client\Api\DefaultApi();
-$list = ; // PossibleLists | The name of the color name list to use
-$values = values_example; // String | The hex values of the colors to retrieve without '#'
+$list = ; // PossibleLists | The name of the color name list to use (case-insensitive)
+$values = values_example; // String | A comma-separated list of hex values (e.g., `FF0000,00FF00` do not include the `#`)
 $noduplicates = true; // Boolean | Allow duplicate names or not
 
 try {
@@ -2150,8 +2201,8 @@ use WWW::OPenAPIClient::DefaultApi;
 
 # Create an instance of the API class
 my $api_instance = WWW::OPenAPIClient::DefaultApi->new();
-my $list = ; # PossibleLists | The name of the color name list to use
-my $values = values_example; # String | The hex values of the colors to retrieve without '#'
+my $list = ; # PossibleLists | The name of the color name list to use (case-insensitive)
+my $values = values_example; # String | A comma-separated list of hex values (e.g., `FF0000,00FF00` do not include the `#`)
 my $noduplicates = true; # Boolean | Allow duplicate names or not
 
 eval {
@@ -2172,8 +2223,8 @@ from pprint import pprint
 
 # Create an instance of the API class
 api_instance = openapi_client.DefaultApi()
-list =  # PossibleLists | The name of the color name list to use (optional) (default to null)
-values = values_example # String | The hex values of the colors to retrieve without '#' (optional) (default to null)
+list =  # PossibleLists | The name of the color name list to use (case-insensitive) (optional) (default to null)
+values = values_example # String | A comma-separated list of hex values (e.g., `FF0000,00FF00` do not include the `#`) (optional) (default to null)
 noduplicates = true # Boolean | Allow duplicate names or not (optional) (default to null)
 
 try:
@@ -2230,7 +2281,7 @@ pub fn main() {
                 </span>
 
                     <div class="inner description marked">
-The name of the color name list to use
+The name of the color name list to use (case-insensitive)
                     </div>
             </div>
         </div>
@@ -2250,7 +2301,7 @@ The name of the color name list to use
                 </span>
 
                     <div class="inner description marked">
-The hex values of the colors to retrieve without &#39;#&#39;
+A comma-separated list of hex values (e.g., &#x60;FF0000,00FF00&#x60; do not include the &#x60;#&#x60;)
                     </div>
             </div>
         </div>
@@ -2417,7 +2468,10 @@ Allow duplicate names or not
                         <div class="pull-right"></div>
                         <div class="clearfix"></div>
                         <p></p>
-                        <p class="marked"></p>
+                        <p class="marked">Generates an SVG swatch representation of a color. The swatch can include 
+the color name if provided. The SVG is designed to be visually appealing 
+and readable across different backgrounds.
+</p>
                         <p></p>
                         <br />
                         <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/swatch/</span></code></pre>
