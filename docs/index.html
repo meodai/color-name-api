@@ -1152,6 +1152,23 @@ ul.nav-tabs {
   "description" : "Predefined color lists. Names are case-sensitive.",
   "enum" : [ "default", "bestOf", "short", "wikipedia", "french", "spanish", "german", "ridgway", "risograph", "basic", "chineseTraditional", "html", "japaneseTraditional", "leCorbusier", "nbsIscc", "ntc", "osxcrayons", "ral", "sanzoWadaI", "thesaurus", "werner", "windows", "x11", "xkcd" ]
 };
+    defs["socketColorResponse"] = {
+  "type" : "object",
+  "properties" : {
+    "paletteTitle" : {
+      "type" : "string"
+    },
+    "list" : {
+      "$ref" : "#/components/schemas/possibleLists"
+    },
+    "colors" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/components/schemas/colorBasic"
+      }
+    }
+  }
+};
 
     var errs = {};
   </script>

@@ -12,5 +12,6 @@ export type { colorBasic } from './models/colorBasic';
 export type { error } from './models/error';
 export type { listDescription } from './models/listDescription';
 export { possibleLists } from './models/possibleLists';
+export type { socketColorResponse } from './models/socketColorResponse';
 
 export { DefaultService } from './services/DefaultService';

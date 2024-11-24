@@ -175,6 +175,19 @@ components:
         - windows
         - x11
         - xkcd
+
+    socketColorResponse:
+      type: object
+      properties:
+        paletteTitle:
+          type: string
+        list:
+          $ref: '#/components/schemas/possibleLists'
+        colors:
+          type: array
+          items:
+            $ref: '#/components/schemas/colorBasic'
+
     error:
       type: object
       properties:
@@ -405,3 +418,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/error'
         
+x-socket-io:
+  version: "4.x"
+  events:
+    - name: colors
+      description: Emitted when new colors are requested
+      payload:
+        $ref: '#/components/schemas/socketColorResponse'
+      direction: server-to-client
+  authentication: 
+    required: false
+  cors:
+    enabled: true
+    origins:
+      description: Controlled via ALLOWED_SOCKET_ORIGINS environment variable
+      default: ["http://localhost:8080"]
