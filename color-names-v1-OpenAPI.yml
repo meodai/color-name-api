@@ -233,10 +233,12 @@ paths:
                     luminanceWCAG: 0.2126
                     distance: 0
                     requestedHex: 'FF0000'
-                    swatchImg: {
-                      svgNamed: '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="...',
-                      svg: '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="...',
-                    }
+                    swatchImg:
+                      svgNamed: > 
+                        <svg xmlns="http://www.w3.org/2000/svg" width="100" height="...
+                      svg: >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="100" height="...
+
         '404':
           description: NOT FOUND
           content: 
