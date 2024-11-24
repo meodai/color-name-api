@@ -7,7 +7,8 @@
   "scripts": {
     "test": "node test/test.js",
     "start": "node src/server.js",
-    "apidocs": "openapi-generator-cli generate -i color-names-v1-OpenAPI.yml -g html2 -o ./docs/"
+    "apidocs": "openapi-generator-cli generate -i color-names-v1-OpenAPI.yml -g html2 -o ./docs/",
+    "openapitypes": "openapi --input ./color-names-v1-OpenAPI.yml --output ./generated"
   },
   "repository": {
     "type": "git",
@@ -47,6 +48,7 @@
   "devDependencies": {
     "eslint": "^8.29.0",
     "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-plugin-import": "^2.26.0"
+    "eslint-plugin-import": "^2.26.0",
+    "openapi-typescript-codegen": "^0.29.0"
   }
 }
