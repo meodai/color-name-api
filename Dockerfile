@@ -12,7 +12,7 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 # Install dependencies with Railway-compatible cache mount
-RUN --mount=type=cache,id=cache-${SERVICE_ID}-npm,target=/root/.npm \
+RUN --mount=type=cache,id=s/${SERVICE_ID}-/root/.npm,target=/root/.npm \
     npm ci --omit=dev
 
 # Copy the rest of the application code
