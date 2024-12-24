@@ -1,4 +1,4 @@
-<img src="logo.png" width="268" alt="Color Name API Logo" align="right" />
+<img src="logo.png" width="275" alt="Color Name API Logo" align="right" />
 
 # Color Name API
 
