@@ -181,5 +181,48 @@ $ curl 'https://api.color.pizza/v1/?values=1b2b11,1c2f11,2e3f24&list=wikipedia&n
 
 In smaller color name lists. This can lead to strage results. So we suggest using this feature with some the larger lists: `default`, `bestOf`, `wikipedia`, `ntc`, `ral`, `ridgway` or `xkcd`
 
+### Using WebSockets
 
+The Color Name API also supports real-time color updates via WebSocket connections. It
+broadcasts whenever new color names are requested through the API. If you're interested in using WebSockets with the API, please [create an issue](/issues) with your use case and domain.
 
+Codepen is allowed by default. See the [demo](https://codepen.io/meodai/full/rNryZyE) for an example of how to use the WebSocket connection.
+
+To use WebSockets with the API:
+
+1. First, make sure your domain is on the allowed origins list. Currently, WebSocket connections are restricted to approved origins for security purposes. If you need access, please [create an issue](https://github.com/meodai/color-name-api/issues) with your use case and domain.
+
+2. Connect to the WebSocket endpoint using a WebSocket client:
+
+    ```javascript
+    const socket = io('https://api.color.pizza', {
+      transports: ['websocket']
+    });
+
+    // Listen for color updates
+    socket.on('colors', (data) => {
+      console.log('Received color data:', data);
+      // {
+      //   paletteTitle: "Neo Mint",
+      //   colors: [{
+      //     name: "Neo Mint",
+      //     hex: "#aaffcc",
+      //     // ... other color properties
+      //   }],
+      //   list: "default"
+      // }
+    });
+    ```
+
+3. The WebSocket connection will automatically receive updates whenever new colors are requested through the API. The data format matches the REST API response structure, containing the `paletteTitle`, `colors` array, and the `list` used.
+
+#### Server Configuration
+
+If you're self-hosting the API, you can enable WebSocket support by setting the following environment variables:
+
+```shell
+SOCKET=true
+ALLOWED_SOCKET_ORIGINS=https://yourdomain.com,https://otherdomain.com
+```
+
+Note that WebSocket support is optional and disabled by default. The REST API endpoints will continue to work regardless of WebSocket configuration.
