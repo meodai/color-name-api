@@ -2,20 +2,16 @@
 
 ARG NODE_VERSION=21.5.0
 ARG PORT=8080
+ARG SERVICE_ID=colorapi # Hardcoded service ID
 
 FROM node:${NODE_VERSION}-alpine AS builder
-
-# First set a default service ID
-ARG DEFAULT_SERVICE_ID=colorapi
-# Then try to use RAILWAY_SERVICE_ID if set, otherwise fall back to default
-ARG SERVICE_ID=${RAILWAY_SERVICE_ID:-$DEFAULT_SERVICE_ID}
 
 WORKDIR /usr/src/app
 
 # Copy package files for better caching
 COPY package*.json ./
 
-# Install dependencies with Railway-specific cache mount format
+# Install dependencies with Railway-compatible cache mount
 RUN --mount=type=cache,id=cache-${SERVICE_ID}-npm,target=/root/.npm \
     npm ci --omit=dev
 
