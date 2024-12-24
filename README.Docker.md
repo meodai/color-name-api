@@ -1,11 +1,13 @@
-### Building and running your application
+# Docker Readme for Color Name API
+
+## Building and running your application
 
 When you're ready, start your application by running:
 `docker compose up --build`.
 
 Your application will be available at http://localhost:8080.
 
-### Deploying your application to the cloud
+## Deploying your application to the cloud
 
 First, build your image, e.g.: `docker build -t myapp .`.
 If your cloud uses a different CPU architecture than your development
@@ -18,5 +20,61 @@ Then, push it to your registry, e.g. `docker push myregistry.com/myapp`.
 Consult Docker's [getting started](https://docs.docker.com/go/get-started-sharing/)
 docs for more detail on building and pushing.
 
-### References
+## References
+
 * [Docker's Node.js guide](https://docs.docker.com/language/nodejs/)
+
+## Quick Start
+
+Clone the repository:
+
+```bash
+git clone https://github.com/meodai/color-name-api.git
+cd color-name-api
+```
+
+Build and start the container:
+
+```bash
+docker compose up --build
+```
+
+The API will be available at http://localhost:8080/v1/
+
+## Docker Configuration
+
+The API can be configured using environment variables in the compose.yaml file:
+
+```yaml
+Copyenvironment:
+  NODE_ENV: production
+  SOCKET: true
+  PORT: 8080
+  ALLOWED_SOCKET_ORIGINS: https://cdpn.io,http://localhost
+  NODB: true
+```
+
+## Build Options
+
+### To build the Docker image manually:
+
+```bash
+docker build -t color-name-api .
+```
+
+### To run the container without Docker Compose:
+
+```bash
+docker run -p 8080:8080 color-name-api
+```
+
+## Production Deployment
+
+For production deployment, consider:
+
+* Setting appropriate environment variables
+* Configuring proper logging
+* Setting up monitoring
+* Configuring SSL/TLS if exposed directly
+* Setting up proper volume mounts if needed
+* Adjusting network settings based on your infrastructure
