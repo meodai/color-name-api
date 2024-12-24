@@ -2,7 +2,6 @@
 
 ARG NODE_VERSION=21.5.0
 ARG PORT=8080
-ARG SERVICE_ID=be505659-a9d6-46bd-8bdd-f1831627005c # Hardcoded service ID
 
 FROM node:${NODE_VERSION}-alpine AS builder
 
