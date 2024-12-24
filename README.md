@@ -1,4 +1,5 @@
-![Color Name API Logo](logo.png "Color Name API")
+<img src="https://github.com/favicon.ico" width="300" alt="Color Name API Logo">
+
 # Color Name API
 
 [![github sponsor count](https://img.shields.io/github/sponsors/meodai)](https://github.com/sponsors/meodai)
