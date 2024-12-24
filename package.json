@@ -36,14 +36,14 @@
   },
   "homepage": "https://github.com/meodai/color-name-api#readme",
   "dependencies": {
-    "@supabase/supabase-js": "^2.7.1",
+    "@supabase/supabase-js": "^2.47.10",
     "color-name-list": "^11.0.0",
     "color-name-lists": "^3.27.0",
-    "culori": "^2.0.3",
-    "dotenv": "^16.0.3",
+    "culori": "^4.0.1",
+    "dotenv": "^16.4.7",
     "request-ip": "^3.3.0",
     "seedrandom": "^3.0.5",
-    "socket.io": "^4.5.4"
+    "socket.io": "^4.8.1"
   },
   "devDependencies": {
     "@openapitools/openapi-generator-cli": "^2.15.3",
