@@ -1,5 +1,3 @@
-/* eslint-disable no-console */
-
 import http from 'http';
 import zlib from 'zlib';
 import fs from 'fs';
