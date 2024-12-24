@@ -2,6 +2,7 @@
 
 ARG NODE_VERSION=21.5.0
 ARG PORT=8080
+ARG SERVICE_ID=colorapi
 
 FROM node:${NODE_VERSION}-alpine AS builder
 
@@ -10,8 +11,8 @@ WORKDIR /usr/src/app
 # Copy package files for better caching
 COPY package*.json ./
 
-# Install dependencies with correct cache-prefixed ID
-RUN --mount=type=cache,id=cache-modules,target=/root/.npm \
+# Install dependencies with Railway-specific cache mount format
+RUN --mount=type=cache,id=s/${SERVICE_ID}-/root/.npm,target=/root/.npm \
     npm ci --omit=dev
 
 # Copy the rest of the application code
