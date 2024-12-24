@@ -1,4 +1,4 @@
-<img src="https://github.com/favicon.ico" width="300" alt="Color Name API Logo">
+<img src="logo.png" width="300" alt="Color Name API Logo">
 
 # Color Name API
 
