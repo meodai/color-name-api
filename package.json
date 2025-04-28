@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "test": "node test/test.js",
+    "benchmark": "node test/benchmark.js",
     "start": "node src/server.js",
     "apidocs": "openapi-generator-cli generate -i color-names-v1-OpenAPI.yml -g html2 -o ./docs/",
     "openapitypes": "npx openapi-typescript color-names-v1-OpenAPI.yml -o generated/types.ts"
