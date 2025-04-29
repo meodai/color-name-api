@@ -4,9 +4,7 @@
   --c-interactive: #ff4081;
   --w: #f8fcff;
   --b: #202126;
-
   background: var(--w);
-  
   --bw: 0.4vmin;
   --s: .45;
   --l: .55;
@@ -151,7 +149,6 @@ pre {
   overflow-x: auto;
 }
 
-/* URL Builder styles */
 .url-builder {
   position: sticky;
   top: 1rem;
@@ -296,14 +293,12 @@ pre {
   display: none;
 }
 
-/* JSON Viewer styles */
 #json-viewer {
   background: #202126;
   border-radius: 5px;
   padding: 2vmin;
 }
 
-/* Live Requests Section */
 .live-requests {
   margin-top: 2em;
   border-top: 1px solid #ddd;
@@ -440,7 +435,6 @@ input:checked + .toggle-slider:before {
   word-break: break-all;
 }
 
-/* Color Visualization Styles */
 #color-visualization {
   margin-bottom: 1.5rem;
   max-height: 400px;
