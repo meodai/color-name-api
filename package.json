@@ -5,8 +5,11 @@
   "main": "src/index.js",
   "type": "module",
   "scripts": {
-    "test": "node test/test.js",
-    "benchmark": "node test/benchmark.js",
+    "test": "npm run test:local && npm run test:vptree && npm run test:compare-api",
+    "test:local": "node test/test.js", 
+    "test:vptree": "node test/vptree.test.js",
+    "test:compare-api": "node test/compare-api.js",
+    "test:benchmark": "node test/benchmark.js",
     "start": "node src/server.js",
     "apidocs": "openapi-generator-cli generate -i color-names-v1-OpenAPI.yml -g html2 -o ./docs/",
     "openapitypes": "npx openapi-typescript color-names-v1-OpenAPI.yml -o generated/types.ts"

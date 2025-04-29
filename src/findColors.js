@@ -40,7 +40,7 @@ const enrichColorObj = (colorObj, colorListParedRef) => {
     l: parseFloat((100 * hslFloat.l).toFixed(5)),
   };
 
-  // populates array needed for ClosestVector()
+  // populates array needed for VPTree search
   colorListParedRef.push(currentColor);
   // transform hex to RGB
   localColorObj.rgb = rgbInt;
@@ -54,7 +54,6 @@ const enrichColorObj = (colorObj, colorListParedRef) => {
   };
 
   // calculate luminancy for each color
-
   localColorObj.luminance = parseFloat(lib.luminance(rgbInt).toFixed(5));
   localColorObj.luminanceWCAG = parseFloat(wcagLuminance(currentColor).toFixed(5));
 
@@ -68,27 +67,52 @@ const enrichColorObj = (colorObj, colorListParedRef) => {
   return localColorObj;
 };
 
+// Initialize color lists and VPTrees just once at module level
+let colorListsCache = null;
+let colorListsParsedCache = {};
+let closestInstancesCache = {};
+
 export class FindColors {
   constructor(colorsListsObj) {
+    // If we already have the cache, use it instead of rebuilding everything
+    if (colorListsCache) {
+      this.colorLists = colorListsCache;
+      this.colorListsParsed = colorListsParsedCache;
+      this.closestInstances = closestInstancesCache;
+      console.log('[FindColors] Using cached VP-trees');
+      return;
+    }
+
+    console.log('[FindColors] Initializing color lists and VP-trees for the first time');
     this.colorLists = colorsListsObj;
 
-    // object containing the name:hex pairs for nearestColor()
+    // object containing the parsed colors for VPTree
     this.colorListsParsed = {};
     this.closestInstances = {};
 
-    // prepare color array
+    // prepare color array and create VPTree instances
     Object.keys(this.colorLists).forEach((listName) => {
-      this.colorListsParsed[listName] = [];
+      console.log(`[Color Finder] Initializing VPTree for list: ${listName}`);
 
-      this.colorLists[listName].forEach((c, i) => {
-        this.colorLists[listName][i] = enrichColorObj(c, this.colorListsParsed[listName]);
-      });
+      this.colorListsParsed[listName] = [];
+      this.colorLists[listName] = this.colorLists[listName].map((c) =>
+        enrichColorObj(c, this.colorListsParsed[listName])
+      );
+
 
       Object.freeze(this.colorLists[listName]);
-      this.closestInstances[listName] = new ClosestColor(
-        this.colorListsParsed[listName],
-      );
+      
+      // Create regular and unique ClosestColor instances using VPTree for this list
+      this.closestInstances[listName] = {
+        regular: new ClosestColor(this.colorListsParsed[listName], false),
+        unique: new ClosestColor(this.colorListsParsed[listName], true)
+      };
     });
+
+    // Cache everything at module level for future instances
+    colorListsCache = this.colorLists;
+    colorListsParsedCache = this.colorListsParsed;
+    closestInstancesCache = this.closestInstances;
 
     // prepare color name response cache
     this.colorNameCache = {};
@@ -109,7 +133,7 @@ export class FindColors {
   /**
    * returns all colors that match a name
    * @param {string} searchStr search term
-   * @param {boolen} bestOf    if set only returns good names
+   * @param {boolean} bestOf    if set only returns good names
    */
   searchNames(searchStr, listKey = 'default') {
     this.validateListKey(listKey);
@@ -126,37 +150,38 @@ export class FindColors {
   }
 
   /**
-   * names an array of colors
+   * names an array of colors using VPTree for efficient search
    * @param   {array} colorArr array containing hex values without the hash
-   * @param   {boolean} unique if set to true every returned name will be unque
-   * @param   {boolean} bestOf if set only returns good names
+   * @param   {boolean} unique if set to true every returned name will be unique
+   * @param   {string} listKey the color list to use
    * @return  {object}         object containing all nearest colors
    */
   getNamesForValues(colorArr, unique = false, listKey = 'default') {
-    let localClosest = this.closestInstances[listKey];
+    this.validateListKey(listKey);
 
+    // Use the appropriate pre-built instance based on unique flag
+    const localClosest = unique 
+      ? this.closestInstances[listKey].unique 
+      : this.closestInstances[listKey].regular;
+
+    // If using unique mode, clear any previous cache to start fresh
     if (unique) {
-      localClosest = new ClosestColor(
-        this.colorListsParsed[listKey],
-        true,
-      );
+      localClosest.clearCache();
     }
 
-    let lastResult = null;
-
-    const colorResp = colorArr.map((hex) => {
+    // Process each color one by one
+    return colorArr.map((hex) => {
       // parse color
       const parsed = parse(hex);
 
-      // get the closest named colors
-
-      let closestColor = localClosest.get(parsed);
-
-      if (closestColor && unique) {
-        lastResult = closestColor;
-      } else if (unique) {
-        closestColor = lastResult;
+      // get the closest named colors using VPTree
+      const closestColor = localClosest.get(parsed);
+      
+      // If no color was found (all unique colors used up)
+      if (!closestColor) {
+        return null;
       }
+      
       const color = this.colorLists[listKey][closestColor.index];
 
       return {
@@ -167,15 +192,9 @@ export class FindColors {
           svg: `/v1/swatch/?color=${hex}`,
         },
         distance: parseFloat(
-          distanceMetric(color.hex, parsed).toFixed(5),
+          distanceMetric(parsed, color.hex).toFixed(5),
         ),
       };
-    });
-
-    if (unique) {
-      localClosest.clearCache();
-    }
-
-    return colorResp;
+    }).filter(Boolean); // Remove any null values
   }
 }

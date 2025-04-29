@@ -1,105 +1,63 @@
-import { differenceCiede2000 } from 'culori';
-import { hasOwnProperty } from './lib.js';
+import { differenceCiede2000 } from "culori";
+import { hasOwnProperty } from "./lib.js";
+import { VPTree } from "./vptree.js";
 
 /**
  * Return closest color from a given list
- * uses caching for faster response. Has the ability to return every match
- * only once.
+ * uses VPTree for faster searches and caching for performance.
+ * Has the ability to return every match only once.
  */
 export default class Closest {
-  /**
-   * Creates an instance of Closest.
-   * @param {Array}     list    Parsed Culori Color List
-   * @param {Boolean}   unique  If set to true, every entry from `list`
-   *                            can be returned only once
-   *                            unit clearCache() is called
-   */
-  constructor(list, unique, metric = differenceCiede2000()) {
-    // creates a copy of list
-    this.list = Array.from(list);
-
+  constructor(colorList, unique, metric = differenceCiede2000()) {
+    this.originalList = colorList;
+    this.list = colorList.map((color, i) => ({ color, index: i }));
     this.unique = unique;
-
-    this.metric = metric;
-
-    // console.log(this.diff)
-    // inits the cache and previouslyReturnedIndexes properties
+    this.metric = (a, b) => metric(a.color, b.color);
+    this.vpTree = new VPTree(this.list, this.metric);
     this.clearCache(false);
   }
 
-  /**
-   Public method to rest cached value / result paris
-   * especially if set to unique (return every match only once)
-   * you may want to reset the previously returned indexes
-   * @param {Boolean} indexOnly if you are using "unique" mode only the returned
-   *                            indexes are cleared by default
-   */
   clearCache(indexOnly = this.unique) {
-    if (!indexOnly) {
-      this.cache = {};
-    }
-    this.previouslyReturnedIndexes = [];
+    if (!indexOnly) this.cache = {};
+    this.previouslyReturnedIndexes = new Set();
   }
 
-  /**
-   * gets the closes Number/VectorN
-   * @param {Number|Array} val reference number or array
-   * @return {Object|Null} closes match within lists containing
-   *                      {
-   *                         closest:   {Number|Array} closest entry from list
-   *                         index:     {Number}       index within list
-   *                         distance:  {Number}       Distance within the
-   *                                                   coordinate system
-   *                      }
-   */
-  get(color) {
-    let minDistance = Infinity;
-    let index = 0;
-    let closest = this.list[index];
+  get(searchColor) {
+    const searchObj = { color: searchColor, index: -1 };
+    const colorUID = JSON.stringify(searchColor);
 
-    // is there a better way to do this? If "color" is only a number, it seams
-    // like a big overhead to JSON stringify it every-time, I don't see an other
-    // way when color is an array thought. Other than something like
-    // cache[color[0]][color[1]][color[3]] or whatever
-    const colorUID = JSON.stringify(color);
-
-    // returns previously found match
     if (!this.unique && hasOwnProperty(this.cache, colorUID)) {
       return this.cache[colorUID];
     }
 
-    // if set to return every colorue in the list only once
-    // and being out of entries in the list
     if (
-      this.unique && this.previouslyReturnedIndexes.length === this.list.length
+      this.unique &&
+      this.previouslyReturnedIndexes.size >= this.list.length
     ) {
       return null;
     }
 
-    for (let i = 0; i < this.list.length; i += 1) {
-      // skip if set to unique and color was returned previously
-      if (!(this.unique && this.previouslyReturnedIndexes.indexOf(i) > -1)) {
-        const distance = this.metric(color, this.list[i]);
-        if (distance < minDistance) {
-          minDistance = distance;
-          index = i;
-          closest = this.list[i];
+    const allCandidates = this.vpTree.search(searchObj, this.list.length);
+
+    for (const candidate of allCandidates) {
+      if (
+        !this.unique ||
+        !this.previouslyReturnedIndexes.has(candidate.index)
+      ) {
+        const result = {
+          closest: candidate.color,
+          index: candidate.index,
+        };
+
+        if (this.unique) {
+          this.previouslyReturnedIndexes.add(result.index);
         }
+
+        this.cache[colorUID] = result;
+        return result;
       }
     }
 
-    // save previously returned indexes if set to unique mode,
-    if (this.unique) {
-      this.previouslyReturnedIndexes.push(index);
-    }
-
-    // save to cache
-    this.cache[colorUID] = {
-      closest,
-      index,
-    };
-
-    // return result
-    return this.cache[colorUID];
+    return null;
   }
 }
