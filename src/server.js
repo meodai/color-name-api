@@ -234,7 +234,7 @@ const respondNameSearch = async ( // Make async
   const searchString = decodeURI(nameString || nameQuery).trim();
 
   if (searchString.length < 3) {
-    return await httpRespond( // Use await
+    return await httpRespond(
       response,
       {
         error: {
@@ -247,7 +247,6 @@ const respondNameSearch = async ( // Make async
     );
   }
 
-  // Use await for httpRespond
   return await httpRespond(response, {
     colors: findColors.searchNames(searchString, listKey),
   }, 200, responseHeader);
@@ -284,7 +283,7 @@ const respondValueSearch = async ( // Make async
   ));
 
   if (invalidColors.length) {
-    return await httpRespond( // Use await
+    return await httpRespond(
       response,
       {
         error: {
@@ -333,14 +332,13 @@ const respondValueSearch = async ( // Make async
   }
 
   // actual http response
-  // Use await for httpRespond
   return await httpRespond(response, {
     paletteTitle,
     colors: colorsResponse,
   }, 200, responseHeader);
 };
 
-const respondLists = async ( // Make async
+const respondLists = async (
   searchParams,
   requestUrl,
   request,
@@ -350,7 +348,7 @@ const respondLists = async ( // Make async
   const listKey = getListKey(searchParams, false);
 
   if (listKey) {
-    return await httpRespond( // Use await
+    return await httpRespond(
       response,
       colorNameLists.meta[listKey],
       200,
@@ -359,7 +357,6 @@ const respondLists = async ( // Make async
   }
 
   const localAvailableColorNameLists = Object.keys(colorsLists);
-  // Use await for httpRespond
   return await httpRespond(response, {
     availableColorNameLists: localAvailableColorNameLists,
     listDescriptions: colorNameLists.meta,
@@ -369,17 +366,17 @@ const respondLists = async ( // Make async
 const routes = [
   {
     path: '/docs/',
-    handler: async ( // Make handler async
+    handler: async (
       searchParams,
       requestUrl,
       request,
       response,
-      responseHeader // Pass responseHeader
-    ) => await httpRespond( // Use await
+      responseHeader
+    ) => await httpRespond(
       response,
-      docsHTML, // Pass docsHTML directly (httpRespond handles content type)
+      docsHTML,
       200,
-      { ...responseHeader, ...responseHandlerHTML }, // Use HTML headers
+      { ...responseHeader, ...responseHandlerHTML },
       'html',
     ),
   },
@@ -393,7 +390,7 @@ const routes = [
   },
   {
     path: '/swatch/',
-    handler: async ( // Make handler async
+    handler: async (
       searchParams,
       requestUrl,
       request,
@@ -404,9 +401,8 @@ const routes = [
       const colorParam = searchParams.get('color');
       const nameParam = searchParams.get('name'); // Optional
 
-      // Basic validation: color is required and should look like a hex value (basic check)
       if (!colorParam || !/^[0-9a-fA-F]+$/.test(colorParam)) {
-        return await httpRespond( // Use await
+        return await httpRespond(
           response,
           {
             error: {
@@ -422,7 +418,7 @@ const routes = [
       // Optional: More robust validation/sanitization for name if needed
       const sanitizedName = nameParam ? String(nameParam).trim() : null; // Basic sanitization
 
-      return await httpRespond( // Use await
+      return await httpRespond(
         response,
         svgTemplate(`#${colorParam}`, sanitizedName), // Pass sanitized name
         200,
@@ -491,7 +487,6 @@ const requestHandler = async (request, response) => { // Make requestHandler asy
 
   // makes sure the API is beeing requested
   if (!isAPI) {
-    // Use await for httpRespond
     return await httpRespond(
       response,
       {
@@ -506,7 +501,6 @@ const requestHandler = async (request, response) => { // Make requestHandler asy
   }
 
   if (responseHandler === null) {
-    // Use await for httpRespond
     return await httpRespond(
       response,
       {
@@ -528,7 +522,6 @@ const requestHandler = async (request, response) => { // Make requestHandler asy
   const requiresListKey = !['/docs/', '/swatch/'].includes(path); // Some paths don't need a list key
 
   if (requiresListKey && !listKeyValidation) {
-    // Use await for httpRespond
     return await httpRespond(
       response,
       {
@@ -554,7 +547,6 @@ const requestHandler = async (request, response) => { // Make requestHandler asy
     console.info('client ip', clientIp);
   }
 
-  // Use await for the actual response handler
   return await responseHandler(
     searchParams,
     requestUrl,
