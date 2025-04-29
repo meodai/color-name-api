@@ -66,7 +66,7 @@ function initializeLogoPoints() {
 function updateLogoColors(data) {
     if (logoTimer) return;
     logoTimer = true;
-    setTimeout(() => logoTimer = false, 2000);
+    setTimeout(() => logoTimer = false, 500);
     
     const {colors} = data;
     const max = Math.min(maxLogoPoints, colors.length);
