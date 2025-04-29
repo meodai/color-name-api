@@ -149,13 +149,23 @@ pre {
   overflow-x: auto;
 }
 
-.url-builder {
-  position: sticky;
-  top: 1rem;
-  z-index: 10;
-  font-family: monospace;
+.pseudo-terminal {
   background-color: #202126;
   color: #fff;
+  position: relative;
+  border-radius: 5px;
+  overflow: clip;
+}
+
+.pseudo-terminal .css-mdotot {
+  background-color: transparent;
+}
+
+.url-builder {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  font-family: monospace;
   padding: 1.2em;
   border-radius: 5px;
   display: flex;
@@ -164,7 +174,9 @@ pre {
   margin-bottom: 1em;
   overflow-x: auto;
   line-height: 1.8;
-  font-size: 1.1em;
+  
+  background-color: #202126;
+  text-shadow: 0 0 1em #202126;
 }
 
 .url-part {

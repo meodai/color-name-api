@@ -38,23 +38,23 @@
       Interact with the elements below to build your API request URL.
     </p>
   </article>
-  <div class="url-builder">
-    <span class="url-prefix">$ curl</span>
-    <span class="url-part url-base">https://api.color.pizza/v1/</span>
-    <span class="url-part">?values=</span>
-    <span id="url-colors" class="url-interactive"></span>
-    <span class="url-part">&list=</span>
-    <label id="url-list-container" class="url-interactive"></label>
-    <span class="url-part">&noduplicates=</span>
-    <label id="url-noduplicates-container" class="url-interactive"></label>
+  <div class="pseudo-terminal">
+    <div class="url-builder">
+      <span class="url-prefix">$ curl</span>
+      <span class="url-part url-base">https://api.color.pizza/v1/</span>
+      <span class="url-part">?values=</span>
+      <span id="url-colors" class="url-interactive"></span>
+      <span class="url-part">&list=</span>
+      <label id="url-list-container" class="url-interactive"></label>
+      <span class="url-part">&noduplicates=</span>
+      <label id="url-noduplicates-container" class="url-interactive"></label>
+    </div>
+    <div id="json-viewer"></div>
   </div>
   
   <aside class="design-width">
-    <h2>API Response</h2>
     <code id="api-url-preview"></code>
-
     <pre id="api-response"></pre>
-    <div id="json-viewer"></div>
   </aside>
   
   <article>
