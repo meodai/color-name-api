@@ -379,7 +379,7 @@ const routes = [
       response,
       docsHTML, // Pass docsHTML directly (httpRespond handles content type)
       200,
-      responseHeader, // Use passed responseHeader which might include gzip
+      { ...responseHeader, ...responseHandlerHTML }, // Use HTML headers
       'html',
     ),
   },
