@@ -355,31 +355,6 @@ pre {
   color: #495057;
 }
 
-.details-toggle {
-  margin-left: auto;
-  background-color: #f8f9fa;
-  color: #212529;
-  border: 1px solid #ddd;
-  border-radius: 3px;
-  font-size: 0.85em;
-  padding: 0.3em 0.6em;
-  cursor: pointer;
-}
-
-.request-details {
-  margin-top: 0.8em;
-  padding: 0.8em;
-  background-color: #f8f9fa;
-  border-radius: 4px;
-  font-size: 0.9em;
-}
-
-.request-details pre {
-  margin: 0;
-  white-space: pre-wrap;
-  word-break: break-all;
-}
-
 #color-visualization {
   margin-bottom: 1.5rem;
   max-height: 400px;
@@ -389,6 +364,9 @@ pre {
 .color-item {
   background: linear-gradient(to right, var(--g, transparent));
   padding: 0.5em;
+  line-height: 1;
+  font-weight: 900;
+  color: var(--c);
 }
 
 .color-item + .color-item {

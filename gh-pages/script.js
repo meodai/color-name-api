@@ -495,7 +495,8 @@ function addColorsToVisualization(data) {
     
     // Set gradient property
     colorItem.style.setProperty('--g', colorArrToSteppedGradient(colorValues));
-    
+    colorItem.style.setProperty("--c", colors[0].bestContrast);
+
     // Add title if available
     if (paletteTitle) {
         const titleElement = document.createElement('div');
