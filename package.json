@@ -1,12 +1,12 @@
 {
   "name": "color-name-api",
-  "version": "0.56.1",
+  "version": "0.57.0",
   "description": "Rest API that returns a bunch of color names for a given color-value",
   "main": "src/index.js",
   "type": "module",
   "scripts": {
     "test": "npm run test:local && npm run test:vptree && npm run test:compare-api",
-    "test:local": "node test/test.js", 
+    "test:local": "node test/test.js",
     "test:vptree": "node test/vptree.test.js",
     "test:compare-api": "node test/compare-api.js",
     "test:benchmark": "node test/benchmark.js",
