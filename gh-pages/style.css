@@ -1,8 +1,13 @@
+:root {
+  font-family: 'Comfortaa', cursive;
+
+  --c-interactive: #ff4081;
+}
 body {
-  font-family: sans-serif;
   margin: 2em;
   background-color: #fff;
   color: #202126;
+
 }
 
 .request-preview, .response {
@@ -10,9 +15,7 @@ body {
 }
 
 button {
-  padding: 0.6em 1.2em;
-  background-color: #007bff;
-  color: white;
+  color: currentColor;
   border: none;
   cursor: pointer;
   font-size: 1em;
@@ -66,43 +69,50 @@ pre {
 }
 
 .url-interactive {
+  position: relative;
   display: inline-flex;
   flex-wrap: wrap;
   align-items: center;
-  color: hotpink;
+  color: var(--c-interactive);
   font-weight: bold;
   min-height: 1.5em;
   min-width: 2em;
+  cursor: pointer;
+}
+
+.url-list-label {
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 /* Interactive list dropdown in URL */
 .url-list-select {
-  background-color: #eee;
-  border: 1px solid #ccc;
-  border-radius: 3px;
-  color: hotpink;
-  font-family: monospace;
-  font-weight: bold;
-  padding: 0.2em 0.5em;
-  margin: 0;
-  cursor: pointer;
-  min-width: 100px;
+  opacity: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 }
 
 /* Interactive noduplicates checkbox in URL */
 .url-checkbox-container {
-  display: inline-flex;
-  align-items: center;
+  cursor: pointer;
+  text-decoration: underline;
 }
 
 .url-checkbox {
-  margin-right: 0.3em;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
   cursor: pointer;
-  transform: scale(1.2);
 }
 
 .url-checkbox-label {
-  color: hotpink;
+  color: var(--c-interactive);
   font-family: monospace;
   font-weight: bold;
 }
@@ -115,52 +125,52 @@ pre {
   position: relative;
 }
 
-.url-color-input {
-  width: 1.8em;
-  height: 1.8em;
-  padding: 0;
-  border: none;
+.url-color-label {
+  position: relative;
   cursor: pointer;
+  display: inline-block;
+}
+
+.url-color-label::before {
+  content: '';
+  display: inline-block;
+  width: .6em;
+  height: .6em;
+  background-color: var(--color);
+  border-radius: 50%;
   margin-right: 0.3em;
+  box-shadow: 0 0 0 1px #fff;
+}
+
+.url-color-input {
+  position: absolute;
+  opacity: 0;
 }
 
 .url-color-text {
-  margin-right: 0.3em;
+  text-decoration: underline;
 }
 
 .url-color-remove {
-  background: rgba(255, 255, 255, 0.7);
-  color: #333;
-  border: none;
-  width: 1.4em;
-  height: 1.4em;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.8em;
-  cursor: pointer;
+  width: 1.2em;
+  height: 1.2em;
   padding: 0;
-  margin-left: 0.2em;
-  opacity: 0.7;
-  transition: opacity 0.2s;
-}
-
-.url-color-remove:hover {
-  opacity: 1;
+  border-radius: 50%;
+  background: none;
+  margin-right: -.5em;
 }
 
 .url-add-color {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #eee;
-  width: 1.8em;
-  height: 1.8em;
+  background: transparent;
   font-size: 1.1em;
   cursor: pointer;
   margin: 0 0.3em;
-  color: #666;
   transition: all 0.2s;
+  color: var(--c-interactive);
+  box-shadow: 0 0 0 1px #fff;
 }
 
 .url-add-color:hover {

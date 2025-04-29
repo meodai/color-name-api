@@ -4,7 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Color Name API Tester</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="style.css">
+  
   <script src="https://cdn.jsdelivr.net/npm/@textea/json-viewer@3"></script>
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 </head>
@@ -23,9 +29,9 @@
       <span class="url-part">?values=</span>
       <span id="url-colors" class="url-interactive"></span>
       <span class="url-part">&list=</span>
-      <span id="url-list-container" class="url-interactive"></span>
+      <label id="url-list-container" class="url-interactive"></label>
       <span class="url-part">&noduplicates=</span>
-      <span id="url-noduplicates-container" class="url-interactive"></span>
+      <label id="url-noduplicates-container" class="url-interactive"></label>
     </div>
     <div id="full-url-display">
       <h3>Full URL:</h3>

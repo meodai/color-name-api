@@ -96,6 +96,10 @@ function initializeUrlInteractiveElements() {
     const urlListSelect = document.createElement('select');
     urlListSelect.classList.add('url-list-select');
     urlListSelect.id = 'url-list-select';
+
+
+    const urlListLabel = document.createElement("span");
+    urlListLabel.classList.add("url-list-label");
     
     // Add the same options as the main dropdown
     availableLists.forEach(listName => {
@@ -112,14 +116,21 @@ function initializeUrlInteractiveElements() {
     urlListSelect.addEventListener('change', (event) => {
         // Update the main dropdown when URL dropdown changes
         listSelect.value = event.target.value;
+        urlListLabel.textContent = event.target.value;
         updateApiUrlPreview();
     });
+
+    urlListLabel.textContent = urlListSelect.value || 'default'; // Sync main dropdown with URL dropdown
     
     urlListContainer.innerHTML = ''; // Clear any previous content
+    
+    
     urlListContainer.appendChild(urlListSelect);
+    urlListContainer.appendChild(urlListLabel);
+
     
     // Setup noduplicates checkbox in URL
-    const checkboxContainer = document.createElement('span');
+    const checkboxContainer = document.createElement('label');
     checkboxContainer.classList.add('url-checkbox-container');
     
     const urlCheckbox = document.createElement('input');
@@ -130,12 +141,13 @@ function initializeUrlInteractiveElements() {
     
     const urlCheckboxLabel = document.createElement('span');
     urlCheckboxLabel.classList.add('url-checkbox-label');
-    urlCheckboxLabel.textContent = 'true';
+    urlCheckboxLabel.textContent = 'false';
     
     // Add event listener
     urlCheckbox.addEventListener('change', (event) => {
         // Update the main checkbox when URL checkbox changes
         noduplicatesCheckbox.checked = event.target.checked;
+        urlCheckboxLabel.textContent = event.target.checked ? 'true' : 'false';
         updateApiUrlPreview();
     });
     
@@ -174,27 +186,29 @@ function renderColors() {
             // Create a container for each color in the URL
             const colorContainer = document.createElement('span');
             colorContainer.classList.add('url-color-chip');
+
+            const label = document.createElement('label');
+            label.classList.add('url-color-label');
             
             // Create color picker input
             const colorInput = document.createElement('input');
             colorInput.type = 'color';
             colorInput.classList.add('url-color-input');
             colorInput.value = `#${hexColor}`;
+            colorContainer.style.setProperty('--color', `#${hexColor}`);
             colorInput.addEventListener('change', (e) => {
                 const newColor = e.target.value.slice(1).toLowerCase();
                 selectedColors[index] = newColor;
+                colorContainer.style.setProperty('--color', `#${newColor}`);
                 renderColors();
                 updateApiUrlPreview();
             });
+
             
             // Create text showing hex value
             const colorText = document.createElement('span');
             colorText.classList.add('url-color-text');
             colorText.textContent = hexColor;
-            colorText.style.backgroundColor = '#f8f8f8';
-            colorText.style.padding = '2px 4px';
-            colorText.style.borderRadius = '3px';
-            colorText.style.color = '#333';
             
             // Create remove button
             const removeBtn = document.createElement('button');
@@ -204,9 +218,9 @@ function renderColors() {
                 removeColor(hexColor);
             });
             
-            // Add all elements to the color container
-            colorContainer.appendChild(colorInput);
-            colorContainer.appendChild(colorText);
+            label.appendChild(colorInput);
+            label.appendChild(colorText);
+            colorContainer.appendChild(label);
             colorContainer.appendChild(removeBtn);
             urlColors.appendChild(colorContainer);
             
@@ -214,7 +228,6 @@ function renderColors() {
             if (index < selectedColors.length - 1) {
                 const comma = document.createElement('span');
                 comma.textContent = ',';
-                comma.style.margin = '0 2px';
                 urlColors.appendChild(comma);
             }
         });
