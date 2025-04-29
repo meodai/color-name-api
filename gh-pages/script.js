@@ -326,7 +326,7 @@ async function fetchColorNames() {
         // Use JSON Viewer to display the data
         new JsonViewer({
             value: data,
-            theme: 'light', // or 'dark' depending on your preference
+            theme: 'dark', // or 'dark' depending on your preference
             expanded: true  // Start with all nodes expanded
         }).render('#json-viewer');
         

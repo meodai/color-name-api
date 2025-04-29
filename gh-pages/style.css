@@ -7,7 +7,11 @@ body {
   margin: 2em;
   background-color: #fff;
   color: #202126;
+}
 
+.design-width {
+  max-width: 30rem;
+  margin: 0 10vmin 3rem 10vmin;
 }
 
 .request-preview, .response {
@@ -182,29 +186,15 @@ pre {
   font-style: italic;
 }
 
-#full-url-display {
-  margin-top: 1.2em;
-}
-
-#full-url-display h3 {
-  margin-top: 0;
-  margin-bottom: 0.5em;
-  font-size: 0.9em;
-  color: #555;
-  border-bottom: none;
-}
-
 .hidden-controls {
   display: none;
 }
 
 /* JSON Viewer styles */
 #json-viewer {
-  margin-top: 1em;
-  background-color: #f8f8f8;
+  background: #202126;
   border-radius: 5px;
-  border: 1px solid #ddd;
-  padding: 0.5em;
+  padding: 2vmin;
 }
 
 /* Live Requests Section */
@@ -212,10 +202,6 @@ pre {
   margin-top: 2em;
   border-top: 1px solid #ddd;
   padding-top: 1em;
-}
-
-.live-requests.inactive #requests-container {
-  opacity: 0.5;
 }
 
 .toggle-container {
@@ -374,7 +360,7 @@ input:checked + .toggle-slider:before {
   
   .url-builder {
     font-size: 0.9em;
-    padding: 0.8em;
+    padding: 2vmin;
   }
 
   .request-header {

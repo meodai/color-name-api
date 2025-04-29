@@ -15,48 +15,54 @@
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 </head>
 <body>
-  <h1>Color Name API</h1>
-  <p>
-    Rest API that returns a bunch of color names for a given color-value. 
-    If comes with different open-source name lists. This page is meant to
-    be a playground for the API. You can test the API and see how it works.
-  </p>
+  <article class="design-width">
+    <h1>Color Name API</h1>
+    <p>
+      Rest API that returns a bunch of color names for a given color-value. 
+      If comes with different open-source name lists. This page is meant to
+      be a playground for the API. You can test the API and see how it works.
+    </p>
+  </article>
   
-  <div class="request-preview">
-    <h2>API Request URL Builder:</h2>
-    <div class="url-builder">
-      <span class="url-part url-base">https://api.color.pizza/v1/</span>
-      <span class="url-part">?values=</span>
-      <span id="url-colors" class="url-interactive"></span>
-      <span class="url-part">&list=</span>
-      <label id="url-list-container" class="url-interactive"></label>
-      <span class="url-part">&noduplicates=</span>
-      <label id="url-noduplicates-container" class="url-interactive"></label>
-    </div>
-    <div id="full-url-display">
-      <h3>Full URL:</h3>
-      <code id="api-url-preview"></code>
-    </div>
+  <div class="design-width">
+    <h2>API Request URL Builder</h2>
+    <p>
+      Interact with the elements below to build your API request URL.
+    </p>
   </div>
+  <div class="url-builder">
+    <span class="url-part url-base">https://api.color.pizza/v1/</span>
+    <span class="url-part">?values=</span>
+    <span id="url-colors" class="url-interactive"></span>
+    <span class="url-part">&list=</span>
+    <label id="url-list-container" class="url-interactive"></label>
+    <span class="url-part">&noduplicates=</span>
+    <label id="url-noduplicates-container" class="url-interactive"></label>
+  </div>
+  <aside class="design-width">
+    <h3>Full URL:</h3>
+    <code id="api-url-preview"></code>
+  </aside>
   
-  <div class="response">
-    <h2>API Response:</h2>
+  <aside class="design-width">
+    <h2>API Response</h2>
     <pre id="api-response"></pre>
     <div id="json-viewer"></div>
-  </div>
+  </aside>
   
-  <div class="live-requests">
-    <h2>Live Color Requests</h2>
-    <div class="toggle-container">
-      <label class="toggle-switch">
-        <input type="checkbox" id="live-toggle" checked>
-        <span class="toggle-slider"></span>
-      </label>
-      <span class="toggle-label">Show live requests</span>
+  <article>
+    <div class="design-width">    <h2>Live Color Requests</h2>
+      <div class="toggle-container">
+        <label class="toggle-switch">
+          <input type="checkbox" id="live-toggle" checked>
+          <span class="toggle-slider"></span>
+        </label>
+        <span class="toggle-label">Show live requests</span>
+      </div>
+      <div id="socket-status" class="socket-status disconnected">Socket: Disconnected</div>
     </div>
-    <div id="socket-status" class="socket-status disconnected">Socket: Disconnected</div>
     <div id="requests-container"></div>
-  </div>
+  </article>
   
   <!-- Hidden elements for internal use -->
   <div class="hidden-controls">
