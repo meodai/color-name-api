@@ -9,9 +9,7 @@ const urlListContainer = document.getElementById('url-list-container');
 const urlNoDuplicatesContainer = document.getElementById('url-noduplicates-container');
 
 // Live requests elements
-const liveToggle = document.getElementById('live-toggle');
 const requestsContainer = document.getElementById('requests-container');
-const socketStatus = document.getElementById('socket-status');
 
 // --- Constants and State ---
 const API_BASE_URL = 'https://api.color.pizza/v1/';
@@ -401,28 +399,6 @@ async function fetchColorNames() {
 // --- Socket.io Functions ---
 
 /**
- * Updates the socket status display to show connection status.
- * @param {boolean} isConnected - Whether socket is connected.
- * @param {string} [errorMessage] - Optional error message to display.
- */
-function showSocketStatus(isConnected, errorMessage) {
-    const statusElement = document.getElementById('socket-status');
-    
-    // Update class and text based on connection status
-    if (isConnected) {
-        statusElement.classList.remove('disconnected');
-        statusElement.classList.add('connected');
-        statusElement.textContent = 'Socket: Connected';
-    } else {
-        statusElement.classList.remove('connected');
-        statusElement.classList.add('disconnected');
-        statusElement.textContent = errorMessage 
-            ? `Socket: Disconnected (${errorMessage})` 
-            : 'Socket: Disconnected';
-    }
-}
-
-/**
  * Initializes the Socket.io connection.
  */
 function initializeSocket() {
@@ -437,38 +413,30 @@ function initializeSocket() {
         socket.on('connect', () => {
             console.log('Connected to Socket.io server');
             isSocketConnected = true;
-            showSocketStatus(true);
         });
 
         socket.on('disconnect', () => {
             console.log('Disconnected from Socket.io server');
             isSocketConnected = false;
-            showSocketStatus(false);
         });
 
         // Listen for API request events
         socket.on('api_request', (data) => {
-            if (liveToggle.checked) {
-                addRequestToDisplay(data);
-            }
+            addRequestToDisplay(data);
         });
 
         // Listen for colors events (like in the CodePen)
         socket.on('colors', (msg) => {
-            if (liveToggle.checked) {
-                addColorsToVisualization(msg);
-            }
+            addColorsToVisualization(msg);
             // Update the interactive logo with the received colors
             updateLogoColors(msg);
         });
 
         socket.on('connect_error', (error) => {
             console.error('Socket connection error:', error);
-            showSocketStatus(false, error.message);
         });
     } catch (error) {
         console.error('Error initializing socket:', error);
-        showSocketStatus(false, 'Failed to initialize socket connection');
     }
 }
 
@@ -551,15 +519,6 @@ noduplicatesCheckbox.addEventListener('change', (event) => {
         document.getElementById('url-noduplicates-checkbox').checked = event.target.checked;
     }
     updateApiUrlPreview();
-});
-
-// Toggle live requests display
-liveToggle.addEventListener('change', (event) => {
-    if (event.target.checked) {
-        document.querySelector('.live-requests').classList.remove('inactive');
-    } else {
-        document.querySelector('.live-requests').classList.add('inactive');
-    }
 });
 
 // --- Initial Load ---

@@ -364,25 +364,6 @@ input:checked + .toggle-slider:before {
   font-weight: bold;
 }
 
-/* Socket Status */
-.socket-status {
-  padding: 0.4em 0.8em;
-  border-radius: 4px;
-  font-size: 0.9em;
-  margin-bottom: 1em;
-  display: inline-block;
-}
-
-.socket-status.connected {
-  background-color: #d4edda;
-  color: #155724;
-}
-
-.socket-status.disconnected {
-  background-color: #f8d7da;
-  color: #721c24;
-}
-
 /* Request Items */
 #requests-container {
   max-height: 400px;
