@@ -180,7 +180,34 @@ What makes this API unique is that you can ask to return a color name only once.
 $ curl 'https://api.color.pizza/v1/?values=1b2b11,1c2f11,2e3f24&list=wikipedia&noduplicates=true'
 ```
 
-In smaller color name lists. This can lead to strage results. So we suggest using this feature with some the larger lists: `default`, `bestOf`, `wikipedia`, `ntc`, `ral`, `ridgway` or `xkcd`
+### Understanding the `noduplicates` Parameter
+
+The `noduplicates=true` parameter is a powerful feature that ensures each requested color receives a unique name, even when colors are similar. When enabled:
+
+- The API will never return the same color name twice in a single response
+- Each color in your request will receive the closest available unique name
+- Names are assigned in the order colors appear in your request
+- The algorithm intelligently selects alternative names with minimal perceptual distance
+
+This is particularly useful for:
+
+- Generating diverse color palettes with distinct names
+- Creating color legends where each item needs a unique identifier
+- Building accessible interfaces where similar colors need distinguishable names
+- Naming elements in data visualizations
+
+#### Technical Implementation
+
+The API uses an efficient Vantage Point Tree (VPTree) spatial data structure to find the nearest unique color names. When `noduplicates=true`, each assigned name is temporarily removed from future consideration within that request.
+
+#### Best Practices
+
+For optimal results with `noduplicates=true`:
+- Use with larger color name lists: `default`, `bestOf`, `wikipedia`, `ntc`, `ral`, `ridgway` or `xkcd`
+- Order your most important colors first in the request, as they'll receive the closest name matches
+- Be aware that with very small color lists or many similar colors, later colors might receive less ideal name matches
+
+In smaller color name lists, this can lead to unexpected results as the algorithm must choose increasingly distant color names. We suggest using this feature with some of the larger lists mentioned above.
 
 ### Using WebSockets
 
