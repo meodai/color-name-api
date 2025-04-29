@@ -514,9 +514,6 @@ function addColorsToVisualization(data) {
     }
 }
 
-// --- Event Listeners ---
-
-// Update URL controls when main list selection changes
 listSelect.addEventListener('change', (event) => {
     if (document.getElementById('url-list-select')) {
         document.getElementById('url-list-select').value = event.target.value;
@@ -532,18 +529,10 @@ noduplicatesCheckbox.addEventListener('change', (event) => {
     updateApiUrlPreview();
 });
 
-// --- Initial Load ---
-// Initialize logo color points
 initializeLogoPoints();
 
 selectedColors.push(getRandomHexColor()); // Add a random color by default
 fetchLists(); // Fetch lists when the page loads
 renderColors(); // Explicitly render colors immediately (will show placeholder initially)
 
-// --- Initial Socket Setup ---
-document.addEventListener('DOMContentLoaded', () => {
-    // Initialize existing functionality
-    
-    // Initialize socket connection
-    initializeSocket();
-});
+initializeSocket();
