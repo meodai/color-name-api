@@ -118,6 +118,10 @@ components:
           type: number
           description: Luminance value according to WCAG
           minimum: 0
+        bestContrast:
+          type: string
+          description: The best contrasting color ('black' or 'white') for text on this color
+          enum: [black, white]
         swatchImg:
           type: object
           description: SVG representation of the color
@@ -125,12 +129,12 @@ components:
           properties:
             svgNamed:
               type: string
-              description: SVG representation of the color with the name
-              format: svg
+              description: URL to SVG representation of the color with the name
+              format: uri
             svg:
               type: string
-              description: SVG representation of the color without the name
-              format: svg
+              description: URL to SVG representation of the color without the name
+              format: uri
 
     color:
       allOf:
@@ -191,22 +195,28 @@ components:
     error:
       type: object
       properties:
-        status:
-          type: number
-        message:
-          type: string
+        error:
+          type: object
+          properties:
+            status:
+              type: number
+            message:
+              type: string
       example:
-        status: 404
-        message: 'Not Found'
+        error:
+          status: 404
+          message: 'Not Found'
 
 paths:
   /:
     get:
-      summary: Get all colors of the default color name list
+      summary: Get color names for specific hex values
       description: |
         Returns an array of colors from the specified list, with distance calculations 
         to show how close each match is to the requested colors. When providing multiple 
         values, the endpoint will find the closest match for each color.
+        
+        If no colors are provided, returns all colors from the specified list.
       responses:
         '200':
           description: OK
@@ -221,23 +231,34 @@ paths:
                       $ref: '#/components/schemas/color'
                   paletteTitle:
                     type: string
+                    description: A creatively generated name for the color palette when multiple colors are requested
               example:
-                paletteTitle: 'Default color list'
+                paletteTitle: 'Ruby Red'
                 colors:
-                  - name: 'red'
-                    hex: 'FF0000'
+                  - name: 'Red'
+                    hex: '#FF0000'
                     rgb: {r: 255, g: 0, b: 0}
                     hsl: {h: 0, s: 100, l: 50}
                     lab: {l: 53.24, a: 80.09, b: 67.2}
                     luminance: 0.2126
                     luminanceWCAG: 0.2126
+                    bestContrast: 'white'
                     distance: 0
-                    requestedHex: 'FF0000'
+                    requestedHex: '#FF0000'
                     swatchImg:
-                      svgNamed: > 
-                        <svg xmlns="http://www.w3.org/2000/svg" width="100" height="...
-                      svg: >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="100" height="...
+                      svgNamed: '/v1/swatch/?color=ff0000&name=Red'
+                      svg: '/v1/swatch/?color=ff0000'
+
+        '400':
+          description: BAD REQUEST
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              example:
+                error:
+                  status: 400
+                  message: "Invalid or missing list key: 'nonexistent'. Available keys are: default, bestOf, short, ..."
 
         '404':
           description: NOT FOUND
@@ -245,30 +266,48 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+              example:
+                error:
+                  status: 404
+                  message: "'xyz' is not a valid HEX color"
 
     parameters:
       - name: list
         in: query
-        description: The name of the color name list to use (case-insensitive)
+        description: The name of the color name list to use (case-sensitive)
         schema:
           $ref: '#/components/schemas/possibleLists'
         style: form
         explode: false
+        required: false
       
       - name: values
         in: query
         description: A comma-separated list of hex values (e.g., `FF0000,00FF00` do not include the `#`)
         schema:
           type: string
+        required: false
       
       - name: noduplicates
         in: query
-        description: Allow duplicate names or not 
+        description: When true, ensures each color gets a unique name even when colors are similar
         schema:
           type: boolean
+        required: false
+      
+      - name: goodnamesonly
+        in: query
+        description: When true, uses the 'bestOf' list automatically
+        schema:
+          type: boolean
+        required: false
+
   /names/:
     get:
-      summary: Get all colors of the default color name list
+      summary: Search for colors by name
+      description: |
+        Returns colors whose names contain the search string. The search is case-insensitive.
+        The search string must be at least 3 characters long.
       responses:
         '200':
           description: OK
@@ -281,6 +320,7 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/colorBasic'
+                    description: Array of colors matching the search term
 
         '404':
           description: NOT FOUND
@@ -288,92 +328,77 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+              example:
+                error:
+                  status: 404
+                  message: "the color name your are looking for must be at least 3 characters long."
 
     parameters:
       - name: name
         in: query
-        description: The name of the color to retrieve (min 3 characters)
+        description: The search term to look for in color names (min 3 characters)
         schema:
           type: string
+          minLength: 3
         style: form
         explode: false
-        required: true
+        required: false
           
       - name: list
         in: query
-        description: The name of the color name list to use
+        description: The name of the color name list to search in
         schema:
           $ref: '#/components/schemas/possibleLists'
         style: form
         explode: false
+        required: false
 
   /lists/:
     get:
-      summary: Get all colors of the default color name list
+      summary: Get available color name lists
       description: |
         Returns a list of available color name lists with descriptions and URLs to
-        the color list endpoints.
+        the color list endpoints. If a specific list key is provided via the 'list' query parameter,
+        only the description for that list will be returned.
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  availableColorNameLists:
-                    type: array
-                    items:
-                      type: string
-                  listDescriptions:
-                    type: object
+                oneOf:
+                  - type: object 
                     properties:
-                      default:
-                        $ref: '#/components/schemas/listDescription'
-                      bestOf:
-                        $ref: '#/components/schemas/listDescription'
-                      wikipedia:
-                        $ref: '#/components/schemas/listDescription'
-                      french:
-                        $ref: '#/components/schemas/listDescription'
-                      spanish:
-                        $ref: '#/components/schemas/listDescription'
-                      german:
-                        $ref: '#/components/schemas/listDescription'
-                      ridgway:
-                        $ref: '#/components/schemas/listDescription'
-                      risograph:
-                        $ref: '#/components/schemas/listDescription'
-                      basic:
-                        $ref: '#/components/schemas/listDescription'
-                      chineseTraditional:
-                        $ref: '#/components/schemas/listDescription'
-                      html:
-                        $ref: '#/components/schemas/listDescription'
-                      japaneseTraditional:
-                        $ref: '#/components/schemas/listDescription'
-                      leCorbusier:
-                        $ref: '#/components/schemas/listDescription'
-                      nbsIscc:
-                        $ref: '#/components/schemas/listDescription'
-                      ntc:
-                        $ref: '#/components/schemas/listDescription'
-                      osxcrayons:
-                        $ref: '#/components/schemas/listDescription'
-                      ral:
-                        $ref: '#/components/schemas/listDescription'
-                      sanzoWadaI:
-                        $ref: '#/components/schemas/listDescription'
-                      thesaurus:
-                        $ref: '#/components/schemas/listDescription'
-                      werner:
-                        $ref: '#/components/schemas/listDescription'
-                      windows:
-                        $ref: '#/components/schemas/listDescription'
-                      x11:
-                        $ref: '#/components/schemas/listDescription'
-                      xkcd:
-                        $ref: '#/components/schemas/listDescription'
+                      availableColorNameLists:
+                        type: array
+                        items:
+                          type: string
+                        description: Array of all available list keys
+                      listDescriptions:
+                        type: object
+                        description: Object containing descriptions for each list
+                        properties:
+                          default:
+                            $ref: '#/components/schemas/listDescription'
+                          bestOf:
+                            $ref: '#/components/schemas/listDescription'
+                          # other lists as defined in possibleLists enum
+                  - $ref: '#/components/schemas/listDescription'
+                discriminator:
+                  propertyName: list
+                  mapping:
+                    listOnly: '#/components/schemas/listDescription'
+
+        '400':
+          description: BAD REQUEST
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              example:
+                error:
+                  status: 400
+                  message: "Invalid or missing list key: 'nonexistent'. Available keys are: default, bestOf, short, ..."
 
         '404':
           description: NOT FOUND
@@ -381,6 +406,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+      
+      parameters:
+        - name: list
+          in: query
+          description: The name of a specific color name list to retrieve details for
+          required: false
+          schema:
+            $ref: '#/components/schemas/possibleLists'
+          style: form
+          explode: false
     
   /swatch/:
     get:
@@ -395,12 +430,13 @@ paths:
           description: The hex value of the color to retrieve without '#' 
           schema:
             type: string
+            pattern: '^[0-9A-Fa-f]{3,6}$'
           style: form
           explode: false
           required: true
         - name: name
           in: query
-          description: The name of the color
+          description: The name of the color to display on the swatch
           schema:
             type: string
           style: form
@@ -413,12 +449,17 @@ paths:
             image/svg+xml:
               schema:
                 type: string
-        '404':
-          description: NOT FOUND
+                format: svg
+        '400':
+          description: BAD REQUEST
           content: 
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+              example:
+                error:
+                  status: 400
+                  message: "A valid hex color parameter (without #) is required."
         
 x-socket-io:
   version: "4.x"

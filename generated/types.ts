@@ -7,33 +7,39 @@ export interface paths {
     "/": {
         parameters: {
             query?: {
-                /** @description The name of the color name list to use (case-insensitive) */
+                /** @description The name of the color name list to use (case-sensitive) */
                 list?: components["schemas"]["possibleLists"];
                 /** @description A comma-separated list of hex values (e.g., `FF0000,00FF00` do not include the `#`) */
                 values?: string;
-                /** @description Allow duplicate names or not */
+                /** @description When true, ensures each color gets a unique name even when colors are similar */
                 noduplicates?: boolean;
+                /** @description When true, uses the 'bestOf' list automatically */
+                goodnamesonly?: boolean;
             };
             header?: never;
             path?: never;
             cookie?: never;
         };
         /**
-         * Get all colors of the default color name list
+         * Get color names for specific hex values
          * @description Returns an array of colors from the specified list, with distance calculations
          *     to show how close each match is to the requested colors. When providing multiple
          *     values, the endpoint will find the closest match for each color.
+         *
+         *     If no colors are provided, returns all colors from the specified list.
          *
          */
         get: {
             parameters: {
                 query?: {
-                    /** @description The name of the color name list to use (case-insensitive) */
+                    /** @description The name of the color name list to use (case-sensitive) */
                     list?: components["schemas"]["possibleLists"];
                     /** @description A comma-separated list of hex values (e.g., `FF0000,00FF00` do not include the `#`) */
                     values?: string;
-                    /** @description Allow duplicate names or not */
+                    /** @description When true, ensures each color gets a unique name even when colors are similar */
                     noduplicates?: boolean;
+                    /** @description When true, uses the 'bestOf' list automatically */
+                    goodnamesonly?: boolean;
                 };
                 header?: never;
                 path?: never;
@@ -49,8 +55,18 @@ export interface paths {
                     content: {
                         "application/json": {
                             colors?: components["schemas"]["color"][];
+                            /** @description A creatively generated name for the color palette when multiple colors are requested */
                             paletteTitle?: string;
                         };
+                    };
+                };
+                /** @description BAD REQUEST */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["error"];
                     };
                 };
                 /** @description NOT FOUND */
@@ -74,23 +90,28 @@ export interface paths {
     };
     "/names/": {
         parameters: {
-            query: {
-                /** @description The name of the color to retrieve (min 3 characters) */
-                name: string;
-                /** @description The name of the color name list to use */
+            query?: {
+                /** @description The search term to look for in color names (min 3 characters) */
+                name?: string;
+                /** @description The name of the color name list to search in */
                 list?: components["schemas"]["possibleLists"];
             };
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get all colors of the default color name list */
+        /**
+         * Search for colors by name
+         * @description Returns colors whose names contain the search string. The search is case-insensitive.
+         *     The search string must be at least 3 characters long.
+         *
+         */
         get: {
             parameters: {
-                query: {
-                    /** @description The name of the color to retrieve (min 3 characters) */
-                    name: string;
-                    /** @description The name of the color name list to use */
+                query?: {
+                    /** @description The search term to look for in color names (min 3 characters) */
+                    name?: string;
+                    /** @description The name of the color name list to search in */
                     list?: components["schemas"]["possibleLists"];
                 };
                 header?: never;
@@ -106,6 +127,7 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Array of colors matching the search term */
                             colors?: components["schemas"]["colorBasic"][];
                         };
                     };
@@ -137,14 +159,18 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get all colors of the default color name list
+         * Get available color name lists
          * @description Returns a list of available color name lists with descriptions and URLs to
-         *     the color list endpoints.
+         *     the color list endpoints. If a specific list key is provided via the 'list' query parameter,
+         *     only the description for that list will be returned.
          *
          */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    /** @description The name of a specific color name list to retrieve details for */
+                    list?: components["schemas"]["possibleLists"];
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
@@ -158,33 +184,23 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /** @description Array of all available list keys */
                             availableColorNameLists?: string[];
+                            /** @description Object containing descriptions for each list */
                             listDescriptions?: {
                                 default?: components["schemas"]["listDescription"];
                                 bestOf?: components["schemas"]["listDescription"];
-                                wikipedia?: components["schemas"]["listDescription"];
-                                french?: components["schemas"]["listDescription"];
-                                spanish?: components["schemas"]["listDescription"];
-                                german?: components["schemas"]["listDescription"];
-                                ridgway?: components["schemas"]["listDescription"];
-                                risograph?: components["schemas"]["listDescription"];
-                                basic?: components["schemas"]["listDescription"];
-                                chineseTraditional?: components["schemas"]["listDescription"];
-                                html?: components["schemas"]["listDescription"];
-                                japaneseTraditional?: components["schemas"]["listDescription"];
-                                leCorbusier?: components["schemas"]["listDescription"];
-                                nbsIscc?: components["schemas"]["listDescription"];
-                                ntc?: components["schemas"]["listDescription"];
-                                osxcrayons?: components["schemas"]["listDescription"];
-                                ral?: components["schemas"]["listDescription"];
-                                sanzoWadaI?: components["schemas"]["listDescription"];
-                                thesaurus?: components["schemas"]["listDescription"];
-                                werner?: components["schemas"]["listDescription"];
-                                windows?: components["schemas"]["listDescription"];
-                                x11?: components["schemas"]["listDescription"];
-                                xkcd?: components["schemas"]["listDescription"];
                             };
-                        };
+                        } | components["schemas"]["listDescription"];
+                    };
+                };
+                /** @description BAD REQUEST */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["error"];
                     };
                 };
                 /** @description NOT FOUND */
@@ -225,7 +241,7 @@ export interface paths {
                 query: {
                     /** @description The hex value of the color to retrieve without '#' */
                     color: string;
-                    /** @description The name of the color */
+                    /** @description The name of the color to display on the swatch */
                     name?: string;
                 };
                 header?: never;
@@ -243,8 +259,8 @@ export interface paths {
                         "image/svg+xml": string;
                     };
                 };
-                /** @description NOT FOUND */
-                404: {
+                /** @description BAD REQUEST */
+                400: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -281,6 +297,11 @@ export interface components {
             license?: string;
             /** @description Amount of colors in the list */
             colorCount?: number;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            list: "listOnly";
         };
         colorBasic: {
             /** @description Name of the closest color relative to the hex value provided */
@@ -309,16 +330,21 @@ export interface components {
             luminance: number;
             /** @description Luminance value according to WCAG */
             luminanceWCAG: number;
+            /**
+             * @description The best contrasting color ('black' or 'white') for text on this color
+             * @enum {string}
+             */
+            bestContrast?: "black" | "white";
             /** @description SVG representation of the color */
             swatchImg: {
                 /**
-                 * Format: svg
-                 * @description SVG representation of the color with the name
+                 * Format: uri
+                 * @description URL to SVG representation of the color with the name
                  */
                 svgNamed: string;
                 /**
-                 * Format: svg
-                 * @description SVG representation of the color without the name
+                 * Format: uri
+                 * @description URL to SVG representation of the color without the name
                  */
                 svg: string;
             };
@@ -340,12 +366,16 @@ export interface components {
             colors?: components["schemas"]["colorBasic"][];
         };
         /** @example {
-         *       "status": 404,
-         *       "message": "Not Found"
+         *       "error": {
+         *         "status": 404,
+         *         "message": "Not Found"
+         *       }
          *     } */
         error: {
-            status?: number;
-            message?: string;
+            error?: {
+                status?: number;
+                message?: string;
+            };
         };
     };
     responses: never;

@@ -898,6 +898,11 @@ ul.nav-tabs {
       "type" : "number",
       "description" : "Luminance value according to WCAG"
     },
+    "bestContrast" : {
+      "type" : "string",
+      "description" : "The best contrasting color ('black' or 'white') for text on this color",
+      "enum" : [ "black", "white" ]
+    },
     "swatchImg" : {
       "$ref" : "#/components/schemas/colorBasic_swatchImg"
     }
@@ -975,18 +980,32 @@ ul.nav-tabs {
   "properties" : {
     "svgNamed" : {
       "type" : "string",
-      "description" : "SVG representation of the color with the name",
-      "format" : "svg"
+      "description" : "URL to SVG representation of the color with the name",
+      "format" : "uri"
     },
     "svg" : {
       "type" : "string",
-      "description" : "SVG representation of the color without the name",
-      "format" : "svg"
+      "description" : "URL to SVG representation of the color without the name",
+      "format" : "uri"
     }
   },
   "description" : "SVG representation of the color"
 };
     defs["error"] = {
+  "type" : "object",
+  "properties" : {
+    "error" : {
+      "$ref" : "#/components/schemas/error_error"
+    }
+  },
+  "example" : {
+    "error" : {
+      "status" : 404,
+      "message" : "Not Found"
+    }
+  }
+};
+    defs["error_error"] = {
   "type" : "object",
   "properties" : {
     "status" : {
@@ -995,10 +1014,6 @@ ul.nav-tabs {
     "message" : {
       "type" : "string"
     }
-  },
-  "example" : {
-    "status" : 404,
-    "message" : "Not Found"
   }
 };
     defs["__get_200_response"] = {
@@ -1011,7 +1026,8 @@ ul.nav-tabs {
       }
     },
     "paletteTitle" : {
-      "type" : "string"
+      "type" : "string",
+      "description" : "A creatively generated name for the color palette when multiple colors are requested"
     }
   }
 };
@@ -1049,20 +1065,34 @@ ul.nav-tabs {
   }
 };
     defs["_lists__get_200_response"] = {
+  "discriminator" : {
+    "propertyName" : "list",
+    "mapping" : {
+      "listOnly" : "#/components/schemas/listDescription"
+    }
+  },
+  "oneOf" : [ {
+    "$ref" : "#/components/schemas/_lists__get_200_response_oneOf"
+  }, {
+    "$ref" : "#/components/schemas/listDescription"
+  } ]
+};
+    defs["_lists__get_200_response_oneOf"] = {
   "type" : "object",
   "properties" : {
     "availableColorNameLists" : {
       "type" : "array",
+      "description" : "Array of all available list keys",
       "items" : {
         "type" : "string"
       }
     },
     "listDescriptions" : {
-      "$ref" : "#/components/schemas/_lists__get_200_response_listDescriptions"
+      "$ref" : "#/components/schemas/_lists__get_200_response_oneOf_listDescriptions"
     }
   }
 };
-    defs["_lists__get_200_response_listDescriptions"] = {
+    defs["_lists__get_200_response_oneOf_listDescriptions"] = {
   "type" : "object",
   "properties" : {
     "default" : {
@@ -1070,77 +1100,16 @@ ul.nav-tabs {
     },
     "bestOf" : {
       "$ref" : "#/components/schemas/listDescription"
-    },
-    "wikipedia" : {
-      "$ref" : "#/components/schemas/listDescription"
-    },
-    "french" : {
-      "$ref" : "#/components/schemas/listDescription"
-    },
-    "spanish" : {
-      "$ref" : "#/components/schemas/listDescription"
-    },
-    "german" : {
-      "$ref" : "#/components/schemas/listDescription"
-    },
-    "ridgway" : {
-      "$ref" : "#/components/schemas/listDescription"
-    },
-    "risograph" : {
-      "$ref" : "#/components/schemas/listDescription"
-    },
-    "basic" : {
-      "$ref" : "#/components/schemas/listDescription"
-    },
-    "chineseTraditional" : {
-      "$ref" : "#/components/schemas/listDescription"
-    },
-    "html" : {
-      "$ref" : "#/components/schemas/listDescription"
-    },
-    "japaneseTraditional" : {
-      "$ref" : "#/components/schemas/listDescription"
-    },
-    "leCorbusier" : {
-      "$ref" : "#/components/schemas/listDescription"
-    },
-    "nbsIscc" : {
-      "$ref" : "#/components/schemas/listDescription"
-    },
-    "ntc" : {
-      "$ref" : "#/components/schemas/listDescription"
-    },
-    "osxcrayons" : {
-      "$ref" : "#/components/schemas/listDescription"
-    },
-    "ral" : {
-      "$ref" : "#/components/schemas/listDescription"
-    },
-    "sanzoWadaI" : {
-      "$ref" : "#/components/schemas/listDescription"
-    },
-    "thesaurus" : {
-      "$ref" : "#/components/schemas/listDescription"
-    },
-    "werner" : {
-      "$ref" : "#/components/schemas/listDescription"
-    },
-    "windows" : {
-      "$ref" : "#/components/schemas/listDescription"
-    },
-    "x11" : {
-      "$ref" : "#/components/schemas/listDescription"
-    },
-    "xkcd" : {
-      "$ref" : "#/components/schemas/listDescription"
     }
-  }
+  },
+  "description" : "Object containing descriptions for each list"
 };
     defs["_names__get_200_response"] = {
   "type" : "object",
   "properties" : {
     "colors" : {
       "type" : "array",
+      "description" : "Array of colors matching the search term",
       "items" : {
         "$ref" : "#/components/schemas/colorBasic"
       }
@@ -1227,13 +1196,14 @@ ul.nav-tabs {
                       <article id="api-Default-listsGet-0" data-group="User" data-name="listsGet" data-version="0">
                         <div class="pull-left">
                           <h1>listsGet</h1>
-                          <p>Get all colors of the default color name list</p>
+                          <p>Get available color name lists</p>
                         </div>
                         <div class="pull-right"></div>
                         <div class="clearfix"></div>
                         <p></p>
                         <p class="marked">Returns a list of available color name lists with descriptions and URLs to
-the color list endpoints.
+the color list endpoints. If a specific list key is provided via the &#39;list&#39; query parameter,
+only the description for that list will be returned.
 </p>
                         <p></p>
                         <br />
@@ -1260,7 +1230,7 @@ the color list endpoints.
                           <div class="tab-pane active" id="examples-Default-listsGet-0-curl">
                             <pre class="prettyprint"><code class="language-bsh">curl -X GET \
  -H "Accept: application/json" \
- "https://api.color.pizza/v1/lists/"
+ "https://api.color.pizza/v1/lists/?list="
 </code></pre>
                           </div>
                           <div class="tab-pane" id="examples-Default-listsGet-0-java">
@@ -1277,9 +1247,10 @@ public class DefaultApiExample {
 
         // Create an instance of the API class
         DefaultApi apiInstance = new DefaultApi();
+        PossibleLists list = ; // PossibleLists | The name of a specific color name list to retrieve details for
 
         try {
-            _lists__get_200_response result = apiInstance.listsGet();
+            _lists__get_200_response result = apiInstance.listsGet(list);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling DefaultApi#listsGet");
@@ -1296,9 +1267,10 @@ public class DefaultApiExample {
 public class DefaultApiExample {
     public static void main(String[] args) {
         DefaultApi apiInstance = new DefaultApi();
+        PossibleLists list = ; // PossibleLists | The name of a specific color name list to retrieve details for
 
         try {
-            _lists__get_200_response result = apiInstance.listsGet();
+            _lists__get_200_response result = apiInstance.listsGet(list);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling DefaultApi#listsGet");
@@ -1316,10 +1288,11 @@ public class DefaultApiExample {
 
 // Create an instance of the API class
 DefaultApi *apiInstance = [[DefaultApi alloc] init];
+PossibleLists *list = ; // The name of a specific color name list to retrieve details for (optional) (default to null)
 
-// Get all colors of the default color name list
-[apiInstance listsGetWithCompletionHandler: 
-              ^(_lists__get_200_response output, NSError* error) {
+// Get available color name lists
+[apiInstance listsGetWith:list
+              completionHandler: ^(_lists__get_200_response output, NSError* error) {
     if (output) {
         NSLog(@"%@", output);
     }
@@ -1335,6 +1308,10 @@ DefaultApi *apiInstance = [[DefaultApi alloc] init];
 
 // Create an instance of the API class
 var api = new ColorNameApi.DefaultApi()
+var opts = {
+  'list':  // {PossibleLists} The name of a specific color name list to retrieve details for
+};
+
 var callback = function(error, data, response) {
   if (error) {
     console.error(error);
@@ -1342,7 +1319,7 @@ var callback = function(error, data, response) {
     console.log('API called successfully. Returned data: ' + data);
   }
 };
-api.listsGet(callback);
+api.listsGet(opts, callback);
 </code></pre>
                             </div>
 
@@ -1365,10 +1342,11 @@ namespace Example
 
             // Create an instance of the API class
             var apiInstance = new DefaultApi();
+            var list = new PossibleLists(); // PossibleLists | The name of a specific color name list to retrieve details for (optional)  (default to null)
 
             try {
-                // Get all colors of the default color name list
-                _lists__get_200_response result = apiInstance.listsGet();
+                // Get available color name lists
+                _lists__get_200_response result = apiInstance.listsGet(list);
                 Debug.WriteLine(result);
             } catch (Exception e) {
                 Debug.Print("Exception when calling DefaultApi.listsGet: " + e.Message );
@@ -1385,9 +1363,10 @@ require_once(__DIR__ . '/vendor/autoload.php');
 
 // Create an instance of the API class
 $api_instance = new OpenAPITools\Client\Api\DefaultApi();
+$list = ; // PossibleLists | The name of a specific color name list to retrieve details for
 
 try {
-    $result = $api_instance->listsGet();
+    $result = $api_instance->listsGet($list);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling DefaultApi->listsGet: ', $e->getMessage(), PHP_EOL;
@@ -1402,9 +1381,10 @@ use WWW::OPenAPIClient::DefaultApi;
 
 # Create an instance of the API class
 my $api_instance = WWW::OPenAPIClient::DefaultApi->new();
+my $list = ; # PossibleLists | The name of a specific color name list to retrieve details for
 
 eval {
-    my $result = $api_instance->listsGet();
+    my $result = $api_instance->listsGet(list => $list);
     print Dumper($result);
 };
 if ($@) {
@@ -1421,10 +1401,11 @@ from pprint import pprint
 
 # Create an instance of the API class
 api_instance = openapi_client.DefaultApi()
+list =  # PossibleLists | The name of a specific color name list to retrieve details for (optional) (default to null)
 
 try:
-    # Get all colors of the default color name list
-    api_response = api_instance.lists_get()
+    # Get available color name lists
+    api_response = api_instance.lists_get(list=list)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling DefaultApi->listsGet: %s\n" % e)</code></pre>
@@ -1434,9 +1415,10 @@ except ApiException as e:
                               <pre class="prettyprint"><code class="language-rust">extern crate DefaultApi;
 
 pub fn main() {
+    let list = ; // PossibleLists
 
     let mut context = DefaultApi::Context::default();
-    let result = client.listsGet(&context).wait();
+    let result = client.listsGet(list, &context).wait();
 
     println!("{:?}", result);
 }
@@ -1455,6 +1437,33 @@ pub fn main() {
 
 
 
+                            <div class="methodsubtabletitle">Query parameters</div>
+                            <table id="methodsubtable">
+                              <tr>
+                                <th width="150px">Name</th>
+                                <th>Description</th>
+                              </tr>
+                                <tr><td style="width:150px;">list</td>
+<td>
+
+
+    <div id="d2e199_listsGet_list">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    PossibleLists
+                </span>
+
+                    <div class="inner description marked">
+The name of a specific color name list to retrieve details for
+                    </div>
+            </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
 
                           <h2>Responses</h2>
                             <h3 id="examples-Default-listsGet-title-200"></h3>
@@ -1517,6 +1526,68 @@ pub fn main() {
                                     </script>
                                   </div>
                                   <input id='responses-Default-listsGet-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+                            <h3 id="examples-Default-listsGet-title-400"></h3>
+                            <p id="examples-Default-listsGet-description-400" class="marked"></p>
+                            <script>
+                              var responseDefault400_description = `BAD REQUEST`;
+                              var responseDefault400_description_break = responseDefault400_description.indexOf('\n');
+                              if (responseDefault400_description_break == -1) {
+                                $("#examples-Default-listsGet-title-400").text("Status: 400 - " + responseDefault400_description);
+                              } else {
+                                $("#examples-Default-listsGet-title-400").text("Status: 400 - " + responseDefault400_description.substring(0, responseDefault400_description_break));
+                                $("#examples-Default-listsGet-description-400").html(responseDefault400_description.substring(responseDefault400_description_break));
+                              }
+                            </script>
+
+
+                            <ul id="responses-detail-Default-listsGet-400" class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-Default-listsGet-400-schema">Schema</a>
+                                </li>
+
+
+
+
+                            </ul>
+
+
+                            <div class="tab-content" id="responses-Default-listsGet-400-wrapper" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-Default-listsGet-400-schema">
+                                  <div id="responses-Default-listsGet-schema-400" class="exampleStyle">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = ;
+                                        var schema = findNode('schema',schemaWrapper).schema;
+                                        if (!schema) {
+                                          schema = schemaWrapper.schema;
+                                        }
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                          Object.keys(schema.properties).forEach( (item) => {
+                                            if (schema.properties[item].$ref != null) {
+                                              schema.properties[item] = defsParser.$refs.get(schema.properties[item].$ref);
+                                            }
+                                          });
+                                        } else if (schema.items != null && schema.items.$ref != null) {
+                                            schema.items = defsParser.$refs.get(schema.items.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-Default-listsGet-400-schema-data').val(JSON.stringify(schema));
+                                        var result = $('#responses-Default-listsGet-schema-400');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-Default-listsGet-400-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
                             <h3 id="examples-Default-listsGet-title-404"></h3>
@@ -1588,12 +1659,14 @@ pub fn main() {
                       <article id="api-Default-namesGet-0" data-group="User" data-name="namesGet" data-version="0">
                         <div class="pull-left">
                           <h1>namesGet</h1>
-                          <p>Get all colors of the default color name list</p>
+                          <p>Search for colors by name</p>
                         </div>
                         <div class="pull-right"></div>
                         <div class="clearfix"></div>
                         <p></p>
-                        <p class="marked"></p>
+                        <p class="marked">Returns colors whose names contain the search string. The search is case-insensitive.
+The search string must be at least 3 characters long.
+</p>
                         <p></p>
                         <br />
                         <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/names/</span></code></pre>
@@ -1636,8 +1709,8 @@ public class DefaultApiExample {
 
         // Create an instance of the API class
         DefaultApi apiInstance = new DefaultApi();
-        String name = name_example; // String | The name of the color to retrieve (min 3 characters)
-        PossibleLists list = ; // PossibleLists | The name of the color name list to use
+        String name = name_example; // String | The search term to look for in color names (min 3 characters)
+        PossibleLists list = ; // PossibleLists | The name of the color name list to search in
 
         try {
             _names__get_200_response result = apiInstance.namesGet(name, list);
@@ -1657,8 +1730,8 @@ public class DefaultApiExample {
 public class DefaultApiExample {
     public static void main(String[] args) {
         DefaultApi apiInstance = new DefaultApi();
-        String name = name_example; // String | The name of the color to retrieve (min 3 characters)
-        PossibleLists list = ; // PossibleLists | The name of the color name list to use
+        String name = name_example; // String | The search term to look for in color names (min 3 characters)
+        PossibleLists list = ; // PossibleLists | The name of the color name list to search in
 
         try {
             _names__get_200_response result = apiInstance.namesGet(name, list);
@@ -1679,10 +1752,10 @@ public class DefaultApiExample {
 
 // Create an instance of the API class
 DefaultApi *apiInstance = [[DefaultApi alloc] init];
-String *name = name_example; // The name of the color to retrieve (min 3 characters) (default to null)
-PossibleLists *list = ; // The name of the color name list to use (optional) (default to null)
+String *name = name_example; // The search term to look for in color names (min 3 characters) (optional) (default to null)
+PossibleLists *list = ; // The name of the color name list to search in (optional) (default to null)
 
-// Get all colors of the default color name list
+// Search for colors by name
 [apiInstance namesGetWith:name
     list:list
               completionHandler: ^(_names__get_200_response output, NSError* error) {
@@ -1701,9 +1774,9 @@ PossibleLists *list = ; // The name of the color name list to use (optional) (de
 
 // Create an instance of the API class
 var api = new ColorNameApi.DefaultApi()
-var name = name_example; // {String} The name of the color to retrieve (min 3 characters)
 var opts = {
-  'list':  // {PossibleLists} The name of the color name list to use
+  'name': name_example, // {String} The search term to look for in color names (min 3 characters)
+  'list':  // {PossibleLists} The name of the color name list to search in
 };
 
 var callback = function(error, data, response) {
@@ -1713,7 +1786,7 @@ var callback = function(error, data, response) {
     console.log('API called successfully. Returned data: ' + data);
   }
 };
-api.namesGet(name, opts, callback);
+api.namesGet(opts, callback);
 </code></pre>
                             </div>
 
@@ -1736,11 +1809,11 @@ namespace Example
 
             // Create an instance of the API class
             var apiInstance = new DefaultApi();
-            var name = name_example;  // String | The name of the color to retrieve (min 3 characters) (default to null)
-            var list = new PossibleLists(); // PossibleLists | The name of the color name list to use (optional)  (default to null)
+            var name = name_example;  // String | The search term to look for in color names (min 3 characters) (optional)  (default to null)
+            var list = new PossibleLists(); // PossibleLists | The name of the color name list to search in (optional)  (default to null)
 
             try {
-                // Get all colors of the default color name list
+                // Search for colors by name
                 _names__get_200_response result = apiInstance.namesGet(name, list);
                 Debug.WriteLine(result);
             } catch (Exception e) {
@@ -1758,8 +1831,8 @@ require_once(__DIR__ . '/vendor/autoload.php');
 
 // Create an instance of the API class
 $api_instance = new OpenAPITools\Client\Api\DefaultApi();
-$name = name_example; // String | The name of the color to retrieve (min 3 characters)
-$list = ; // PossibleLists | The name of the color name list to use
+$name = name_example; // String | The search term to look for in color names (min 3 characters)
+$list = ; // PossibleLists | The name of the color name list to search in
 
 try {
     $result = $api_instance->namesGet($name, $list);
@@ -1777,8 +1850,8 @@ use WWW::OPenAPIClient::DefaultApi;
 
 # Create an instance of the API class
 my $api_instance = WWW::OPenAPIClient::DefaultApi->new();
-my $name = name_example; # String | The name of the color to retrieve (min 3 characters)
-my $list = ; # PossibleLists | The name of the color name list to use
+my $name = name_example; # String | The search term to look for in color names (min 3 characters)
+my $list = ; # PossibleLists | The name of the color name list to search in
 
 eval {
     my $result = $api_instance->namesGet(name => $name, list => $list);
@@ -1798,12 +1871,12 @@ from pprint import pprint
 
 # Create an instance of the API class
 api_instance = openapi_client.DefaultApi()
-name = name_example # String | The name of the color to retrieve (min 3 characters) (default to null)
-list =  # PossibleLists | The name of the color name list to use (optional) (default to null)
+name = name_example # String | The search term to look for in color names (min 3 characters) (optional) (default to null)
+list =  # PossibleLists | The name of the color name list to search in (optional) (default to null)
 
 try:
-    # Get all colors of the default color name list
-    api_response = api_instance.names_get(name, list=list)
+    # Search for colors by name
+    api_response = api_instance.names_get(name=name, list=list)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling DefaultApi->namesGet: %s\n" % e)</code></pre>
@@ -1842,7 +1915,7 @@ pub fn main() {
                                 <th width="150px">Name</th>
                                 <th>Description</th>
                               </tr>
-                                <tr><td style="width:150px;">name*</td>
+                                <tr><td style="width:150px;">name</td>
 <td>
 
 
@@ -1854,12 +1927,9 @@ pub fn main() {
                 </span>
 
                     <div class="inner description marked">
-The name of the color to retrieve (min 3 characters)
+The search term to look for in color names (min 3 characters)
                     </div>
             </div>
-                <div class="inner required">
-                    Required
-                </div>
         </div>
     </div>
 </td>
@@ -1877,7 +1947,7 @@ The name of the color to retrieve (min 3 characters)
                 </span>
 
                     <div class="inner description marked">
-The name of the color name list to use
+The name of the color name list to search in
                     </div>
             </div>
         </div>
@@ -2019,7 +2089,7 @@ The name of the color name list to use
                       <article id="api-Default-rootGet-0" data-group="User" data-name="rootGet" data-version="0">
                         <div class="pull-left">
                           <h1>rootGet</h1>
-                          <p>Get all colors of the default color name list</p>
+                          <p>Get color names for specific hex values</p>
                         </div>
                         <div class="pull-right"></div>
                         <div class="clearfix"></div>
@@ -2027,6 +2097,8 @@ The name of the color name list to use
                         <p class="marked">Returns an array of colors from the specified list, with distance calculations 
 to show how close each match is to the requested colors. When providing multiple 
 values, the endpoint will find the closest match for each color.
+
+If no colors are provided, returns all colors from the specified list.
 </p>
                         <p></p>
                         <br />
@@ -2053,7 +2125,7 @@ values, the endpoint will find the closest match for each color.
                           <div class="tab-pane active" id="examples-Default-rootGet-0-curl">
                             <pre class="prettyprint"><code class="language-bsh">curl -X GET \
  -H "Accept: application/json" \
- "https://api.color.pizza/v1/?list=&values=values_example&noduplicates=true"
+ "https://api.color.pizza/v1/?list=&values=values_example&noduplicates=true&goodnamesonly=true"
 </code></pre>
                           </div>
                           <div class="tab-pane" id="examples-Default-rootGet-0-java">
@@ -2070,12 +2142,13 @@ public class DefaultApiExample {
 
         // Create an instance of the API class
         DefaultApi apiInstance = new DefaultApi();
-        PossibleLists list = ; // PossibleLists | The name of the color name list to use (case-insensitive)
+        PossibleLists list = ; // PossibleLists | The name of the color name list to use (case-sensitive)
         String values = values_example; // String | A comma-separated list of hex values (e.g., `FF0000,00FF00` do not include the `#`)
-        Boolean noduplicates = true; // Boolean | Allow duplicate names or not
+        Boolean noduplicates = true; // Boolean | When true, ensures each color gets a unique name even when colors are similar
+        Boolean goodnamesonly = true; // Boolean | When true, uses the 'bestOf' list automatically
 
         try {
-            __get_200_response result = apiInstance.rootGet(list, values, noduplicates);
+            __get_200_response result = apiInstance.rootGet(list, values, noduplicates, goodnamesonly);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling DefaultApi#rootGet");
@@ -2092,12 +2165,13 @@ public class DefaultApiExample {
 public class DefaultApiExample {
     public static void main(String[] args) {
         DefaultApi apiInstance = new DefaultApi();
-        PossibleLists list = ; // PossibleLists | The name of the color name list to use (case-insensitive)
+        PossibleLists list = ; // PossibleLists | The name of the color name list to use (case-sensitive)
         String values = values_example; // String | A comma-separated list of hex values (e.g., `FF0000,00FF00` do not include the `#`)
-        Boolean noduplicates = true; // Boolean | Allow duplicate names or not
+        Boolean noduplicates = true; // Boolean | When true, ensures each color gets a unique name even when colors are similar
+        Boolean goodnamesonly = true; // Boolean | When true, uses the 'bestOf' list automatically
 
         try {
-            __get_200_response result = apiInstance.rootGet(list, values, noduplicates);
+            __get_200_response result = apiInstance.rootGet(list, values, noduplicates, goodnamesonly);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling DefaultApi#rootGet");
@@ -2115,14 +2189,16 @@ public class DefaultApiExample {
 
 // Create an instance of the API class
 DefaultApi *apiInstance = [[DefaultApi alloc] init];
-PossibleLists *list = ; // The name of the color name list to use (case-insensitive) (optional) (default to null)
+PossibleLists *list = ; // The name of the color name list to use (case-sensitive) (optional) (default to null)
 String *values = values_example; // A comma-separated list of hex values (e.g., `FF0000,00FF00` do not include the `#`) (optional) (default to null)
-Boolean *noduplicates = true; // Allow duplicate names or not (optional) (default to null)
+Boolean *noduplicates = true; // When true, ensures each color gets a unique name even when colors are similar (optional) (default to null)
+Boolean *goodnamesonly = true; // When true, uses the 'bestOf' list automatically (optional) (default to null)
 
-// Get all colors of the default color name list
+// Get color names for specific hex values
 [apiInstance rootGetWith:list
     values:values
     noduplicates:noduplicates
+    goodnamesonly:goodnamesonly
               completionHandler: ^(__get_200_response output, NSError* error) {
     if (output) {
         NSLog(@"%@", output);
@@ -2140,9 +2216,10 @@ Boolean *noduplicates = true; // Allow duplicate names or not (optional) (defaul
 // Create an instance of the API class
 var api = new ColorNameApi.DefaultApi()
 var opts = {
-  'list': , // {PossibleLists} The name of the color name list to use (case-insensitive)
+  'list': , // {PossibleLists} The name of the color name list to use (case-sensitive)
   'values': values_example, // {String} A comma-separated list of hex values (e.g., `FF0000,00FF00` do not include the `#`)
-  'noduplicates': true // {Boolean} Allow duplicate names or not
+  'noduplicates': true, // {Boolean} When true, ensures each color gets a unique name even when colors are similar
+  'goodnamesonly': true // {Boolean} When true, uses the 'bestOf' list automatically
 };
 
 var callback = function(error, data, response) {
@@ -2175,13 +2252,14 @@ namespace Example
 
             // Create an instance of the API class
             var apiInstance = new DefaultApi();
-            var list = new PossibleLists(); // PossibleLists | The name of the color name list to use (case-insensitive) (optional)  (default to null)
+            var list = new PossibleLists(); // PossibleLists | The name of the color name list to use (case-sensitive) (optional)  (default to null)
             var values = values_example;  // String | A comma-separated list of hex values (e.g., `FF0000,00FF00` do not include the `#`) (optional)  (default to null)
-            var noduplicates = true;  // Boolean | Allow duplicate names or not (optional)  (default to null)
+            var noduplicates = true;  // Boolean | When true, ensures each color gets a unique name even when colors are similar (optional)  (default to null)
+            var goodnamesonly = true;  // Boolean | When true, uses the 'bestOf' list automatically (optional)  (default to null)
 
             try {
-                // Get all colors of the default color name list
-                __get_200_response result = apiInstance.rootGet(list, values, noduplicates);
+                // Get color names for specific hex values
+                __get_200_response result = apiInstance.rootGet(list, values, noduplicates, goodnamesonly);
                 Debug.WriteLine(result);
             } catch (Exception e) {
                 Debug.Print("Exception when calling DefaultApi.rootGet: " + e.Message );
@@ -2198,12 +2276,13 @@ require_once(__DIR__ . '/vendor/autoload.php');
 
 // Create an instance of the API class
 $api_instance = new OpenAPITools\Client\Api\DefaultApi();
-$list = ; // PossibleLists | The name of the color name list to use (case-insensitive)
+$list = ; // PossibleLists | The name of the color name list to use (case-sensitive)
 $values = values_example; // String | A comma-separated list of hex values (e.g., `FF0000,00FF00` do not include the `#`)
-$noduplicates = true; // Boolean | Allow duplicate names or not
+$noduplicates = true; // Boolean | When true, ensures each color gets a unique name even when colors are similar
+$goodnamesonly = true; // Boolean | When true, uses the 'bestOf' list automatically
 
 try {
-    $result = $api_instance->rootGet($list, $values, $noduplicates);
+    $result = $api_instance->rootGet($list, $values, $noduplicates, $goodnamesonly);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling DefaultApi->rootGet: ', $e->getMessage(), PHP_EOL;
@@ -2218,12 +2297,13 @@ use WWW::OPenAPIClient::DefaultApi;
 
 # Create an instance of the API class
 my $api_instance = WWW::OPenAPIClient::DefaultApi->new();
-my $list = ; # PossibleLists | The name of the color name list to use (case-insensitive)
+my $list = ; # PossibleLists | The name of the color name list to use (case-sensitive)
 my $values = values_example; # String | A comma-separated list of hex values (e.g., `FF0000,00FF00` do not include the `#`)
-my $noduplicates = true; # Boolean | Allow duplicate names or not
+my $noduplicates = true; # Boolean | When true, ensures each color gets a unique name even when colors are similar
+my $goodnamesonly = true; # Boolean | When true, uses the 'bestOf' list automatically
 
 eval {
-    my $result = $api_instance->rootGet(list => $list, values => $values, noduplicates => $noduplicates);
+    my $result = $api_instance->rootGet(list => $list, values => $values, noduplicates => $noduplicates, goodnamesonly => $goodnamesonly);
     print Dumper($result);
 };
 if ($@) {
@@ -2240,13 +2320,14 @@ from pprint import pprint
 
 # Create an instance of the API class
 api_instance = openapi_client.DefaultApi()
-list =  # PossibleLists | The name of the color name list to use (case-insensitive) (optional) (default to null)
+list =  # PossibleLists | The name of the color name list to use (case-sensitive) (optional) (default to null)
 values = values_example # String | A comma-separated list of hex values (e.g., `FF0000,00FF00` do not include the `#`) (optional) (default to null)
-noduplicates = true # Boolean | Allow duplicate names or not (optional) (default to null)
+noduplicates = true # Boolean | When true, ensures each color gets a unique name even when colors are similar (optional) (default to null)
+goodnamesonly = true # Boolean | When true, uses the 'bestOf' list automatically (optional) (default to null)
 
 try:
-    # Get all colors of the default color name list
-    api_response = api_instance.root_get(list=list, values=values, noduplicates=noduplicates)
+    # Get color names for specific hex values
+    api_response = api_instance.root_get(list=list, values=values, noduplicates=noduplicates, goodnamesonly=goodnamesonly)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling DefaultApi->rootGet: %s\n" % e)</code></pre>
@@ -2259,9 +2340,10 @@ pub fn main() {
     let list = ; // PossibleLists
     let values = values_example; // String
     let noduplicates = true; // Boolean
+    let goodnamesonly = true; // Boolean
 
     let mut context = DefaultApi::Context::default();
-    let result = client.rootGet(list, values, noduplicates, &context).wait();
+    let result = client.rootGet(list, values, noduplicates, goodnamesonly, &context).wait();
 
     println!("{:?}", result);
 }
@@ -2298,7 +2380,7 @@ pub fn main() {
                 </span>
 
                     <div class="inner description marked">
-The name of the color name list to use (case-insensitive)
+The name of the color name list to use (case-sensitive)
                     </div>
             </div>
         </div>
@@ -2338,7 +2420,27 @@ A comma-separated list of hex values (e.g., &#x60;FF0000,00FF00&#x60; do not inc
                 </span>
 
                     <div class="inner description marked">
-Allow duplicate names or not
+When true, ensures each color gets a unique name even when colors are similar
+                    </div>
+            </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                                <tr><td style="width:150px;">goodnamesonly</td>
+<td>
+
+
+    <div id="d2e199_rootGet_goodnamesonly">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Boolean
+                </span>
+
+                    <div class="inner description marked">
+When true, uses the &#39;bestOf&#39; list automatically
                     </div>
             </div>
         </div>
@@ -2409,6 +2511,68 @@ Allow duplicate names or not
                                     </script>
                                   </div>
                                   <input id='responses-Default-rootGet-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+                            <h3 id="examples-Default-rootGet-title-400"></h3>
+                            <p id="examples-Default-rootGet-description-400" class="marked"></p>
+                            <script>
+                              var responseDefault400_description = `BAD REQUEST`;
+                              var responseDefault400_description_break = responseDefault400_description.indexOf('\n');
+                              if (responseDefault400_description_break == -1) {
+                                $("#examples-Default-rootGet-title-400").text("Status: 400 - " + responseDefault400_description);
+                              } else {
+                                $("#examples-Default-rootGet-title-400").text("Status: 400 - " + responseDefault400_description.substring(0, responseDefault400_description_break));
+                                $("#examples-Default-rootGet-description-400").html(responseDefault400_description.substring(responseDefault400_description_break));
+                              }
+                            </script>
+
+
+                            <ul id="responses-detail-Default-rootGet-400" class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-Default-rootGet-400-schema">Schema</a>
+                                </li>
+
+
+
+
+                            </ul>
+
+
+                            <div class="tab-content" id="responses-Default-rootGet-400-wrapper" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-Default-rootGet-400-schema">
+                                  <div id="responses-Default-rootGet-schema-400" class="exampleStyle">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = ;
+                                        var schema = findNode('schema',schemaWrapper).schema;
+                                        if (!schema) {
+                                          schema = schemaWrapper.schema;
+                                        }
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                          Object.keys(schema.properties).forEach( (item) => {
+                                            if (schema.properties[item].$ref != null) {
+                                              schema.properties[item] = defsParser.$refs.get(schema.properties[item].$ref);
+                                            }
+                                          });
+                                        } else if (schema.items != null && schema.items.$ref != null) {
+                                            schema.items = defsParser.$refs.get(schema.items.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-Default-rootGet-400-schema-data').val(JSON.stringify(schema));
+                                        var result = $('#responses-Default-rootGet-schema-400');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-Default-rootGet-400-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
                             <h3 id="examples-Default-rootGet-title-404"></h3>
@@ -2532,7 +2696,7 @@ public class DefaultApiExample {
         // Create an instance of the API class
         DefaultApi apiInstance = new DefaultApi();
         String color = color_example; // String | The hex value of the color to retrieve without '#'
-        String name = name_example; // String | The name of the color
+        String name = name_example; // String | The name of the color to display on the swatch
 
         try {
             'String' result = apiInstance.swatchGet(color, name);
@@ -2553,7 +2717,7 @@ public class DefaultApiExample {
     public static void main(String[] args) {
         DefaultApi apiInstance = new DefaultApi();
         String color = color_example; // String | The hex value of the color to retrieve without '#'
-        String name = name_example; // String | The name of the color
+        String name = name_example; // String | The name of the color to display on the swatch
 
         try {
             'String' result = apiInstance.swatchGet(color, name);
@@ -2575,7 +2739,7 @@ public class DefaultApiExample {
 // Create an instance of the API class
 DefaultApi *apiInstance = [[DefaultApi alloc] init];
 String *color = color_example; // The hex value of the color to retrieve without '#' (default to null)
-String *name = name_example; // The name of the color (optional) (default to null)
+String *name = name_example; // The name of the color to display on the swatch (optional) (default to null)
 
 // Generate a color swatch for any color
 [apiInstance swatchGetWith:color
@@ -2598,7 +2762,7 @@ String *name = name_example; // The name of the color (optional) (default to nul
 var api = new ColorNameApi.DefaultApi()
 var color = color_example; // {String} The hex value of the color to retrieve without '#'
 var opts = {
-  'name': name_example // {String} The name of the color
+  'name': name_example // {String} The name of the color to display on the swatch
 };
 
 var callback = function(error, data, response) {
@@ -2632,7 +2796,7 @@ namespace Example
             // Create an instance of the API class
             var apiInstance = new DefaultApi();
             var color = color_example;  // String | The hex value of the color to retrieve without '#' (default to null)
-            var name = name_example;  // String | The name of the color (optional)  (default to null)
+            var name = name_example;  // String | The name of the color to display on the swatch (optional)  (default to null)
 
             try {
                 // Generate a color swatch for any color
@@ -2654,7 +2818,7 @@ require_once(__DIR__ . '/vendor/autoload.php');
 // Create an instance of the API class
 $api_instance = new OpenAPITools\Client\Api\DefaultApi();
 $color = color_example; // String | The hex value of the color to retrieve without '#'
-$name = name_example; // String | The name of the color
+$name = name_example; // String | The name of the color to display on the swatch
 
 try {
     $result = $api_instance->swatchGet($color, $name);
@@ -2673,7 +2837,7 @@ use WWW::OPenAPIClient::DefaultApi;
 # Create an instance of the API class
 my $api_instance = WWW::OPenAPIClient::DefaultApi->new();
 my $color = color_example; # String | The hex value of the color to retrieve without '#'
-my $name = name_example; # String | The name of the color
+my $name = name_example; # String | The name of the color to display on the swatch
 
 eval {
     my $result = $api_instance->swatchGet(color => $color, name => $name);
@@ -2694,7 +2858,7 @@ from pprint import pprint
 # Create an instance of the API class
 api_instance = openapi_client.DefaultApi()
 color = color_example # String | The hex value of the color to retrieve without '#' (default to null)
-name = name_example # String | The name of the color (optional) (default to null)
+name = name_example # String | The name of the color to display on the swatch (optional) (default to null)
 
 try:
     # Generate a color swatch for any color
@@ -2772,7 +2936,7 @@ The hex value of the color to retrieve without &#39;#&#39;
                 </span>
 
                     <div class="inner description marked">
-The name of the color
+The name of the color to display on the swatch
                     </div>
             </div>
         </div>
@@ -2845,23 +3009,23 @@ The name of the color
                                   <input id='responses-Default-swatchGet-200-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
-                            <h3 id="examples-Default-swatchGet-title-404"></h3>
-                            <p id="examples-Default-swatchGet-description-404" class="marked"></p>
+                            <h3 id="examples-Default-swatchGet-title-400"></h3>
+                            <p id="examples-Default-swatchGet-description-400" class="marked"></p>
                             <script>
-                              var responseDefault404_description = `NOT FOUND`;
-                              var responseDefault404_description_break = responseDefault404_description.indexOf('\n');
-                              if (responseDefault404_description_break == -1) {
-                                $("#examples-Default-swatchGet-title-404").text("Status: 404 - " + responseDefault404_description);
+                              var responseDefault400_description = `BAD REQUEST`;
+                              var responseDefault400_description_break = responseDefault400_description.indexOf('\n');
+                              if (responseDefault400_description_break == -1) {
+                                $("#examples-Default-swatchGet-title-400").text("Status: 400 - " + responseDefault400_description);
                               } else {
-                                $("#examples-Default-swatchGet-title-404").text("Status: 404 - " + responseDefault404_description.substring(0, responseDefault404_description_break));
-                                $("#examples-Default-swatchGet-description-404").html(responseDefault404_description.substring(responseDefault404_description_break));
+                                $("#examples-Default-swatchGet-title-400").text("Status: 400 - " + responseDefault400_description.substring(0, responseDefault400_description_break));
+                                $("#examples-Default-swatchGet-description-400").html(responseDefault400_description.substring(responseDefault400_description_break));
                               }
                             </script>
 
 
-                            <ul id="responses-detail-Default-swatchGet-404" class="nav nav-tabs nav-tabs-examples" >
+                            <ul id="responses-detail-Default-swatchGet-400" class="nav nav-tabs nav-tabs-examples" >
                                 <li class="active">
-                                  <a data-toggle="tab" href="#responses-Default-swatchGet-404-schema">Schema</a>
+                                  <a data-toggle="tab" href="#responses-Default-swatchGet-400-schema">Schema</a>
                                 </li>
 
 
@@ -2870,9 +3034,9 @@ The name of the color
                             </ul>
 
 
-                            <div class="tab-content" id="responses-Default-swatchGet-404-wrapper" style='margin-bottom: 10px;'>
-                                <div class="tab-pane active" id="responses-Default-swatchGet-404-schema">
-                                  <div id="responses-Default-swatchGet-schema-404" class="exampleStyle">
+                            <div class="tab-content" id="responses-Default-swatchGet-400-wrapper" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-Default-swatchGet-400-schema">
+                                  <div id="responses-Default-swatchGet-schema-400" class="exampleStyle">
                                     <script>
                                       $(document).ready(function() {
                                         var schemaWrapper = ;
@@ -2897,14 +3061,14 @@ The name of the color
                                         }
 
                                         var view = new JSONSchemaView(schema, 3);
-                                        $('#responses-Default-swatchGet-404-schema-data').val(JSON.stringify(schema));
-                                        var result = $('#responses-Default-swatchGet-schema-404');
+                                        $('#responses-Default-swatchGet-400-schema-data').val(JSON.stringify(schema));
+                                        var result = $('#responses-Default-swatchGet-schema-400');
                                         result.empty();
                                         result.append(view.render());
                                       });
                                     </script>
                                   </div>
-                                  <input id='responses-Default-swatchGet-404-schema-data' type='hidden' value=''></input>
+                                  <input id='responses-Default-swatchGet-400-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
                         </article>
