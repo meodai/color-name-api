@@ -1,21 +1,25 @@
 :root {
   font-family: 'Comfortaa', cursive;
   line-height: 1.5;
+
   --c-interactive: rgb(220, 150, 86);
   --w: #f8fcff;
   --b: #202126;
-  background: var(--w);
-  --bw: 0.4vmin;
+  --bw: 1cqi;
   --s: .45;
   --l: .55;
-  --grad:hsl(0, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(10.2857, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(20.5714, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(30.8571, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(41.1429, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(51.4286, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(61.7143, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(72, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(82.2857, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(92.5714, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(102.857, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(113.143, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(123.429, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(133.714, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(144, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(154.286, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(164.571, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(174.857, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(185.143, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(195.429, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(205.714, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(216, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(226.286, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(236.571, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(246.857, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(257.143, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(267.429, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(277.714, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(288, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(298.286, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(308.571, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(318.857, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(329.143, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(339.429, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(349.714, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(360, calc(var(--s) * 100%), calc(var(--l,0) * 100%)); 
-  --minL:#000; 
-  --maxL:#fff;
+  --grad: hsl(0, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(10.2857, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(20.5714, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(30.8571, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(41.1429, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(51.4286, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(61.7143, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(72, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(82.2857, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(92.5714, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(102.857, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(113.143, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(123.429, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(133.714, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(144, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(154.286, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(164.571, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(174.857, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(185.143, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(195.429, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(205.714, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(216, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(226.286, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(236.571, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(246.857, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(257.143, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(267.429, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(277.714, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(288, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(298.286, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(308.571, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(318.857, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(329.143, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(339.429, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(349.714, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(360, calc(var(--s) * 100%), calc(var(--l,0) * 100%)); 
+  --minL: var(--b); 
+  --maxL: var(--w);
+
+
+  background: var(--w);
 }
 
 .logo-container {
+  z-index: 100;
   position: relative;
-  width: 100%;
+  width: 10rem;
   aspect-ratio: 1;
   display: flex;
   justify-content: center;
@@ -31,8 +35,8 @@
   margin: 0;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%) rotate(-0deg) translateY(-16.9vmin);
-  font-size: 5cqi;
+  transform: translate(-50%, -50%) rotate(-0deg) translateY(-30.2cqi);
+  font-size: 6cqi;
   letter-spacing: -0.01em;
   z-index: 1;
   text-transform: uppercase;
@@ -44,6 +48,7 @@
   top: 50%;
   left: 50%;
   width: 30vmin;
+  width: 53cqi;
   aspect-ratio: .6;
   border: var(--bw) solid var(--b);
   transform: translate(-50%,-50%) rotate(90deg);
@@ -107,12 +112,29 @@
 
 body {
   margin: 2em;
-  color: #202126;
+}
+
+p {
+  max-width: 55ch;
 }
 
 .design-width {
-  max-width: 30rem;
-  margin: 0 10vmin 3rem 10vmin;
+  margin: 0 10vmin 3rem 0;
+}
+
+.intro {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  flex-wrap: wrap;
+
+  p {
+    /*max-width: 40ch;*/
+  }
+
+  .logo-container {
+    flex: 0 1 15.5rem;
+  }
 }
 
 .request-preview, .response {
@@ -126,18 +148,7 @@ button {
   font-size: 1em;
 }
 
-button:hover {
-  background-color: #0056b3;
-}
-
-button:disabled {
-  background-color: #cccccc;
-  cursor: not-allowed;
-}
-
 code, pre {
-  background-color: #eee;
-  padding: 0.2em 0.4em;
   font-family: monospace;
   word-wrap: break-word;
   white-space: pre-wrap;
@@ -155,6 +166,8 @@ pre {
   position: relative;
   border-radius: 5px;
   overflow: clip;
+
+  margin-bottom: 1rem;
 }
 
 .pseudo-terminal .css-mdotot {
@@ -259,18 +272,16 @@ pre {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: transparent;
-  font-size: 1.1em;
+  font-size: 1em;
   cursor: pointer;
   margin: 0 0.3em;
-  transition: all 0.2s;
   color: var(--c-interactive);
   box-shadow: 0 0 0 1px #fff;
+  border-radius: 50%;
 }
 
 .url-add-color:hover {
-  background: #ddd;
-  color: #333;
+  background: transparent;
 }
 
 .url-placeholder {
@@ -353,10 +364,6 @@ pre {
   font-size: 0.85em;
   padding: 0.3em 0.6em;
   cursor: pointer;
-}
-
-.details-toggle:hover {
-  background-color: #e9ecef;
 }
 
 .request-details {
