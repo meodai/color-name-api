@@ -2,10 +2,113 @@
   font-family: 'Comfortaa', cursive;
   line-height: 1.5;
   --c-interactive: #ff4081;
+  --w: #f8fcff;
+  --b: #202126;
+
+  background: var(--w);
+  
+  --bw: 0.4vmin;
+  --s: .45;
+  --l: .55;
+  --grad:hsl(0, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(10.2857, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(20.5714, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(30.8571, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(41.1429, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(51.4286, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(61.7143, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(72, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(82.2857, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(92.5714, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(102.857, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(113.143, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(123.429, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(133.714, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(144, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(154.286, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(164.571, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(174.857, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(185.143, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(195.429, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(205.714, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(216, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(226.286, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(236.571, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(246.857, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(257.143, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(267.429, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(277.714, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(288, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(298.286, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(308.571, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(318.857, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(329.143, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(339.429, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(349.714, calc(var(--s) * 100%), calc(var(--l,0) * 100%)),hsl(360, calc(var(--s) * 100%), calc(var(--l,0) * 100%)); 
+  --minL:#000; 
+  --maxL:#fff;
 }
+
+.logo-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+
+  container-type: inline-size;
+}
+
+.logo-container h1 {
+  position: absolute;
+  font-weight: 700;
+  margin: 0;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-0deg) translateY(-16.9vmin);
+  font-size: 5cqi;
+  letter-spacing: -0.01em;
+  z-index: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.frame {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 30vmin;
+  aspect-ratio: .6;
+  border: var(--bw) solid var(--b);
+  transform: translate(-50%,-50%) rotate(90deg);
+}
+
+.frame::after {
+  content: '';
+  position: absolute;
+  border-left: var(--bw) solid var(--b);
+  top: 0;
+  left: calc(-1 * var(--bw));
+  bottom: 0;
+  display: none;
+}
+
+.frame::before {
+  position: absolute;
+  content: '';
+  height: 105%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: var(--bw) solid var(--b);
+  top: 50%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-50%);
+  clip-path: inset(0 79.5% 0 0);
+}
+
+.circle {
+  position: absolute;
+  height: 105%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: var(--bw) solid var(--b);
+  top: 50%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-50%);
+  background: var(--w);
+  clip-path: inset(0 0 0 21.5%);
+  background: radial-gradient(closest-side, var(--b) -10%, rgba(255, 255, 255, 0), var(--w) 105%), conic-gradient(from 90deg, var(--grad));
+}
+
+.color {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: calc(var(--bw) * 2);
+  height: calc(var(--bw) * 2);
+  background: var(--w);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) rotate(calc(-90deg + (var(--h) * 1deg))) translateY(calc(var(--l) * 30vmin - 100%));
+  box-shadow: 0 0 0 var(--bw) var(--c);
+  transition: 1500ms transform cubic-bezier(.3,.7,0,1), 100ms opacity linear, 100ms box-shadow linear;
+  transition-delay: calc(50ms * var(--i)), 0ms, calc(50ms * var(--i));
+  opacity: 1;
+}
+
+.color.hidden {
+  opacity: 0;
+}
+
 body {
   margin: 2em;
-  background-color: #fff;
   color: #202126;
 }
 

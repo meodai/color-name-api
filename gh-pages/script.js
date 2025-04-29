@@ -27,6 +27,11 @@ const MAX_DISPLAYED_REQUESTS = 50; // Maximum number of requests to display
 const MAX_COLORS_DISPLAY = 100; // Maximum number of colors to display in the visualization
 const MAX_COLOR_ITEMS = 100; // Maximum number of color items to keep in the DOM
 
+// --- Logo Constants and Elements ---
+let maxLogoPoints = 20;
+const logoColors = document.querySelector('[data-log]');
+let logoTimer;
+
 // --- Functions ---
 
 /**
@@ -35,6 +40,61 @@ const MAX_COLOR_ITEMS = 100; // Maximum number of color items to keep in the DOM
  */
 function getRandomHexColor() {
     return Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+}
+
+/**
+ * Initialize the color points for the interactive logo
+ */
+function initializeLogoPoints() {
+    // Create the color points for the logo
+    for (let i = 0; i < maxLogoPoints; i++) {
+        const colorPoint = document.createElement('i');
+        colorPoint.classList.add('color');
+        colorPoint.classList.add('hidden');
+        colorPoint.style.setProperty('--c', '#000');
+        colorPoint.style.setProperty('--h', 0);
+        colorPoint.style.setProperty('--s', 0);
+        colorPoint.style.setProperty('--l', 0);
+        colorPoint.style.setProperty('--i', i);
+        
+        logoColors.appendChild(colorPoint);
+    }
+}
+
+/**
+ * Update the logo with new colors
+ * @param {Object} data - Color data with colors array
+ */
+function updateLogoColors(data) {
+    if (logoTimer) return;
+    logoTimer = true;
+    setTimeout(() => logoTimer = false, 2000);
+    
+    const {colors} = data;
+    const max = Math.min(maxLogoPoints, colors.length);
+    const colorPoints = logoColors.querySelectorAll('.color');
+    
+    colorPoints.forEach((point, i) => {
+        point.classList.remove('hidden');
+        if (colors[i]) {
+            const c = colors[i].hasOwnProperty('requestedHex') ? colors[i].requestedHex : colors[i].hex;
+            try {
+                const hsl = chroma(c).hsl();
+                if (hsl && !isNaN(hsl[0])) {
+                    const [h, s, l] = hsl;
+                    point.style.setProperty('--c', c);
+                    point.style.setProperty('--h', h || 0);
+                    point.style.setProperty('--s', s || 0);
+                    point.style.setProperty('--l', l || 0);
+                }
+            } catch (e) {
+                console.error('Error processing color:', c, e);
+                point.classList.add('hidden');
+            }
+        } else {
+            point.classList.add('hidden');
+        }
+    });
 }
 
 /**
@@ -398,6 +458,8 @@ function initializeSocket() {
             if (liveToggle.checked) {
                 addColorsToVisualization(msg);
             }
+            // Update the interactive logo with the received colors
+            updateLogoColors(msg);
         });
 
         socket.on('connect_error', (error) => {
@@ -501,6 +563,9 @@ liveToggle.addEventListener('change', (event) => {
 });
 
 // --- Initial Load ---
+// Initialize logo color points
+initializeLogoPoints();
+
 selectedColors.push(getRandomHexColor()); // Add a random color by default
 fetchLists(); // Fetch lists when the page loads
 renderColors(); // Explicitly render colors immediately (will show placeholder initially)
