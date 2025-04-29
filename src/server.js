@@ -1,6 +1,7 @@
 import http from 'http';
 import zlib from 'zlib';
-import fs from 'fs';
+import { promisify } from 'util';
+import fs from 'fs/promises';
 import colorNameLists from 'color-name-lists';
 import {colornames as colors} from 'color-name-list';
 import {colornames as colorsBestOf } from "color-name-list/bestof";
@@ -17,6 +18,8 @@ import { initDatabase, addResponseToTable } from './database.js';
 
 dotenv.config();
 
+const gzip = promisify(zlib.gzip);
+
 const port = process.env.PORT || 8080;
 const socket = process.env.SOCKET || false;
 const allowedSocketOrigins = (
@@ -30,21 +33,13 @@ const baseUrl = `${APIurl}${currentVersion}/`;
 const baseUrlNames = `${baseUrl}${urlNameSubpath}/`;
 const urlColorSeparator = ',';
 
-const docsHTML = fs.readFileSync('./docs/index.html', 'utf8');
+// Declare variables for async loading
+let docsHTML;
+let gzippedDocsHTML; // Cache for gzipped docs
+const gzipCache = new Map(); // Simple cache for dynamic gzipped responses
 
 let io;
 let hasDb = false;
-
-if (
-  !process.env.NODB
-  && (process.env.SUPRABASEURL && process.env.SUPRABASEKEY)
-) {
-  console.log('Initializing database...');
-  hasDb = true;
-  initDatabase(process.env.SUPRABASEURL, process.env.SUPRABASEKEY);
-} else {
-  console.log('No database connection configured.');
-}
 
 const responseHeaderObj = {
   'Access-Control-Allow-Origin': '*',
@@ -64,8 +59,6 @@ const responseHandlerHTML = {
   ...responseHeaderObj,
   'Content-Type': 'text/html; charset=utf-8',
 };
-
-// accepts encoding
 
 // [{name: 'red', value: '#f00'}, ...]
 const colorsLists = {
@@ -156,7 +149,7 @@ const getListKey = (searchParams, returnDefault = true) => {
  * @param {object} responseObj   the actual response object
  * @param {*} statusCode         HTTP status code
  */
-const httpRespond = (
+const httpRespond = async ( // Make httpRespond async
   response,
   responseObj = {},
   statusCode = 200,
@@ -164,19 +157,63 @@ const httpRespond = (
   type = 'json',
 ) => {
   response.writeHead(statusCode, responseHeader);
-  const stringifiedResponse = type === 'json' ? JSON.stringify(responseObj) : responseObj;
+
+  // Handle specific content types
+  if (type === 'html') {
+    if (responseHeader['Content-Encoding'] === 'gzip' && gzippedDocsHTML) {
+      response.end(gzippedDocsHTML);
+    } else if (docsHTML) {
+      response.end(docsHTML);
+    } else {
+      // Fallback if docsHTML hasn't loaded (should not happen in normal flow)
+      response.writeHead(500, { 'Content-Type': 'text/plain' });
+      response.end('Internal Server Error: Could not load documentation.');
+    }
+    return;
+  }
+
+  if (type === 'svg') {
+     // SVG is small, gzip on the fly if needed, no caching needed here
+     const svgString = responseObj; // Assuming responseObj is the SVG string for type 'svg'
+     if (responseHeader['Content-Encoding'] === 'gzip') {
+        const gzippedSvg = await gzip(svgString);
+        response.end(gzippedSvg);
+     } else {
+        response.end(svgString);
+     }
+     return;
+  }
+
+  // Default to JSON handling
+  const stringifiedResponse = JSON.stringify(responseObj);
 
   if (responseHeader['Content-Encoding'] === 'gzip') {
-    // ends the response with the gziped API answer
-    zlib.gzip(stringifiedResponse, (_, result) => {
-      response.end(result);
-    });
+    // Check cache first for JSON responses
+    let gzippedResponse = gzipCache.get(stringifiedResponse);
+    if (!gzippedResponse) {
+      try {
+        gzippedResponse = await gzip(stringifiedResponse);
+        // Limit cache size to avoid memory issues (e.g., 1000 entries)
+        if (gzipCache.size > 1000) {
+            const firstKey = gzipCache.keys().next().value;
+            gzipCache.delete(firstKey);
+        }
+        gzipCache.set(stringifiedResponse, gzippedResponse); // Cache the gzipped result
+      } catch (err) {
+         console.error('Gzip compression failed:', err);
+         // Send uncompressed if gzip fails
+         response.writeHead(statusCode, { ...responseHeader, 'Content-Encoding': undefined });
+         response.end(stringifiedResponse);
+         return;
+      }
+    }
+    response.end(gzippedResponse);
   } else {
     response.end(stringifiedResponse);
   }
 };
 
-const respondNameSearch = (
+const respondNameSearch = async ( // Make async
   searchParams,
   requestUrl,
   request,
@@ -197,7 +234,7 @@ const respondNameSearch = (
   const searchString = decodeURI(nameString || nameQuery).trim();
 
   if (searchString.length < 3) {
-    return httpRespond(
+    return await httpRespond( // Use await
       response,
       {
         error: {
@@ -210,12 +247,13 @@ const respondNameSearch = (
     );
   }
 
-  return httpRespond(response, {
+  // Use await for httpRespond
+  return await httpRespond(response, {
     colors: findColors.searchNames(searchString, listKey),
   }, 200, responseHeader);
 };
 
-const respondValueSearch = (
+const respondValueSearch = async ( // Make async
   searchParams,
   requestUrl,
   request,
@@ -246,7 +284,7 @@ const respondValueSearch = (
   ));
 
   if (invalidColors.length) {
-    return httpRespond(
+    return await httpRespond( // Use await
       response,
       {
         error: {
@@ -295,13 +333,14 @@ const respondValueSearch = (
   }
 
   // actual http response
-  return httpRespond(response, {
+  // Use await for httpRespond
+  return await httpRespond(response, {
     paletteTitle,
     colors: colorsResponse,
   }, 200, responseHeader);
 };
 
-const respondLists = (
+const respondLists = async ( // Make async
   searchParams,
   requestUrl,
   request,
@@ -311,7 +350,7 @@ const respondLists = (
   const listKey = getListKey(searchParams, false);
 
   if (listKey) {
-    return httpRespond(
+    return await httpRespond( // Use await
       response,
       colorNameLists.meta[listKey],
       200,
@@ -320,7 +359,8 @@ const respondLists = (
   }
 
   const localAvailableColorNameLists = Object.keys(colorsLists);
-  return httpRespond(response, {
+  // Use await for httpRespond
+  return await httpRespond(response, {
     availableColorNameLists: localAvailableColorNameLists,
     listDescriptions: colorNameLists.meta,
   }, 200, responseHeader);
@@ -329,16 +369,17 @@ const respondLists = (
 const routes = [
   {
     path: '/docs/',
-    handler: (
+    handler: async ( // Make handler async
       searchParams,
       requestUrl,
       request,
       response,
-    ) => httpRespond(
+      responseHeader // Pass responseHeader
+    ) => await httpRespond( // Use await
       response,
-      docsHTML,
+      docsHTML, // Pass docsHTML directly (httpRespond handles content type)
       200,
-      responseHandlerHTML,
+      responseHeader, // Use passed responseHeader which might include gzip
       'html',
     ),
   },
@@ -352,36 +393,40 @@ const routes = [
   },
   {
     path: '/swatch/',
-    handler: (
+    handler: async ( // Make handler async
       searchParams,
       requestUrl,
       request,
       response,
       responseHeader,
-    
     ) => {
-      const color = searchParams.has('color') ? searchParams.get('color') : null;
-      const colorName = searchParams.has('name') ? searchParams.get('name') : null;
+      // Input validation for color and name parameters
+      const colorParam = searchParams.get('color');
+      const nameParam = searchParams.get('name'); // Optional
 
-      if (!color) {
-        return httpRespond(
+      // Basic validation: color is required and should look like a hex value (basic check)
+      if (!colorParam || !/^[0-9a-fA-F]+$/.test(colorParam)) {
+        return await httpRespond( // Use await
           response,
           {
             error: {
-              status: 404,
-              message: 'you need to provide at least a color',
+              status: 400, // Use 400 for bad request
+              message: 'A valid hex color parameter (without #) is required.',
             },
           },
-          404,
+          400, // Bad Request
           responseHeader,
         );
       }
 
-      return httpRespond(
+      // Optional: More robust validation/sanitization for name if needed
+      const sanitizedName = nameParam ? String(nameParam).trim() : null; // Basic sanitization
+
+      return await httpRespond( // Use await
         response,
-        svgTemplate(`#${color}`, colorName),
+        svgTemplate(`#${colorParam}`, sanitizedName), // Pass sanitized name
         200,
-        responseHandlerSVG,
+        { ...responseHeader, ...responseHandlerSVG }, // Merge headers, ensure correct content type
         'svg',
       );
     },
@@ -422,7 +467,7 @@ const getHandlerForPath = (path) => {
  * /v1/swatch/?color=212121&name=red => svg with color and name
  */
 
-const requestHandler = (request, response) => {
+const requestHandler = async (request, response) => { // Make requestHandler async
   const requestUrl = new URL(request.url, 'http://localhost');
   const isAPI = requestUrl.pathname.includes(baseUrl);
   const path = requestUrl.pathname.replace(baseUrl, '');
@@ -436,18 +481,18 @@ const requestHandler = (request, response) => {
     return true;
   }
 
-  if (request.headers['accept-encoding']) {
-    const accepts = request.headers['accept-encoding'];
-    if (accepts.toLowerCase().includes('gzip')) {
-      responseHeader['Content-Encoding'] = 'gzip';
-    }
+  // Determine if client accepts gzip
+  const acceptEncoding = request.headers['accept-encoding'] || '';
+  if (acceptEncoding.toLowerCase().includes('gzip')) {
+    responseHeader['Content-Encoding'] = 'gzip';
   }
 
   // const accpets = request.headers['accept-encoding'];
 
   // makes sure the API is beeing requested
   if (!isAPI) {
-    return httpRespond(
+    // Use await for httpRespond
+    return await httpRespond(
       response,
       {
         error: {
@@ -461,7 +506,8 @@ const requestHandler = (request, response) => {
   }
 
   if (responseHandler === null) {
-    return httpRespond(
+    // Use await for httpRespond
+    return await httpRespond(
       response,
       {
         error: {
@@ -477,16 +523,22 @@ const requestHandler = (request, response) => {
   // const search = requestUrl.search || '';
   const searchParams = new URLSearchParams(requestUrl.search);
 
-  if (!getListKey(searchParams)) {
-    return httpRespond(
+  // Validate list key before proceeding
+  const listKeyValidation = getListKey(searchParams); // Check if list key is valid or default is applicable
+  const requiresListKey = !['/docs/', '/swatch/'].includes(path); // Some paths don't need a list key
+
+  if (requiresListKey && !listKeyValidation) {
+    // Use await for httpRespond
+    return await httpRespond(
       response,
       {
         error: {
-          status: 404,
-          message: `invalid list key: '${searchParams.get('list')}, available keys are: ${availableColorNameLists.join(', ')} check /lists/ for more info`,
+          status: 400, // Use 400 for bad request
+          message: `Invalid or missing list key: '${searchParams.get('list') || ''}'. Available keys are: ${availableColorNameLists.join(', ')}. Check /lists/ for more info.`,
         },
       },
-      404,
+      400, // Bad Request
+      responseHeader // Pass header which might include gzip
     );
   }
 
@@ -502,7 +554,8 @@ const requestHandler = (request, response) => {
     console.info('client ip', clientIp);
   }
 
-  return responseHandler(
+  // Use await for the actual response handler
+  return await responseHandler(
     searchParams,
     requestUrl,
     request,
@@ -512,6 +565,11 @@ const requestHandler = (request, response) => {
 };
 
 const server = http.createServer(requestHandler);
+
+// Configure Server Timeouts
+server.keepAliveTimeout = 5000; // 5 seconds - Node default is 5s
+server.headersTimeout = 60000; // 60 seconds - Node default is 60s
+server.requestTimeout = 300000; // 5 minutes (adjust as needed) - Node default is 5min
 
 if (socket) {
   io = new Server(server, {
@@ -523,12 +581,44 @@ if (socket) {
   });
 }
 
-server.listen(port, '0.0.0.0', (error) => {
-  if (error) {
-    return console.log(`something terrible happened: ${error}`);
-  }
-  console.log(`Server running and listening on port ${port}`);
-  console.log(`http://localhost:${port}/${baseUrl}`);
+// --- Async Initialization ---
+async function initializeServer() {
+  try {
+    // Load docs HTML asynchronously
+    docsHTML = await fs.readFile('./docs/index.html', 'utf8');
+    // Pre-gzip docs HTML
+    gzippedDocsHTML = await gzip(docsHTML);
+    console.log('Documentation HTML loaded and pre-gzipped.');
 
-  return null;
-});
+    // Initialize database if configured
+    if (
+      !process.env.NODB &&
+      process.env.SUPRABASEURL &&
+      process.env.SUPRABASEKEY
+    ) {
+      console.log('Initializing database...');
+      await initDatabase(process.env.SUPRABASEURL, process.env.SUPRABASEKEY); // Assuming initDatabase might be async
+      hasDb = true;
+      console.log('Database initialized.');
+    } else {
+      console.log('No database connection configured.');
+    }
+
+    // Start the server only after async setup is complete
+    server.listen(port, '0.0.0.0', (error) => {
+      if (error) {
+        console.error(`Server failed to start: ${error}`);
+        process.exit(1); // Exit if server can't start
+      }
+      console.log(`Server running and listening on port ${port}`);
+      console.log(`http://localhost:${port}/${baseUrl}`);
+    });
+
+  } catch (error) {
+    console.error('Failed to initialize server:', error);
+    process.exit(1); // Exit if initialization fails
+  }
+}
+
+// Start the initialization process
+initializeServer();

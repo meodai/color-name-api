@@ -69,16 +69,16 @@ async function loadColorLists() {
   try {
     // Get the main color list
     const mainListPath = path.join(rootDir, 'node_modules', 'color-name-list', 'dist', 'colornames.json');
-    const mainList = JSON.parse(await fs.readFile(mainListPath, 'utf8'));
-    
+    const mainList = JSON.parse(await fs.readFile(mainListPath, 'utf8')); // Use await fs.readFile
+
     // Load other lists if needed
     const bestOfPath = path.join(rootDir, 'node_modules', 'color-name-list', 'dist', 'colornames.bestof.json');
-    const bestOf = JSON.parse(await fs.readFile(bestOfPath, 'utf8'));
-    
+    const bestOf = JSON.parse(await fs.readFile(bestOfPath, 'utf8')); // Use await fs.readFile
+
     // Load the short list
     const shortPath = path.join(rootDir, 'node_modules', 'color-name-list', 'dist', 'colornames.short.json');
-    const short = JSON.parse(await fs.readFile(shortPath, 'utf8'));
-    
+    const short = JSON.parse(await fs.readFile(shortPath, 'utf8')); // Use await fs.readFile
+
     // Return all lists
     return {
       default: mainList,
@@ -103,8 +103,10 @@ async function fetchLiveApiColors(hexColors, listType = 'default', unique = fals
     // Join multiple colors with commas
     const colorString = hexColors.join(',');
     // Construct URL with appropriate parameters
-    const url = `${LIVE_API_URL}?values=${colorString}${listType !== 'default' ? `&list=${listType}` : ''}${unique ? '&noduplicates=true' : ''}`;
-    
+    // Basic input validation/sanitization for listType
+    const validListType = /^[a-zA-Z0-9]+$/.test(listType) ? listType : 'default';
+    const url = `${LIVE_API_URL}?values=${encodeURIComponent(colorString)}${validListType !== 'default' ? `&list=${encodeURIComponent(validListType)}` : ''}${unique ? '&noduplicates=true' : ''}`;
+
     const response = await fetch(url);
     
     if (!response.ok) {
@@ -122,7 +124,10 @@ async function fetchLiveApiColors(hexColors, listType = 'default', unique = fals
 // Function to fetch single color from live API (kept for backward compatibility)
 async function fetchLiveApiColor(hexColor, listType = 'default') {
   try {
-    const url = `${LIVE_API_URL}?values=${hexColor}${listType !== 'default' ? `&list=${listType}` : ''}`;
+    // Basic input validation/sanitization
+    const validHexColor = /^[0-9a-fA-F]{3,6}$/.test(hexColor) ? hexColor : '000000';
+    const validListType = /^[a-zA-Z0-9]+$/.test(listType) ? listType : 'default';
+    const url = `${LIVE_API_URL}?values=${encodeURIComponent(validHexColor)}${validListType !== 'default' ? `&list=${encodeURIComponent(validListType)}` : ''}`;
     const response = await fetch(url);
     
     if (!response.ok) {
@@ -140,7 +145,13 @@ async function fetchLiveApiColor(hexColor, listType = 'default') {
 // Function to get multiple colors from local implementation
 function getLocalColors(findColors, hexColors, listType = 'default', unique = false) {
   try {
-    return findColors.getNamesForValues(hexColors, unique, listType);
+     // Basic validation before passing to findColors
+     const validHexColors = hexColors.filter(hex => /^[0-9a-fA-F]{3,6}$/.test(hex));
+     if (validHexColors.length !== hexColors.length) {
+         console.warn("Some invalid hex colors were filtered out:", hexColors.filter(hex => !/^[0-9a-fA-F]{3,6}$/.test(hex)));
+     }
+     const validListType = /^[a-zA-Z0-9]+$/.test(listType) ? listType : 'default';
+     return findColors.getNamesForValues(validHexColors, unique, validListType);
   } catch (err) {
     console.error(`Error getting colors from local implementation:`, err);
     return [];
@@ -150,7 +161,14 @@ function getLocalColors(findColors, hexColors, listType = 'default', unique = fa
 // Function to get single color from local implementation (kept for backward compatibility)
 function getLocalColor(findColors, hexColor, listType = 'default') {
   try {
-    const result = findColors.getNamesForValues([hexColor], false, listType);
+    // Basic validation
+    const validHexColor = /^[0-9a-fA-F]{3,6}$/.test(hexColor) ? hexColor : null;
+    if (!validHexColor) {
+        console.warn(`Invalid hex color provided to getLocalColor: ${hexColor}`);
+        return null;
+    }
+    const validListType = /^[a-zA-Z0-9]+$/.test(listType) ? listType : 'default';
+    const result = findColors.getNamesForValues([validHexColor], false, validListType);
     return result && result.length ? result[0] : null;
   } catch (err) {
     console.error(`Error getting color from local implementation for ${hexColor}:`, err);
