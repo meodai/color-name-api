@@ -315,33 +315,34 @@ function updateApiUrlPreview() {
 
     // Add values parameter if colors are selected
     if (selectedColors.length > 0) {
-        params.push(`values=${selectedColors.join(',')}`);
+        params.push(`values=${selectedColors.join(",")}`);
     }
 
     const selectedList = listSelect.value;
     // Sync URL dropdown with main dropdown
-    if (document.getElementById('url-list-select')) {
-        document.getElementById('url-list-select').value = selectedList;
+    if (document.getElementById("url-list-select")) {
+        document.getElementById("url-list-select").value = selectedList;
     }
 
     // Add list parameter if not default
-    if (selectedList && selectedList !== 'default') {
+    if (selectedList && selectedList !== "default") {
         params.push(`list=${selectedList}`);
     }
 
     // Sync URL checkbox with main checkbox
-    if (document.getElementById('url-noduplicates-checkbox')) {
-        document.getElementById('url-noduplicates-checkbox').checked = noduplicatesCheckbox.checked;
+    if (document.getElementById("url-noduplicates-checkbox")) {
+        document.getElementById("url-noduplicates-checkbox").checked =
+        noduplicatesCheckbox.checked;
     }
 
     // Add noduplicates parameter if checked
     if (noduplicatesCheckbox.checked) {
-        params.push('noduplicates=true');
+        params.push("noduplicates=true");
     }
 
     // Append parameters if any exist
     if (params.length > 0) {
-        urlString += `?${params.join('&')}`;
+        urlString += `?${params.join("&")}`;
     }
 
     // Update full URL display
@@ -352,51 +353,57 @@ function updateApiUrlPreview() {
     // Fetch even if no colors are selected, as long as initialized
     if (isInitialized) {
         fetchTimeout = setTimeout(fetchColorNames, FETCH_DEBOUNCE_MS);
-    } 
+    }
 }
 
 /**
  * Fetches color names from the API using the constructed URL and displays the response.
  */
 async function fetchColorNames() {
-    const apiUrl = apiUrlPreview.textContent;
-    // Basic check if URL is valid
-    if (!apiUrl || !apiUrl.startsWith(API_BASE_URL)) {
-        // Don't fetch if URL is invalid
-        return;
+  const apiUrl = apiUrlPreview.textContent;
+  // Basic check if URL is valid
+  if (!apiUrl || !apiUrl.startsWith(API_BASE_URL)) {
+    // Don't fetch if URL is invalid
+    return;
+  }
+
+  // before doing anything measure the height of #json-viewer and fix the height of the container
+  const jsonViewer = document.getElementById("json-viewer");
+  const jsonViewerHeight = jsonViewer.getBoundingClientRect().height;
+  jsonViewer.style.height = `${jsonViewerHeight}px`;
+
+  // Update status message regardless of color count
+  apiResponse.textContent = "Fetching...";
+  document.getElementById("json-viewer").innerHTML = ""; // Clear previous JSON viewer
+
+  try {
+    const response = await fetch(apiUrl);
+    const data = await response.json();
+
+    jsonViewer.style.height = "auto"; // Reset height to auto for error message
+    // Check for API-level errors if the HTTP status was ok but the API returned an error structure
+    if (!response.ok || data.error) {
+      throw new Error(data.error || `HTTP error! status: ${response.status}`);
     }
 
-    // Update status message regardless of color count
-    apiResponse.textContent = 'Fetching...';
-    document.getElementById('json-viewer').innerHTML = ''; // Clear previous JSON viewer
+    // Hide the text-based response since we're using the viewer
+    apiResponse.style.display = "none";
 
-    try {
-        const response = await fetch(apiUrl);
-        const data = await response.json();
-        // Check for API-level errors if the HTTP status was ok but the API returned an error structure
-        if (!response.ok || data.error) {
-              throw new Error(data.error || `HTTP error! status: ${response.status}`);
-        }
-        
-        // Hide the text-based response since we're using the viewer
-        apiResponse.style.display = 'none';
-        
-        // Use JSON Viewer to display the data
-        new JsonViewer({
-          value: data,
-          theme: "dark",
-          expanded: false,
-          enableClipboard: false,
-          indentWidth: 2,
-          collapseStringsAfterLength: 20,
-        }).render("#json-viewer");
-        
-    } catch (error) {
-        console.error('Error fetching color names:', error);
-        apiResponse.textContent = `Error: ${error.message}`;
-        apiResponse.style.display = 'block'; // Make sure error is visible
-        document.getElementById('json-viewer').innerHTML = ''; // Clear the viewer on error
-    }
+    // Use JSON Viewer to display the data
+    new JsonViewer({
+      value: data,
+      theme: "dark",
+      expanded: false,
+      enableClipboard: false,
+      indentWidth: 2,
+      collapseStringsAfterLength: 20,
+    }).render("#json-viewer");
+  } catch (error) {
+    console.error("Error fetching color names:", error);
+    apiResponse.textContent = `Error: ${error.message}`;
+    apiResponse.style.display = "block"; // Make sure error is visible
+    document.getElementById("json-viewer").innerHTML = ""; // Clear the viewer on error
+  }
 }
 
 // --- Socket.io Functions ---
