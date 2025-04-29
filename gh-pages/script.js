@@ -179,7 +179,7 @@ function renderColors() {
     if (selectedColors.length === 0) {
         const placeholder = document.createElement('span');
         placeholder.classList.add('url-placeholder');
-        placeholder.textContent = 'add colors...';
+        placeholder.textContent = 'Add Colors';
         urlColors.appendChild(placeholder);
     } else {
         selectedColors.forEach((hexColor, index) => {

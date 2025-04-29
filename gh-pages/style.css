@@ -1,6 +1,6 @@
 :root {
   font-family: 'Comfortaa', cursive;
-
+  line-height: 1.5;
   --c-interactive: #ff4081;
 }
 body {
@@ -180,9 +180,6 @@ pre {
 
 .url-placeholder {
   font-style: italic;
-  color: #999;
-  border-bottom: 1px dashed #999;
-  padding: 0.2em 0.4em;
 }
 
 #full-url-display {
