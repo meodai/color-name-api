@@ -383,10 +383,13 @@ async function fetchColorNames() {
         
         // Use JSON Viewer to display the data
         new JsonViewer({
-            value: data,
-            theme: 'dark', // or 'dark' depending on your preference
-            expanded: true  // Start with all nodes expanded
-        }).render('#json-viewer');
+          value: data,
+          theme: "dark",
+          expanded: false,
+          enableClipboard: false,
+          indentWidth: 2,
+          collapseStringsAfterLength: 20,
+        }).render("#json-viewer");
         
     } catch (error) {
         console.error('Error fetching color names:', error);

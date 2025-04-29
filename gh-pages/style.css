@@ -171,6 +171,11 @@ pre {
   white-space: nowrap;
 }
 
+.url-prefix {
+  opacity: 0.75;
+  margin-right: 1em;
+}
+
 .url-interactive {
   position: relative;
   display: inline-flex;
