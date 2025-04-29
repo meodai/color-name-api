@@ -225,8 +225,76 @@ function compareColorArrays(liveColors, localColors) {
   });
 }
 
+// Test ordering of results for duplicate color requests with noduplicates=true
+async function testDuplicateColorOrdering() {
+  console.log('\n--- Testing duplicate color ordering with noduplicates=true ---');
+  
+  // The color to test with
+  const testColor = '2c2060'; // Purple color
+  
+  // Create an array with 10 duplicate colors
+  const duplicateColors = Array(10).fill(testColor);
+  
+  console.log(`Testing with ${duplicateColors.length} instances of the same color: ${testColor}`);
+  
+  try {
+    // Get results from local implementation
+    const findColors = await initializeLocalFindColors();
+    const localResults = getLocalColors(findColors, duplicateColors, 'bestOf', true);
+    
+    // Get results from live API
+    const liveResults = await fetchLiveApiColors(duplicateColors, 'bestOf', true);
+    
+    // Verify we got 10 results
+    console.log(`Local results count: ${localResults.length}`);
+    console.log(`Live API results count: ${liveResults.length}`);
+    
+    // Check that results are in order of increasing distance
+    let isLocalSorted = true;
+    let isLiveSorted = true;
+    
+    for (let i = 1; i < localResults.length; i++) {
+      if (localResults[i].distance < localResults[i-1].distance) {
+        isLocalSorted = false;
+        console.log(`Local results NOT sorted at index ${i}: ${localResults[i-1].distance} -> ${localResults[i].distance}`);
+        break;
+      }
+    }
+    
+    for (let i = 1; i < liveResults.length; i++) {
+      if (liveResults[i].distance < liveResults[i-1].distance) {
+        isLiveSorted = false;
+        console.log(`Live results NOT sorted at index ${i}: ${liveResults[i-1].distance} -> ${liveResults[i].distance}`);
+        break;
+      }
+    }
+    
+    console.log(`Local results sorted by distance: ${isLocalSorted ? '✅ Yes' : '❌ No'}`);
+    console.log(`Live results sorted by distance: ${isLiveSorted ? '✅ Yes' : '❌ No'}`);
+    
+    // Show first few results
+    console.log('\nSample of local results (first 5):');
+    localResults.slice(0, 5).forEach((result, i) => {
+      console.log(`${i+1}. "${result.name}" (distance: ${result.distance})`);
+    });
+    
+    // Compare differences
+    const differences = compareColorArrays(liveResults, localResults);
+    const hasDifferences = differences.some(diff => diff !== null);
+    
+    console.log(`\nDifferences between local and live: ${hasDifferences ? '❌ Found differences' : '✅ No differences'}`);
+    if (hasDifferences) {
+      console.log('First difference found:');
+      console.log(differences.find(diff => diff !== null));
+    }
+    
+  } catch (error) {
+    console.error('Error in duplicate color ordering test:', error);
+  }
+}
+
 // Main function to run the comparison
-async function runComparison() {
+async function main() {
   console.log('Initializing local FindColors instance...');
   const findColors = await initializeLocalFindColors();
   
@@ -329,10 +397,15 @@ async function runComparison() {
   console.log(`Total tests run: ${totalTests}`);
   console.log(`Matches: ${matchCount} (${((matchCount / totalTests) * 100).toFixed(2)}%)`);
   console.log(`Differences: ${differenceCount} (${((differenceCount / totalTests) * 100).toFixed(2)}%)`);
+  
+  // Test duplicate color ordering
+  await testDuplicateColorOrdering();
+  
+  console.log('\nAll tests completed!');
 }
 
 // Run the comparison
-runComparison().catch(err => {
+main().catch(err => {
   console.error('Error running comparison:', err);
   process.exit(1);
 });
