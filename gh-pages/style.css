@@ -1,7 +1,7 @@
 :root {
   font-family: 'Comfortaa', cursive;
   line-height: 1.5;
-  --c-interactive: #ff4081;
+  --c-interactive: rgb(220, 150, 86);
   --w: #f8fcff;
   --b: #202126;
   background: var(--w);
@@ -181,18 +181,12 @@ pre {
   flex-wrap: wrap;
   align-items: center;
   color: var(--c-interactive);
-  font-weight: bold;
-  min-height: 1.5em;
-  min-width: 2em;
   cursor: pointer;
-}
 
-.url-list-label {
   text-decoration: underline;
-  cursor: pointer;
+  text-underline-offset: 0.2em;
 }
 
-/* Interactive list dropdown in URL */
 .url-list-select {
   opacity: 0;
   position: absolute;
@@ -200,12 +194,6 @@ pre {
   left: 0;
   width: 100%;
   height: 100%;
-}
-
-/* Interactive noduplicates checkbox in URL */
-.url-checkbox-container {
-  cursor: pointer;
-  text-decoration: underline;
 }
 
 .url-checkbox {
@@ -216,12 +204,6 @@ pre {
   height: 100%;
   opacity: 0;
   cursor: pointer;
-}
-
-.url-checkbox-label {
-  color: var(--c-interactive);
-  font-family: monospace;
-  font-weight: bold;
 }
 
 .url-color-chip {
@@ -252,10 +234,6 @@ pre {
 .url-color-input {
   position: absolute;
   opacity: 0;
-}
-
-.url-color-text {
-  text-decoration: underline;
 }
 
 .url-color-remove {
