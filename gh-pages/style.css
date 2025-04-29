@@ -153,6 +153,9 @@ pre {
 
 /* URL Builder styles */
 .url-builder {
+  position: sticky;
+  top: 1rem;
+  z-index: 10;
   font-family: monospace;
   background-color: #202126;
   color: #fff;
@@ -435,28 +438,6 @@ input:checked + .toggle-slider:before {
   margin: 0;
   white-space: pre-wrap;
   word-break: break-all;
-}
-
-@media (max-width: 768px) {
-  body {
-    margin: 1em;
-  }
-  
-  .url-builder {
-    font-size: 0.9em;
-    padding: 2vmin;
-  }
-
-  .request-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 5px;
-  }
-
-  .details-toggle {
-    margin-left: 0;
-    margin-top: 5px;
-  }
 }
 
 /* Color Visualization Styles */
