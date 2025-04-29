@@ -209,6 +209,17 @@ For optimal results with `noduplicates=true`:
 
 In smaller color name lists, this can lead to unexpected results as the algorithm must choose increasingly distant color names. We suggest using this feature with some of the larger lists mentioned above.
 
+#### Important Note About Color Limits
+
+When using `noduplicates=true`, if you request more colors than are available in the selected list, the API will:
+- Return as many uniquely named colors as possible (up to the size of the selected list)
+- Drop any additional colors that can't be assigned unique names
+- Return a response with fewer color objects than requested
+
+For example, if you use the "basic" list (which has only 21 colors) and request 30 colors with `noduplicates=true`, the response will contain only 21 color objects.
+
+This behavior ensures the API maintains its promise of providing truly unique names for each color, even in edge cases. If you need to name a large number of colors uniquely, make sure to use one of the larger color lists mentioned above.
+
 ### Using WebSockets
 
 The Color Name API also supports real-time color updates via WebSocket connections. It
