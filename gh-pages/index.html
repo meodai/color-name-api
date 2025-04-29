@@ -1,65 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Color Name API Tester</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/@textea/json-viewer@3"></script>
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Color Name API Tester</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@textea/json-viewer@3"></script>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 </head>
 <body>
-    <h1>Color Name API</h1>
-    <p>
-      Rest API that returns a bunch of color names for a given color-value. 
-      If comes with different open-source name lists. This page is meant to
-      be a playground for the API. You can test the API and see how it works.
-    </p>
-
-    <div class="request-preview">
-        <h2>API Request URL Builder:</h2>
-        <div class="url-builder">
-            <span class="url-part url-base">https://api.color.pizza/v1/</span>
-            <span class="url-part">?values=</span>
-            <span id="url-colors" class="url-interactive"></span>
-            <span class="url-part">&list=</span>
-            <span id="url-list-container" class="url-interactive"></span>
-            <span class="url-part">&noduplicates=</span>
-            <span id="url-noduplicates-container" class="url-interactive"></span>
-        </div>
-        <div id="full-url-display">
-            <h3>Full URL:</h3>
-            <code id="api-url-preview"></code>
-        </div>
+  <h1>Color Name API</h1>
+  <p>
+    Rest API that returns a bunch of color names for a given color-value. 
+    If comes with different open-source name lists. This page is meant to
+    be a playground for the API. You can test the API and see how it works.
+  </p>
+  
+  <div class="request-preview">
+    <h2>API Request URL Builder:</h2>
+    <div class="url-builder">
+      <span class="url-part url-base">https://api.color.pizza/v1/</span>
+      <span class="url-part">?values=</span>
+      <span id="url-colors" class="url-interactive"></span>
+      <span class="url-part">&list=</span>
+      <span id="url-list-container" class="url-interactive"></span>
+      <span class="url-part">&noduplicates=</span>
+      <span id="url-noduplicates-container" class="url-interactive"></span>
     </div>
-
-    <div class="response">
-        <h2>API Response:</h2>
-        <pre id="api-response"></pre>
-        <div id="json-viewer"></div>
+    <div id="full-url-display">
+      <h3>Full URL:</h3>
+      <code id="api-url-preview"></code>
     </div>
-
-    <div class="live-requests">
-        <h2>Live Color Requests</h2>
-        <div class="toggle-container">
-            <label class="toggle-switch">
-                <input type="checkbox" id="live-toggle" checked>
-                <span class="toggle-slider"></span>
-            </label>
-            <span class="toggle-label">Show live requests</span>
-        </div>
-        <div id="socket-status" class="socket-status disconnected">Socket: Disconnected</div>
-        <div id="requests-container"></div>
+  </div>
+  
+  <div class="response">
+    <h2>API Response:</h2>
+    <pre id="api-response"></pre>
+    <div id="json-viewer"></div>
+  </div>
+  
+  <div class="live-requests">
+    <h2>Live Color Requests</h2>
+    <div class="toggle-container">
+      <label class="toggle-switch">
+        <input type="checkbox" id="live-toggle" checked>
+        <span class="toggle-slider"></span>
+      </label>
+      <span class="toggle-label">Show live requests</span>
     </div>
-
-    <!-- Hidden elements for internal use -->
-    <div class="hidden-controls">
-        <select id="list-select" style="display:none">
-            <option value="default">Loading lists...</option>
-        </select>
-        <input type="checkbox" id="noduplicates-checkbox" style="display:none">
-    </div>
-
-    <script src="script.js"></script>
+    <div id="socket-status" class="socket-status disconnected">Socket: Disconnected</div>
+    <div id="requests-container"></div>
+  </div>
+  
+  <!-- Hidden elements for internal use -->
+  <div class="hidden-controls">
+    <select id="list-select" style="display:none">
+      <option value="default">Loading lists...</option>
+    </select>
+    <input type="checkbox" id="noduplicates-checkbox" style="display:none">
+  </div>
+  
+  <script src="script.js"></script>
 </body>
 </html>
