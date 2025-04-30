@@ -47,6 +47,7 @@ let physics = {
     },
     resizeThrottle: null,
     scrollThrottle: null,
+    scrollCheckCounter: 0,
     observer: null
 };
 
@@ -245,17 +246,22 @@ function createHeadingBodies() {
     });
     
     // Create bodies for all heading elements
-    const headings = document.querySelectorAll('h1, h2, h3, p');
+    const headings = document.querySelectorAll(
+      "h1, h2, h3, p, .pseudo-terminal"
+    );
+    
+    let visibleCount = 0;
     
     headings.forEach(heading => {
         const rect = heading.getBoundingClientRect();
         
         // Only create bodies for visible headings
         if (rect.top < window.innerHeight && rect.bottom > 0 && rect.width > 0 && rect.height > 0) {
+            visibleCount++;
             const x = rect.left + rect.width / 2;
-            const y = rect.top + rect.height / 2 + rect.height * 0.25;
+            const y = rect.top + rect.height / 2;
             const width = rect.width;
-            const height = rect.height * .75;
+            const height = rect.height;
             
             // Create a physics body for the heading
             const body = Bodies.rectangle(
@@ -267,7 +273,7 @@ function createHeadingBodies() {
                     headingType: heading.tagName.toLowerCase(),
                     friction: 0.2,
                     render: {
-                        fillStyle: 'rgba(0, 0, 0, 0)',  // Subtle visualization
+                        fillStyle: 'rgba(0, 0, 0, 0)',  // Transparent fill
                         strokeStyle: 'rgba(0, 0, 0, 0.1)',
                         lineWidth: 0
                     }
@@ -288,6 +294,9 @@ function updateHeadingBodies() {
     const bodies = Composite.allBodies(engine.world);
     const headingBodies = bodies.filter(body => body.isHeading);
     
+    // Bodies to remove when they're no longer visible
+    const bodiesToRemove = [];
+    
     headingBodies.forEach(body => {
         if (body.headingElement) {
             const rect = body.headingElement.getBoundingClientRect();
@@ -301,12 +310,18 @@ function updateHeadingBodies() {
                 Body.setPosition(body, { x, y });
                 body.render.opacity = 1;
             } else {
-                // Make it invisible and ineffective when out of viewport
-                body.render.opacity = 0;
-                Body.setPosition(body, { x, y: -1000 });
+                // Add to removal list when out of viewport
+                bodiesToRemove.push(body);
             }
         }
     });
+    
+    // Remove bodies outside the viewport
+    if (bodiesToRemove.length > 0) {
+        bodiesToRemove.forEach(body => {
+            Composite.remove(engine.world, body);
+        });
+    }
 }
 
 /**
@@ -319,6 +334,17 @@ function handleScroll() {
     
     physics.scrollThrottle = requestAnimationFrame(() => {
         updateHeadingBodies();
+        
+        // Check for new headings becoming visible during scroll
+        // Use a less frequent check for new elements to improve performance
+        if (!physics.scrollCheckCounter) {
+            physics.scrollCheckCounter = 0;
+        }
+        
+        physics.scrollCheckCounter++;
+        if (physics.scrollCheckCounter % 10 === 0) {
+            createHeadingBodies();
+        }
     });
 }
 
