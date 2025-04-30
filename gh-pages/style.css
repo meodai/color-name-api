@@ -16,6 +16,7 @@
   --minL: var(--b); 
   --maxL: var(--w);
 
+  --inset: 3rem;
 
   background: var(--w);
 }
@@ -117,7 +118,7 @@
 }
 
 body {
-  margin: 2em;
+  margin: 2rem 6vw;
   padding-bottom: 20vmin;
 }
 
@@ -127,11 +128,13 @@ h1, h2, h3 {
   letter-spacing: -.015em;
   font-size: 3em;
   margin-top: 1em;
+  margin-bottom: .75em;
   line-height: .9;
 }
 
 h1 {
   font-size: 5em;
+  margin-bottom: .5em;
 }
 
 strong {
@@ -140,11 +143,11 @@ strong {
 
 p {
   max-width: 55ch;
-  margin-left: 3rem;
+  margin-left: var(--inset);
 }
 
 .design-width {
-  margin: 0 10vmin 3rem 2rem;
+  margin: 0 10vmin var(--inset) 0;
 }
 
 .request-preview, .response {
@@ -188,7 +191,7 @@ pre {
   top: 0;
   z-index: 10;
   font-family: monospace;
-  padding: 1.5rem 2rem 0.5rem 2rem;
+  padding: 1.5rem var(--inset) 0.5rem var(--inset);
   border-radius: 5px;
   display: flex;
   flex-wrap: wrap;
@@ -304,7 +307,7 @@ pre {
 #json-viewer {
   background: #202126;
   border-radius: 5px;
-  padding: 0 2rem 2rem;
+  padding: 0 var(--inset) 2rem;
 }
 
 #color-visualization {
@@ -324,10 +327,10 @@ pre {
 
 .color-title {
   position: absolute;
-  left: 2rem;
+  left: var(--inset);
   top: 50%;
   transform: translateY(-50%) translateY(-.05em);
-  font-size: 3rem;
+  font-size: 2rem;
   white-space: nowrap;
 
 }
