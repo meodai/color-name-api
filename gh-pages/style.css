@@ -119,7 +119,7 @@ p {
 }
 
 .design-width {
-  margin: 0 10vmin 3rem 0;
+  margin: 0 10vmin 3rem 2rem;
 }
 
 .intro {
@@ -363,7 +363,7 @@ pre {
 
 .color-item {
   background: linear-gradient(to right, var(--g, transparent));
-  padding: 0.5em;
+  padding: 1.1rem 1rem 1rem;
   line-height: 1;
   font-weight: 900;
   color: var(--c);
