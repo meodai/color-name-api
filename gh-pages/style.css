@@ -15,6 +15,11 @@
   background: var(--w);
 }
 
+::selection {
+  background: var(--b);
+  color: var(--w);
+}
+
 
 body {
   margin: 2rem 6vw;

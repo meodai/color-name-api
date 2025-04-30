@@ -1,4 +1,3 @@
-
 const elements = {
   listSelect: document.getElementById('list-select'),
   noduplicatesCheckbox: document.getElementById('noduplicates-checkbox'),
@@ -33,7 +32,8 @@ let physics = {
   scrollThrottle: null,
   scrollCheckCounter: 0,
   observer: null,
-  mouseBody: null
+  mouseBody: null,
+  isTouchActive: false  // Track if touch is currently active
 };
 
 function getRandomHexColor() {
@@ -153,6 +153,16 @@ function initializePhysics() {
   window.removeEventListener('scroll', handleScroll);
   window.addEventListener('scroll', handleScroll);
   
+  // Remove existing touch event listeners if any
+  document.removeEventListener('touchstart', handleTouchStart);
+  document.removeEventListener('touchend', handleTouchEnd);
+  document.removeEventListener('touchcancel', handleTouchEnd);
+  
+  // Add touch event listeners
+  document.addEventListener('touchstart', handleTouchStart);
+  document.addEventListener('touchend', handleTouchEnd);
+  document.addEventListener('touchcancel', handleTouchEnd);
+  
   if (physics.observer) {
     physics.observer.disconnect();
   }
@@ -180,6 +190,9 @@ function cleanupPhysics() {
   
   window.removeEventListener('scroll', handleScroll);
   document.removeEventListener('mousemove', handleMouseMove);
+  document.removeEventListener('touchstart', handleTouchStart);
+  document.removeEventListener('touchend', handleTouchEnd);
+  document.removeEventListener('touchcancel', handleTouchEnd);
   
   if (physics.observer) {
     physics.observer.disconnect();
@@ -205,8 +218,19 @@ function handleMouseMove(event) {
 }
 
 function handleWindowResize() {
+  // Ignore resize events during touch gestures (mobile address bar showing/hiding)
+  if (physics.isTouchActive) return;
+  
   if (physics.resizeThrottle) clearTimeout(physics.resizeThrottle);
   physics.resizeThrottle = setTimeout(initializePhysics, 300);
+}
+
+function handleTouchStart() {
+  physics.isTouchActive = true;
+}
+
+function handleTouchEnd() {
+  physics.isTouchActive = false;
 }
 
 function createHeadingBodies() {
