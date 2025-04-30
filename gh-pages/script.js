@@ -9,7 +9,6 @@ const elements = {
   urlNoDuplicatesContainer: document.getElementById('url-noduplicates-container'),
   requestsContainer: document.getElementById('requests-container'),
   jsonViewer: document.getElementById('json-viewer'),
-  logoColors: document.querySelector('[data-log]')
 };
 
 // Constants
@@ -18,7 +17,6 @@ const SOCKET_URL = 'https://api.color.pizza';
 const FETCH_DEBOUNCE_MS = 300;
 const MAX_COLORS_DISPLAY = 100;
 const MAX_COLOR_ITEMS = 100;
-const MAX_LOGO_POINTS = 20;
 
 // State variables
 let selectedColors = [];
@@ -26,7 +24,6 @@ let availableLists = [];
 let isInitialized = false;
 let fetchTimeout = null;
 let socket = null;
-let logoTimer;
 
 // Matter.js setup
 const { Engine, Render, Runner, Bodies, Composite, Events, Body } = Matter;
@@ -306,54 +303,6 @@ function createColorObjectsFromData(data) {
   }
 }
 
-// Logo Functions
-function initializeLogoPoints() {
-  for (let i = 0; i < MAX_LOGO_POINTS; i++) {
-    const colorPoint = document.createElement('i');
-    colorPoint.classList.add('color', 'hidden');
-    colorPoint.style.setProperty('--c', '#000');
-    colorPoint.style.setProperty('--h', 0);
-    colorPoint.style.setProperty('--s', 0);
-    colorPoint.style.setProperty('--l', 0);
-    colorPoint.style.setProperty('--i', i);
-    
-    elements.logoColors.appendChild(colorPoint);
-  }
-}
-
-function updateLogoColors(data) {
-  if (logoTimer) return;
-  
-  logoTimer = true;
-  setTimeout(() => logoTimer = false, 500);
-  
-  const { colors } = data;
-  const colorPoints = elements.logoColors.querySelectorAll('.color');
-  
-  colorPoints.forEach((point, i) => {
-    point.classList.remove('hidden');
-    
-    if (colors[i]) {
-      const c = getColorValue(colors[i]);
-      try {
-        const hsl = chroma(c).hsl();
-        if (hsl && !isNaN(hsl[0])) {
-          const [h, s, l] = hsl;
-          point.style.setProperty('--c', c);
-          point.style.setProperty('--h', h || 0);
-          point.style.setProperty('--s', s || 0);
-          point.style.setProperty('--l', l || 0);
-        }
-      } catch (e) {
-        console.error('Error processing color:', c, e);
-        point.classList.add('hidden');
-      }
-    } else {
-      point.classList.add('hidden');
-    }
-  });
-}
-
 // API Functions
 async function fetchLists() {
   try {
@@ -615,7 +564,6 @@ function initializeSocket() {
     
     socket.on('colors', (msg) => {
       addColorsToVisualization(msg);
-      updateLogoColors(msg);
       createColorObjectsFromData(msg);
     });
 
@@ -677,7 +625,6 @@ elements.noduplicatesCheckbox.addEventListener('change', (event) => {
 });
 
 // Initialization
-initializeLogoPoints();
 initializePhysics();
 
 selectedColors.push(getRandomHexColor());

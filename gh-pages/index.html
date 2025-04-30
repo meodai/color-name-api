@@ -14,7 +14,6 @@
   
   <script src="https://cdn.jsdelivr.net/npm/@textea/json-viewer@3"></script>
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.4.2/chroma.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.20.0/matter.min.js"></script>
 </head>
 <body>
@@ -58,21 +57,21 @@
 
   <aside>
     <div class="design-width">
-      
       <h2>About</h2>
       <p>
-        This is a simple playground for the Color Name API. It is not meant to be a full
-        documentation of the API. For more information about the API, please visit the
-        <a href="https://github.com/meodai/color-name-api" target="_blank">github page</a> or the <a href="https://api.color.pizza/v1/docs/" target="_blank">consult the API reference</a>.
-    </div>
-    
-    <div class="logo-container">
-      <div class="frame">
-        <div class="circle">
-          <div class="colors" data-log></div>
-        </div>
-      </div>
-      <h1>Color Name API</h1>
+        This interactive tool lets you explore the API's capabilities in a hands-on way. 
+        While not a comprehensive documentation, you can find more details about the API on its 
+        <a href="https://github.com/meodai/color-name-api" target="_blank">GitHub page</a> or in the 
+        <a href="https://api.color.pizza/v1/docs/" target="_blank">official API reference</a>.
+      </p>
+      <p>
+        The falling particles are powered by <a href="https://brm.io/matter-js/" target="_blank">Matter.js</a>. 
+        Each particle represents a color name fetched from the API in real-time using <a href="https://socket.io/" target="_blank">Socket.IO</a>.
+      </p>
+      <p>
+        As you can imagine from the number of requests, running this service is not free. 
+        If you find this tool useful, consider supporting the project by donating via <a href="https://ko-fi.com/colorparrot" target="_blank">Buy Me a Coffee</a>.
+      </p>
     </div>
   </aside>
 
