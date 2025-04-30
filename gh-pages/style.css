@@ -50,7 +50,7 @@ strong {
 p {
   max-width: 55ch;
   margin-left: var(--inset);
-  padding-top: 1.55em;
+  padding-top: 0;
 }
 
 .design-width {
