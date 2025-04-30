@@ -114,6 +114,15 @@ body {
   margin: 2em;
 }
 
+h1, h2, h3 {
+  font-family: 'Comfortaa', cursive;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: -.015em;
+  font-size: 2em;
+  margin-top: 1em;
+}
+
 p {
   max-width: 55ch;
 }
@@ -164,7 +173,6 @@ pre {
   background-color: #202126;
   color: #fff;
   position: relative;
-  border-radius: 1.2rem;
   overflow: clip;
 
   margin-bottom: 1rem;
@@ -179,7 +187,7 @@ pre {
   top: 0;
   z-index: 10;
   font-family: monospace;
-  padding: 1.25rem 2rem 0.5rem 2rem;
+  padding: 1.5rem 2rem 0.5rem 2rem;
   border-radius: 5px;
   display: flex;
   flex-wrap: wrap;
@@ -357,19 +365,19 @@ pre {
 
 #color-visualization {
   margin-bottom: 1.5rem;
-  max-height: 400px;
+  max-height: 38rem;
   overflow-y: auto;
 }
 
 .color-item {
   background: linear-gradient(to right, var(--g, transparent));
-  padding: 1.1rem 1rem 1rem;
+  padding: 1.1rem 2rem 1rem;
   line-height: 1;
   font-weight: 900;
   color: var(--c);
 }
 
 .color-item + .color-item {
-  margin-top: 0.5em;
+  margin-top: 0.75em;
 }
 
