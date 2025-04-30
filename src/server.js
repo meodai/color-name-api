@@ -251,7 +251,7 @@ const respondNameSearch = async ( // Make async
   }, 200, responseHeader);
 };
 
-const respondValueSearch = async ( // Make async
+const respondValueSearch = async (
   searchParams,
   requestUrl,
   request,
@@ -300,6 +300,25 @@ const respondValueSearch = async ( // Make async
 
   if (urlColorList[0]) {
     colorsResponse = findColors.getNamesForValues(urlColorList, uniqueMode, listKey);
+    
+    // Check if we've exhausted all colors in unique mode
+    if (uniqueMode && colorsResponse.some(color => color.error)) {
+      const exhaustedColor = colorsResponse.find(color => color.error);
+      return await httpRespond(
+        response,
+        {
+          error: {
+            status: 409, // Conflict - best status code for "resource exhausted"
+            message: exhaustedColor.error,
+            availableCount: exhaustedColor.availableCount,
+            totalCount: exhaustedColor.totalCount,
+            requestedCount: urlColorList.length
+          },
+        },
+        409,
+        responseHeader,
+      );
+    }
   } else {
     colorsResponse = colorsLists[listKey];
   }

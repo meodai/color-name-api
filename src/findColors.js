@@ -177,6 +177,17 @@ export class FindColors {
       localClosest.clearCache();
     }
 
+    // In unique mode, check if we have enough colors before proceeding
+    if (unique && colorArr.length > this.colorLists[listKey].length) {
+      // Construct an error object that matches our pattern
+      return [{
+        error: `Too many colors requested in unique mode. Requested ${colorArr.length} colors but only ${this.colorLists[listKey].length} are available.`,
+        availableCount: this.colorLists[listKey].length,
+        totalCount: this.colorLists[listKey].length,
+        requestedCount: colorArr.length
+      }];
+    }
+
     // Process each color one by one
     return colorArr.map((hex) => {
       // parse color
@@ -185,9 +196,12 @@ export class FindColors {
       // get the closest named colors using VPTree
       const closestColor = localClosest.get(parsed);
       
-      // If no color was found (all unique colors used up)
+      // If no color was found (all unique colors used up) or we got an error response
       if (!closestColor) {
         return null;
+      } else if (closestColor.error) {
+        // If we got an error object instead of a color (happens when all colors are exhausted)
+        return closestColor;
       }
       
       const color = this.colorLists[listKey][closestColor.index];

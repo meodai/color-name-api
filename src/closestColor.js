@@ -27,6 +27,17 @@ export default class Closest {
     }
     this.previouslyReturnedIndexes = new Set();
   }
+  
+  /**
+   * Returns the number of available colors remaining when in unique mode
+   * @returns {number} Number of colors still available
+   */
+  getAvailableColorsCount() {
+    if (!this.unique) {
+      return this.list.length; // In non-unique mode, all colors are always available
+    }
+    return this.list.length - this.previouslyReturnedIndexes.size;
+  }
 
   get(searchColor) {
     const searchObj = { color: searchColor, index: -1 };
@@ -36,18 +47,29 @@ export default class Closest {
       return this.cache.get(colorUID); 
     }
 
-    if (
-      this.unique &&
-      this.previouslyReturnedIndexes.size >= this.list.length
-    ) {
-      return null;
+    // Check if all colors have been used in unique mode
+    if (this.unique && this.previouslyReturnedIndexes.size >= this.list.length) {
+      return {
+        error: "All available colors have been exhausted",
+        availableCount: 0,
+        totalCount: this.list.length
+      };
     }
 
     // Determine how many results we need from the VP-tree search
     let maxResultsNeeded;
     
     if (this.unique) {
-      maxResultsNeeded = this.list.length;
+      // Use a reasonable batch size instead of the entire list
+      // Start with a smaller number of results for better performance
+      // 500 is a good balance between performance and accuracy
+      maxResultsNeeded = Math.min(500, this.list.length);
+      
+      // If we've already used a large percentage of colors, increase the batch size
+      // to improve chances of finding unused colors
+      if (this.previouslyReturnedIndexes.size > this.list.length * 0.8) {
+        maxResultsNeeded = Math.min(2000, this.list.length);
+      }
     } else {
       maxResultsNeeded = 1;
     }
