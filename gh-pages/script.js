@@ -267,7 +267,7 @@ function createColorObject(hexColor) {
   if (!physics.initialized) return;
   
   const color = hexColor.startsWith('#') ? hexColor : `#${hexColor}`;
-  const size = Math.random() * 20 + 10;
+  const size = Math.random() * 18 + 5;
   const x = Math.random() * physics.bounds.width; 
   const y = -size * 2; 
   const isSquare = Math.random() > 0.5;
