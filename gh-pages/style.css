@@ -319,6 +319,7 @@ pre {
   height: 4rem;
   font-weight: 900;
   color: var(--c);
+  overflow: hidden;
 }
 
 .color-title {
@@ -327,6 +328,8 @@ pre {
   top: 50%;
   transform: translateY(-50%) translateY(-.05em);
   font-size: 3rem;
+  white-space: nowrap;
+
 }
 
 .color-item + .color-item {
