@@ -45,7 +45,9 @@ let physics = {
         width: 0,
         height: 0
     },
-    resizeThrottle: null
+    resizeThrottle: null,
+    scrollThrottle: null,
+    observer: null
 };
 
 /**
@@ -99,6 +101,9 @@ function initializePhysics() {
     
     Composite.add(engine.world, platform);
     
+    // Create bodies for headings
+    createHeadingBodies();
+    
     Events.on(engine, 'afterUpdate', () => {
         const objectsToRemove = [];
         const buffer = 500;
@@ -119,6 +124,22 @@ function initializePhysics() {
     
     window.removeEventListener('resize', handleWindowResize);
     window.addEventListener('resize', handleWindowResize);
+    
+    // Add scroll event listener
+    window.removeEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll);
+    
+    // Add a mutation observer to detect when new headings are added
+    if (physics.observer) {
+        physics.observer.disconnect();
+    }
+    physics.observer = new MutationObserver(mutations => {
+        createHeadingBodies();
+    });
+    physics.observer.observe(document.body, { 
+        childList: true, 
+        subtree: true 
+    });
     
     runner = Runner.create();
     Render.run(render);
@@ -142,6 +163,13 @@ function cleanupPhysics() {
         if (render.canvas && render.canvas.parentNode) {
             render.canvas.parentNode.removeChild(render.canvas);
         }
+    }
+    
+    window.removeEventListener('scroll', handleScroll);
+    
+    if (physics.observer) {
+        physics.observer.disconnect();
+        physics.observer = null;
     }
     
     physics.objects = [];
@@ -179,7 +207,7 @@ function resizePhysicsCanvas() {
     
     const bodies = Composite.allBodies(engine.world);
     
-    const platform = bodies.find(body => body.isStatic);
+    const platform = bodies.find(body => body.isStatic && !body.isHeading);
     if (platform) {
         const platformWidth = physics.bounds.width * 0.7;
         const platformHeight = 50;
@@ -197,6 +225,101 @@ function resizePhysicsCanvas() {
         
         Composite.add(engine.world, newPlatform);
     }
+    
+    // Update heading physics bodies
+    updateHeadingBodies();
+}
+
+/**
+ * Creates physics bodies for heading elements (h1, h2, h3)
+ */
+function createHeadingBodies() {
+    if (!physics.initialized) return;
+    
+    // Clear existing heading bodies first
+    const bodies = Composite.allBodies(engine.world);
+    const headingBodies = bodies.filter(body => body.isHeading);
+    
+    headingBodies.forEach(body => {
+        Composite.remove(engine.world, body);
+    });
+    
+    // Create bodies for all heading elements
+    const headings = document.querySelectorAll('h1, h2, h3');
+    
+    headings.forEach(heading => {
+        const rect = heading.getBoundingClientRect();
+        
+        // Only create bodies for visible headings
+        if (rect.top < window.innerHeight && rect.bottom > 0 && rect.width > 0 && rect.height > 0) {
+            const x = rect.left + rect.width / 2;
+            const y = rect.top + rect.height / 2 + rect.height * 0.3;
+            const width = rect.width;
+            const height = rect.height * .7;
+            
+            // Create a physics body for the heading
+            const body = Bodies.rectangle(
+                x, y, width, height,
+                {
+                    isStatic: true,
+                    isHeading: true,
+                    headingElement: heading,
+                    headingType: heading.tagName.toLowerCase(),
+                    friction: 0.2,
+                    render: {
+                        fillStyle: 'rgba(0, 0, 0, 0)',  // Subtle visualization
+                        strokeStyle: 'rgba(0, 0, 0, 0.1)',
+                        lineWidth: 0
+                    }
+                }
+            );
+            
+            Composite.add(engine.world, body);
+        }
+    });
+}
+
+/**
+ * Updates the position of heading physics bodies based on scroll position
+ */
+function updateHeadingBodies() {
+    if (!physics.initialized) return;
+    
+    const bodies = Composite.allBodies(engine.world);
+    const headingBodies = bodies.filter(body => body.isHeading);
+    
+    headingBodies.forEach(body => {
+        if (body.headingElement) {
+            const rect = body.headingElement.getBoundingClientRect();
+            
+            // Update body position
+            const x = rect.left + rect.width / 2;
+            const y = rect.top + rect.height / 2;
+            
+            // Check if heading is still visible
+            if (rect.top < window.innerHeight && rect.bottom > 0 && rect.width > 0 && rect.height > 0) {
+                Body.setPosition(body, { x, y });
+                body.render.opacity = 1;
+            } else {
+                // Make it invisible and ineffective when out of viewport
+                body.render.opacity = 0;
+                Body.setPosition(body, { x, y: -1000 });
+            }
+        }
+    });
+}
+
+/**
+ * Handle scroll events to update heading bodies
+ */
+function handleScroll() {
+    if (physics.scrollThrottle) {
+        cancelAnimationFrame(physics.scrollThrottle);
+    }
+    
+    physics.scrollThrottle = requestAnimationFrame(() => {
+        updateHeadingBodies();
+    });
 }
 
 /**
