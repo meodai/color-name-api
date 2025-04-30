@@ -20,8 +20,6 @@ let isInitialized = false; // Flag to prevent fetching on initial load
 let fetchTimeout = null; // Debounce fetch calls
 const FETCH_DEBOUNCE_MS = 300; // Debounce time in milliseconds
 let socket = null; // Socket.io connection
-let isSocketConnected = false; // Flag to track socket connection status
-const MAX_DISPLAYED_REQUESTS = 50; // Maximum number of requests to display
 const MAX_COLORS_DISPLAY = 100; // Maximum number of colors to display in the visualization
 const MAX_COLOR_ITEMS = 100; // Maximum number of color items to keep in the DOM
 
@@ -69,7 +67,6 @@ function updateLogoColors(data) {
     setTimeout(() => logoTimer = false, 500);
     
     const {colors} = data;
-    const max = Math.min(maxLogoPoints, colors.length);
     const colorPoints = logoColors.querySelectorAll('.color');
     
     colorPoints.forEach((point, i) => {
@@ -422,17 +419,10 @@ function initializeSocket() {
         // Socket connection event handlers
         socket.on('connect', () => {
             console.log('Connected to Socket.io server');
-            isSocketConnected = true;
         });
 
         socket.on('disconnect', () => {
             console.log('Disconnected from Socket.io server');
-            isSocketConnected = false;
-        });
-
-        // Listen for API request events
-        socket.on('api_request', (data) => {
-            addRequestToDisplay(data);
         });
 
         // Listen for colors events (like in the CodePen)

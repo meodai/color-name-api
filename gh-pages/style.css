@@ -1,5 +1,9 @@
 :root {
-  font-family: 'Comfortaa', cursive;
+  font-family: "Familjen Grotesk", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-weight: 100;
+
   line-height: 1.5;
 
   --c-interactive: rgb(220, 150, 86);
@@ -19,7 +23,8 @@
 .logo-container {
   z-index: 100;
   position: relative;
-  width: 10rem;
+  width: 15rem;
+  margin: 5rem auto 2rem;
   aspect-ratio: 1;
   display: flex;
   justify-content: center;
@@ -27,6 +32,8 @@
   overflow: hidden;
 
   container-type: inline-size;
+
+  display: none;
 }
 
 .logo-container h1 {
@@ -35,11 +42,10 @@
   margin: 0;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%) rotate(-0deg) translateY(-30.2cqi);
-  font-size: 6cqi;
+  transform: translate(-50%, -50%) rotate(-0deg) translateY(-31.3cqi);
+  font-size: 8cqi;
   letter-spacing: -0.01em;
   z-index: 1;
-  text-transform: uppercase;
   white-space: nowrap;
 }
 
@@ -115,35 +121,28 @@ body {
 }
 
 h1, h2, h3 {
-  font-family: 'Comfortaa', cursive;
-  font-weight: 700;
+  font-weight: 800;
   margin: 0;
   letter-spacing: -.015em;
-  font-size: 2em;
+  font-size: 3em;
   margin-top: 1em;
+}
+
+h1 {
+  font-size: 5em;
+}
+
+strong {
+  font-weight: 800;
 }
 
 p {
   max-width: 55ch;
+  margin-left: 3rem;
 }
 
 .design-width {
   margin: 0 10vmin 3rem 2rem;
-}
-
-.intro {
-  display: flex;
-  gap: 2rem;
-  align-items: center;
-  flex-wrap: wrap;
-
-  p {
-    /*max-width: 40ch;*/
-  }
-
-  .logo-container {
-    flex: 0 1 15.5rem;
-  }
 }
 
 .request-preview, .response {
@@ -170,8 +169,8 @@ pre {
 }
 
 .pseudo-terminal {
-  background-color: #202126;
-  color: #fff;
+  background-color: var(--b);
+  color: var(--w);
   position: relative;
   overflow: clip;
 
@@ -195,8 +194,8 @@ pre {
   overflow-x: auto;
   line-height: 1.8;
   
-  background-color: #202126;
-  text-shadow: 0 0 1em #202126;
+  background-color: var(--b);
+  text-shadow: 0 0 1em var(--b);
 }
 
 .url-part {
@@ -306,63 +305,6 @@ pre {
   padding: 0 2rem 2rem;
 }
 
-.live-requests {
-  margin-top: 2em;
-  border-top: 1px solid #ddd;
-  padding-top: 1em;
-}
-
-.toggle-container {
-  display: flex;
-  align-items: center;
-  margin-bottom: 1em;
-}
-
-
-/* Request Items */
-#requests-container {
-  max-height: 400px;
-  overflow-y: auto;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  background-color: #f8f8f8;
-}
-
-.request-item {
-  border-bottom: 1px solid #ddd;
-  padding: 0.8em;
-  background-color: #fff;
-}
-
-.request-item:nth-child(even) {
-  background-color: #f8f8f8;
-}
-
-.request-header {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.method-endpoint {
-  font-weight: bold;
-  color: #007bff;
-}
-
-.timestamp {
-  color: #666;
-  font-size: 0.9em;
-}
-
-.client-info {
-  background-color: #e9ecef;
-  padding: 0.2em 0.5em;
-  border-radius: 3px;
-  font-size: 0.85em;
-  color: #495057;
-}
-
 #color-visualization {
   margin-bottom: 1.5rem;
   max-height: 38rem;
@@ -370,14 +312,21 @@ pre {
 }
 
 .color-item {
+  position: relative;
   background: linear-gradient(to right, var(--g, transparent));
-  padding: 1.1rem 2rem 1rem;
-  line-height: 1;
+  height: 4rem;
   font-weight: 900;
   color: var(--c);
+}
+
+.color-title {
+  position: absolute;
+  left: 2rem;
+  top: 50%;
+  transform: translateY(-50%) translateY(-.05em);
+  font-size: 3rem;
 }
 
 .color-item + .color-item {
   margin-top: 0.75em;
 }
-
