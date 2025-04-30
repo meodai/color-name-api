@@ -245,7 +245,7 @@ function createHeadingBodies() {
     });
     
     // Create bodies for all heading elements
-    const headings = document.querySelectorAll('h1, h2, h3');
+    const headings = document.querySelectorAll('h1, h2, h3, p');
     
     headings.forEach(heading => {
         const rect = heading.getBoundingClientRect();
@@ -253,9 +253,9 @@ function createHeadingBodies() {
         // Only create bodies for visible headings
         if (rect.top < window.innerHeight && rect.bottom > 0 && rect.width > 0 && rect.height > 0) {
             const x = rect.left + rect.width / 2;
-            const y = rect.top + rect.height / 2 + rect.height * 0.3;
+            const y = rect.top + rect.height / 2 + rect.height * 0.25;
             const width = rect.width;
-            const height = rect.height * .7;
+            const height = rect.height * .75;
             
             // Create a physics body for the heading
             const body = Bodies.rectangle(
