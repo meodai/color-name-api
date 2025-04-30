@@ -1,4 +1,4 @@
-// DOM elements
+
 const elements = {
   listSelect: document.getElementById('list-select'),
   noduplicatesCheckbox: document.getElementById('noduplicates-checkbox'),
@@ -10,24 +10,20 @@ const elements = {
   requestsContainer: document.getElementById('requests-container'),
   jsonViewer: document.getElementById('json-viewer'),
 };
-
-// Constants
 const API_BASE_URL = 'https://api.color.pizza/v1/';
 const SOCKET_URL = 'https://api.color.pizza';
 const FETCH_DEBOUNCE_MS = 300;
 const MAX_COLORS_DISPLAY = 100;
 const MAX_COLOR_ITEMS = 100;
 
-// State variables
 let selectedColors = [];
 let availableLists = [];
 let isInitialized = false;
 let fetchTimeout = null;
 let socket = null;
 
-// Matter.js setup
-const { Engine, Render, Runner, Bodies, Composite, Events, Body } = Matter;
-let engine, render, runner;
+const { Engine, Render, Runner, Bodies, Composite, Events, Body, Mouse, MouseConstraint, Common } = Matter;
+let engine, render, runner, mouseConstraint;
 let physics = {
   objects: [],
   maxObjects: 1000,
@@ -36,10 +32,10 @@ let physics = {
   resizeThrottle: null,
   scrollThrottle: null,
   scrollCheckCounter: 0,
-  observer: null
+  observer: null,
+  mouseBody: null
 };
 
-// Helper Functions
 function getRandomHexColor() {
   return Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
 }
@@ -67,7 +63,6 @@ function updateElementIfExists(id, property, value) {
   }
 }
 
-// Physics Engine Functions
 function initializePhysics() {
   if (physics.initialized) {
     cleanupPhysics();
@@ -115,6 +110,22 @@ function initializePhysics() {
   );
   
   Composite.add(engine.world, platform);
+  
+  physics.mouseBody = Bodies.circle(0, 0, 35, {
+    isStatic: true,
+    collisionFilter: {
+      group: 1,
+      category: 0x0002
+    },
+    render: {
+      fillStyle: 'rgba(0, 0, 0, 0)',
+      opacity: 0
+    }
+  });
+  
+  Composite.add(engine.world, physics.mouseBody);
+  
+  document.addEventListener('mousemove', handleMouseMove);
   
   createHeadingBodies();
   
@@ -168,6 +179,7 @@ function cleanupPhysics() {
   }
   
   window.removeEventListener('scroll', handleScroll);
+  document.removeEventListener('mousemove', handleMouseMove);
   
   if (physics.observer) {
     physics.observer.disconnect();
@@ -175,7 +187,21 @@ function cleanupPhysics() {
   }
   
   physics.objects = [];
+  physics.mouseBody = null;
   physics.initialized = false;
+}
+
+function handleMouseMove(event) {
+  if (!physics.initialized || !physics.mouseBody) return;
+  
+  const canvasBounds = render.canvas.getBoundingClientRect();
+  const mouseX = event.clientX - canvasBounds.left;
+  const mouseY = event.clientY - canvasBounds.top;
+  
+  Body.setPosition(physics.mouseBody, {
+    x: mouseX,
+    y: mouseY
+  });
 }
 
 function handleWindowResize() {
@@ -303,7 +329,6 @@ function createColorObjectsFromData(data) {
   }
 }
 
-// API Functions
 async function fetchLists() {
   try {
     const response = await fetch(`${API_BASE_URL}lists/`);
@@ -346,7 +371,6 @@ function populateListDropdown(lists) {
 }
 
 function initializeUrlInteractiveElements() {
-  // Create list select
   const urlListSelect = document.createElement('select');
   urlListSelect.classList.add('url-list-select');
   urlListSelect.id = 'url-list-select';
@@ -374,7 +398,6 @@ function initializeUrlInteractiveElements() {
   elements.urlListContainer.appendChild(urlListSelect);
   elements.urlListContainer.appendChild(urlListLabel);
   
-  // Create checkbox
   const checkboxContainer = document.createElement('label');
   checkboxContainer.classList.add('url-checkbox-container');
   
@@ -551,7 +574,6 @@ async function fetchColorNames() {
   }
 }
 
-// Socket Functions
 function initializeSocket() {
   try {
     socket = io(SOCKET_URL, {
@@ -613,7 +635,6 @@ function addColorsToVisualization(data) {
   }
 }
 
-// Event Listeners
 elements.listSelect.addEventListener('change', (event) => {
   updateElementIfExists('url-list-select', 'value', event.target.value);
   updateApiUrlPreview();
@@ -624,7 +645,6 @@ elements.noduplicatesCheckbox.addEventListener('change', (event) => {
   updateApiUrlPreview();
 });
 
-// Initialization
 initializePhysics();
 
 selectedColors.push(getRandomHexColor());
