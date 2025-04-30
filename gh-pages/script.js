@@ -224,7 +224,7 @@ function createColorObject(hexColor) {
             render: {
                 fillStyle: color,
                 strokeStyle: '#000000',
-                lineWidth: 2
+                lineWidth: 0
             }
         });
     } else {
@@ -235,7 +235,7 @@ function createColorObject(hexColor) {
             render: {
                 fillStyle: color,
                 strokeStyle: '#000000',
-                lineWidth: 2
+                lineWidth: 0
             }
         });
     }
