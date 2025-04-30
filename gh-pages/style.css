@@ -220,7 +220,7 @@ pre {
 
 #color-visualization {
   margin-bottom: 1.5rem;
-  max-height: 38rem;
+  height: 38rem;
   overflow-y: auto;
 }
 
