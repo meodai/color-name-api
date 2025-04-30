@@ -3,15 +3,11 @@ const noduplicatesCheckbox = document.getElementById('noduplicates-checkbox');
 const apiUrlPreview = document.getElementById('api-url-preview');
 const apiResponse = document.getElementById('api-response');
 
-// URL Builder elements
 const urlColors = document.getElementById('url-colors');
 const urlListContainer = document.getElementById('url-list-container');
 const urlNoDuplicatesContainer = document.getElementById('url-noduplicates-container');
-
-// Live requests elements
 const requestsContainer = document.getElementById('requests-container');
 
-// --- Constants and State ---
 const API_BASE_URL = 'https://api.color.pizza/v1/';
 const SOCKET_URL = 'https://api.color.pizza';
 let selectedColors = [];
@@ -23,12 +19,10 @@ let socket = null;
 const MAX_COLORS_DISPLAY = 100;
 const MAX_COLOR_ITEMS = 100;
 
-// --- Logo Constants and Elements ---
 let maxLogoPoints = 20;
 const logoColors = document.querySelector('[data-log]');
 let logoTimer;
 
-// --- Matter.js Physics Engine Setup ---
 let Engine = Matter.Engine,
     Render = Matter.Render,
     Runner = Matter.Runner,
@@ -51,9 +45,6 @@ let physics = {
     observer: null
 };
 
-/**
- * Initializes the Matter.js physics engine for the color objects animation
- */
 function initializePhysics() {
     if (physics.initialized) {
         cleanupPhysics();
@@ -102,7 +93,6 @@ function initializePhysics() {
     
     Composite.add(engine.world, platform);
     
-    // Create bodies for headings
     createHeadingBodies();
     
     Events.on(engine, 'afterUpdate', () => {
@@ -149,9 +139,6 @@ function initializePhysics() {
     physics.initialized = true;
 }
 
-/**
- * Cleans up the physics engine resources
- */
 function cleanupPhysics() {
     if (!physics.initialized) return;
     
@@ -177,9 +164,6 @@ function cleanupPhysics() {
     physics.initialized = false;
 }
 
-/**
- * Handle window resize with throttling
- */
 function handleWindowResize() {
     if (physics.resizeThrottle) {
         clearTimeout(physics.resizeThrottle);
@@ -190,9 +174,6 @@ function handleWindowResize() {
     }, 300);
 }
 
-/**
- * Resizes the physics canvas when the window size changes
- */
 function resizePhysicsCanvas() {
     if (!physics.initialized) return;
     
@@ -227,17 +208,12 @@ function resizePhysicsCanvas() {
         Composite.add(engine.world, newPlatform);
     }
     
-    // Update heading physics bodies
     updateHeadingBodies();
 }
 
-/**
- * Creates physics bodies for heading elements (h1, h2, h3)
- */
 function createHeadingBodies() {
     if (!physics.initialized) return;
     
-    // Clear existing heading bodies first
     const bodies = Composite.allBodies(engine.world);
     const headingBodies = bodies.filter(body => body.isHeading);
     
@@ -245,7 +221,6 @@ function createHeadingBodies() {
         Composite.remove(engine.world, body);
     });
     
-    // Create bodies for all heading elements
     const headings = document.querySelectorAll(
       "h1, h2, h3, p, .pseudo-terminal"
     );
@@ -255,7 +230,6 @@ function createHeadingBodies() {
     headings.forEach(heading => {
         const rect = heading.getBoundingClientRect();
         
-        // Only create bodies for visible headings
         if (rect.top < window.innerHeight && rect.bottom > 0 && rect.width > 0 && rect.height > 0) {
             visibleCount++;
             const x = rect.left + rect.width / 2;
@@ -263,7 +237,6 @@ function createHeadingBodies() {
             const width = rect.width;
             const height = rect.height;
             
-            // Create a physics body for the heading
             const body = Bodies.rectangle(
                 x, y, width, height,
                 {
@@ -273,7 +246,7 @@ function createHeadingBodies() {
                     headingType: heading.tagName.toLowerCase(),
                     friction: 0.2,
                     render: {
-                        fillStyle: 'rgba(0, 0, 0, 0)',  // Transparent fill
+                        fillStyle: 'rgba(0, 0, 0, 0)', 
                         strokeStyle: 'rgba(0, 0, 0, 0.1)',
                         lineWidth: 0
                     }
@@ -285,38 +258,30 @@ function createHeadingBodies() {
     });
 }
 
-/**
- * Updates the position of heading physics bodies based on scroll position
- */
 function updateHeadingBodies() {
     if (!physics.initialized) return;
     
     const bodies = Composite.allBodies(engine.world);
     const headingBodies = bodies.filter(body => body.isHeading);
     
-    // Bodies to remove when they're no longer visible
     const bodiesToRemove = [];
     
     headingBodies.forEach(body => {
         if (body.headingElement) {
             const rect = body.headingElement.getBoundingClientRect();
             
-            // Update body position
             const x = rect.left + rect.width / 2;
             const y = rect.top + rect.height / 2;
             
-            // Check if heading is still visible
             if (rect.top < window.innerHeight && rect.bottom > 0 && rect.width > 0 && rect.height > 0) {
                 Body.setPosition(body, { x, y });
                 body.render.opacity = 1;
             } else {
-                // Add to removal list when out of viewport
                 bodiesToRemove.push(body);
             }
         }
     });
     
-    // Remove bodies outside the viewport
     if (bodiesToRemove.length > 0) {
         bodiesToRemove.forEach(body => {
             Composite.remove(engine.world, body);
@@ -324,9 +289,6 @@ function updateHeadingBodies() {
     }
 }
 
-/**
- * Handle scroll events to update heading bodies
- */
 function handleScroll() {
     if (physics.scrollThrottle) {
         cancelAnimationFrame(physics.scrollThrottle);
@@ -335,8 +297,6 @@ function handleScroll() {
     physics.scrollThrottle = requestAnimationFrame(() => {
         updateHeadingBodies();
         
-        // Check for new headings becoming visible during scroll
-        // Use a less frequent check for new elements to improve performance
         if (!physics.scrollCheckCounter) {
             physics.scrollCheckCounter = 0;
         }
@@ -348,10 +308,6 @@ function handleScroll() {
     });
 }
 
-/**
- * Creates a shape with the given color and adds it to the physics world
- * @param {string} hexColor - Hex color code with or without the # prefix
- */
 function createColorObject(hexColor) {
     if (!physics.initialized) return;
     
@@ -393,10 +349,6 @@ function createColorObject(hexColor) {
     Composite.add(engine.world, object);
 }
 
-/**
- * Creates objects for all colors in a color palette
- * @param {Object} data - Color data with colors array
- */
 function createColorObjectsFromData(data) {
     if (!physics.initialized) return;
     
@@ -412,19 +364,10 @@ function createColorObjectsFromData(data) {
     }
 }
 
-// --- Functions ---
-
-/**
- * Generates a random 6-digit hex color code.
- * @returns {string} A hex color string (without #).
- */
 function getRandomHexColor() {
     return Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
 }
 
-/**
- * Initialize the color points for the interactive logo
- */
 function initializeLogoPoints() {
     for (let i = 0; i < maxLogoPoints; i++) {
         const colorPoint = document.createElement('i');
@@ -440,10 +383,6 @@ function initializeLogoPoints() {
     }
 }
 
-/**
- * Update the logo with new colors
- * @param {Object} data - Color data with colors array
- */
 function updateLogoColors(data) {
     if (logoTimer) return;
     logoTimer = true;
@@ -475,9 +414,6 @@ function updateLogoColors(data) {
     });
 }
 
-/**
- * Fetches the available color name lists from the API and populates the dropdown.
- */
 async function fetchLists() {
     try {
         const response = await fetch(`${API_BASE_URL}lists/`);
@@ -492,10 +428,6 @@ async function fetchLists() {
     }
 }
 
-/**
- * Populates the list selection dropdown.
- * @param {string[]} lists - An array of available list names.
- */
 function populateListDropdown(lists) {
     listSelect.innerHTML = '';
     availableLists = lists.sort();
@@ -524,9 +456,6 @@ function populateListDropdown(lists) {
     }
 }
 
-/**
- * Sets up the interactive elements in the URL builder
- */
 function initializeUrlInteractiveElements() {
     const urlListSelect = document.createElement('select');
     urlListSelect.classList.add('url-list-select');
@@ -583,19 +512,12 @@ function initializeUrlInteractiveElements() {
     urlNoDuplicatesContainer.appendChild(checkboxContainer);
 }
 
-/**
- * Removes a specific color from the selected list.
- * @param {string} hexColorToRemove - The hex color string (without #) to remove.
- */
 function removeColor(hexColorToRemove) {
     selectedColors = selectedColors.filter(color => color !== hexColorToRemove);
     renderColors();
     updateApiUrlPreview();
 }
 
-/**
- * Renders the selected color chips in the UI.
- */
 function renderColors() {
     urlColors.innerHTML = '';
     
@@ -663,9 +585,6 @@ function renderColors() {
     urlColors.appendChild(addBtn);
 }
 
-/**
- * Updates the API URL preview based on the current selections and triggers fetch.
- */
 function updateApiUrlPreview() {
     let urlString = API_BASE_URL;
     let params = [];
@@ -706,9 +625,7 @@ function updateApiUrlPreview() {
     }
 }
 
-/**
- * Fetches color names from the API using the constructed URL and displays the response.
- */
+
 async function fetchColorNames() {
   const apiUrl = apiUrlPreview.textContent;
   
@@ -755,11 +672,6 @@ async function fetchColorNames() {
   }
 }
 
-// --- Socket.io Functions ---
-
-/**
- * Initializes the Socket.io connection.
- */
 function initializeSocket() {
     try {
         socket = io(SOCKET_URL, {
@@ -789,21 +701,12 @@ function initializeSocket() {
     }
 }
 
-/**
- * Converts an array of colors to a CSS stepped gradient string.
- * @param {string[]} colorsArr - Array of hex color strings.
- * @returns {string} CSS gradient string.
- */
 function colorArrToSteppedGradient(colorsArr) {
     return colorsArr.map(
         (c, i) => `${c} ${i/colorsArr.length*100}% ${(i+1)/colorsArr.length*100}%`
     ).join();
 }
 
-/**
- * Creates a visual representation of color data received from the socket.
- * @param {Object} data - Color data with paletteTitle and colors array.
- */
 function addColorsToVisualization(data) {
     const { paletteTitle, colors } = data;
     
