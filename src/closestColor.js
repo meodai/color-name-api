@@ -33,7 +33,7 @@ export default class Closest {
     const colorUID = JSON.stringify(searchColor); // Use stringified color as cache key
 
     if (!this.unique && this.cache.has(colorUID)) {
-      return this.cache.get(colorUID); // .get() automatically marks as recently used
+      return this.cache.get(colorUID); 
     }
 
     if (
@@ -43,29 +43,44 @@ export default class Closest {
       return null;
     }
 
-    const allCandidates = this.vpTree.search(searchObj, this.list.length);
+    // Determine how many results we need from the VP-tree search
+    let maxResultsNeeded;
+    
+    if (this.unique) {
+      maxResultsNeeded = this.list.length;
+    } else {
+      maxResultsNeeded = 1;
+    }
 
-    for (const candidate of allCandidates) {
-      if (
-        !this.unique ||
-        !this.previouslyReturnedIndexes.has(candidate.index)
-      ) {
+    const candidates = this.vpTree.search(searchObj, maxResultsNeeded);
+
+    // If not unique, the first candidate is the result (if found)
+    if (!this.unique) {
+      if (candidates.length > 0) {
         const result = {
-          // Use the original color object from the list, not the parsed one used for search
+          closest: this.originalList[candidates[0].index],
+          index: candidates[0].index,
+        };
+        this.cache.set(colorUID, result);
+        return result;
+      } else {
+        return null; // Should not happen if list is not empty
+      }
+    }
+
+    // If unique, iterate through candidates to find the first available one
+    for (const candidate of candidates) {
+      if (!this.previouslyReturnedIndexes.has(candidate.index)) {
+        const result = {
           closest: this.originalList[candidate.index],
           index: candidate.index,
         };
-
-        if (this.unique) {
-          this.previouslyReturnedIndexes.add(result.index);
-        } else {
-          this.cache.set(colorUID, result);
-        }
-
+        this.previouslyReturnedIndexes.add(result.index);
+        // No caching needed for unique results as they change each time
         return result;
       }
     }
 
-    return null; // Should not happen if list is not empty
+    return null; // All colors have been returned
   }
 }
