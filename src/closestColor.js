@@ -1,6 +1,10 @@
 import { differenceCiede2000 } from "culori";
 import { hasOwnProperty } from "./lib.js";
 import { VPTree } from "./vptree.js";
+import { LRUCache } from 'lru-cache';
+
+// Define cache size limit
+const MAX_CLOSEST_CACHE_SIZE = 5000; // Max entries in the instance cache
 
 /**
  * Return closest color from a given list
@@ -18,16 +22,18 @@ export default class Closest {
   }
 
   clearCache(indexOnly = this.unique) {
-    if (!indexOnly) this.cache = {};
+    if (!indexOnly) {
+      this.cache = new LRUCache({ max: MAX_CLOSEST_CACHE_SIZE });
+    }
     this.previouslyReturnedIndexes = new Set();
   }
 
   get(searchColor) {
     const searchObj = { color: searchColor, index: -1 };
-    const colorUID = JSON.stringify(searchColor);
+    const colorUID = JSON.stringify(searchColor); // Use stringified color as cache key
 
-    if (!this.unique && hasOwnProperty(this.cache, colorUID)) {
-      return this.cache[colorUID];
+    if (!this.unique && this.cache.has(colorUID)) {
+      return this.cache.get(colorUID); // .get() automatically marks as recently used
     }
 
     if (
@@ -45,19 +51,21 @@ export default class Closest {
         !this.previouslyReturnedIndexes.has(candidate.index)
       ) {
         const result = {
-          closest: candidate.color,
+          // Use the original color object from the list, not the parsed one used for search
+          closest: this.originalList[candidate.index],
           index: candidate.index,
         };
 
         if (this.unique) {
           this.previouslyReturnedIndexes.add(result.index);
+        } else {
+          this.cache.set(colorUID, result);
         }
 
-        this.cache[colorUID] = result;
         return result;
       }
     }
 
-    return null;
+    return null; // Should not happen if list is not empty
   }
 }

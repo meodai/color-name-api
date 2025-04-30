@@ -9,6 +9,7 @@ import {colornames as colorsShort } from 'color-name-list/short';
 import { Server } from 'socket.io';
 import requestIp from 'request-ip';
 import * as dotenv from 'dotenv';
+import { LRUCache } from 'lru-cache'; // Import LRUCache
 
 import { FindColors } from './findColors.js';
 import { getPaletteTitle } from './generatePaletteName.js';
@@ -32,11 +33,14 @@ const APIurl = ''; // subfolder for the API
 const baseUrl = `${APIurl}${currentVersion}/`;
 const baseUrlNames = `${baseUrl}${urlNameSubpath}/`;
 const urlColorSeparator = ',';
+const gzipCacheSize = 500; // Max size of the gzip cache
 
 // Declare variables for async loading
 let docsHTML;
 let gzippedDocsHTML; // Cache for gzipped docs
-const gzipCache = new Map(); // Simple cache for dynamic gzipped responses
+const gzipCache = new LRUCache({ max: gzipCacheSize });
+
+// ...existing code...
 
 let io;
 let hasDb = false;
@@ -188,16 +192,11 @@ const httpRespond = async ( // Make httpRespond async
   const stringifiedResponse = JSON.stringify(responseObj);
 
   if (responseHeader['Content-Encoding'] === 'gzip') {
-    // Check cache first for JSON responses
+    // Check cache first for JSON responses using LRUCache methods
     let gzippedResponse = gzipCache.get(stringifiedResponse);
     if (!gzippedResponse) {
       try {
         gzippedResponse = await gzip(stringifiedResponse);
-        // Limit cache size to avoid memory issues (e.g., 1000 entries)
-        if (gzipCache.size > 1000) {
-            const firstKey = gzipCache.keys().next().value;
-            gzipCache.delete(firstKey);
-        }
         gzipCache.set(stringifiedResponse, gzippedResponse); // Cache the gzipped result
       } catch (err) {
          console.error('Gzip compression failed:', err);

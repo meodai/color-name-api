@@ -8,6 +8,7 @@ import {
 
 import { lib } from './lib.js';
 import ClosestColor from './closestColor.js';
+import { LRUCache } from 'lru-cache';
 
 const distanceMetric = differenceCiede2000();
 
@@ -72,6 +73,9 @@ let colorListsCache = null;
 let colorListsParsedCache = {};
 let closestInstancesCache = {};
 
+// Define cache size limits
+const MAX_NAME_CACHE_SIZE = 1000; // Max entries per list in colorNameCache
+
 export class FindColors {
   constructor(colorsListsObj) {
     // If we already have the cache, use it instead of rebuilding everything
@@ -118,7 +122,7 @@ export class FindColors {
     this.colorNameCache = {};
     // add a key for each color list
     Object.keys(this.colorLists).forEach((listName) => {
-      this.colorNameCache[listName] = {};
+      this.colorNameCache[listName] = new LRUCache({ max: MAX_NAME_CACHE_SIZE });
     });
   }
 
@@ -137,16 +141,20 @@ export class FindColors {
    */
   searchNames(searchStr, listKey = 'default') {
     this.validateListKey(listKey);
+    const cache = this.colorNameCache[listKey];
 
-    if (this.colorNameCache[listKey][searchStr]) {
-      return this.colorNameCache[listKey][searchStr];
+    if (cache.has(searchStr)) {
+      return cache.get(searchStr);
     }
 
-    this.colorNameCache[listKey][searchStr] = this.colorLists[listKey].filter(
+    const results = this.colorLists[listKey].filter(
       (color) => color.name.toLowerCase().includes(searchStr.toLowerCase()),
     );
 
-    return this.colorNameCache[listKey][searchStr];
+    // Add to cache - LRUCache handles size limit and eviction automatically
+    cache.set(searchStr, results);
+
+    return results;
   }
 
   /**
