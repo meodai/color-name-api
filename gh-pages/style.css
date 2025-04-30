@@ -118,6 +118,7 @@
 
 body {
   margin: 2em;
+  padding-bottom: 20vmin;
 }
 
 h1, h2, h3 {

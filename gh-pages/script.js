@@ -13,15 +13,15 @@ const requestsContainer = document.getElementById('requests-container');
 
 // --- Constants and State ---
 const API_BASE_URL = 'https://api.color.pizza/v1/';
-const SOCKET_URL = 'https://api.color.pizza'; // Use the same base URL for the socket connection
-let selectedColors = []; // Stores hex codes without '#'
-let availableLists = []; // Stores available color lists
-let isInitialized = false; // Flag to prevent fetching on initial load
-let fetchTimeout = null; // Debounce fetch calls
-const FETCH_DEBOUNCE_MS = 300; // Debounce time in milliseconds
-let socket = null; // Socket.io connection
-const MAX_COLORS_DISPLAY = 100; // Maximum number of colors to display in the visualization
-const MAX_COLOR_ITEMS = 100; // Maximum number of color items to keep in the DOM
+const SOCKET_URL = 'https://api.color.pizza';
+let selectedColors = [];
+let availableLists = [];
+let isInitialized = false;
+let fetchTimeout = null;
+const FETCH_DEBOUNCE_MS = 300;
+let socket = null;
+const MAX_COLORS_DISPLAY = 100;
+const MAX_COLOR_ITEMS = 100;
 
 // --- Logo Constants and Elements ---
 let maxLogoPoints = 20;
@@ -52,23 +52,19 @@ let physics = {
  * Initializes the Matter.js physics engine for the color objects animation
  */
 function initializePhysics() {
-    // Clean up any existing physics engine
     if (physics.initialized) {
         cleanupPhysics();
     }
     
-    // Create engine
     engine = Engine.create({
-        gravity: { x: 0, y: 0.5 } // Reduced gravity for slower falling
+        gravity: { x: 0, y: 0.5 }
     });
     
-    // Store bounds for reference
     physics.bounds = {
         width: window.innerWidth,
         height: window.innerHeight
     };
     
-    // Create renderer in the background
     render = Render.create({
         element: document.body,
         engine: engine,
@@ -81,16 +77,14 @@ function initializePhysics() {
         }
     });
     
-    // Position the canvas as a background
     render.canvas.style.position = 'fixed';
     render.canvas.style.top = '0';
     render.canvas.style.left = '0';
     render.canvas.style.width = '100%';
     render.canvas.style.height = '100%';
     render.canvas.style.zIndex = '-1';
-    render.canvas.style.pointerEvents = 'none'; // Allow interaction with page elements
+    render.canvas.style.pointerEvents = 'none';
     
-    // Create platform with gaps on the left and right sides
     const platformWidth = physics.bounds.width * 0.8;
     const platformHeight = 10;
     const platformY = physics.bounds.height - platformHeight / 2;
@@ -103,23 +97,18 @@ function initializePhysics() {
         { isStatic: true, render: { fillStyle: '#ffffff', opacity: 0.5 } }
     );
     
-    // Add the platform to the world
     Composite.add(engine.world, platform);
     
-    // Set up event to remove objects that fall off the screen
-    // Use a much larger buffer to ensure objects are well off screen before removal
     Events.on(engine, 'afterUpdate', () => {
         const objectsToRemove = [];
-        const buffer = 500; // Large buffer to ensure objects are far off screen
+        const buffer = 500;
         
         physics.objects.forEach(obj => {
-            // Only remove if object is FAR below the screen
             if (obj.position.y > physics.bounds.height + buffer) {
                 objectsToRemove.push(obj);
             }
         });
         
-        // Remove objects that fell off
         if (objectsToRemove.length > 0) {
             objectsToRemove.forEach(obj => {
                 Composite.remove(engine.world, obj);
@@ -128,16 +117,13 @@ function initializePhysics() {
         }
     });
     
-    // Remove previous listener and add new one
     window.removeEventListener('resize', handleWindowResize);
     window.addEventListener('resize', handleWindowResize);
     
-    // Run the engine and renderer
     runner = Runner.create();
     Render.run(render);
     Runner.run(runner, engine);
     
-    // Mark as initialized
     physics.initialized = true;
 }
 
@@ -147,21 +133,17 @@ function initializePhysics() {
 function cleanupPhysics() {
     if (!physics.initialized) return;
     
-    // Stop the runner
     if (runner) {
         Runner.stop(runner);
     }
     
-    // Stop the renderer
     if (render) {
         Render.stop(render);
-        // Remove the canvas from the DOM
         if (render.canvas && render.canvas.parentNode) {
             render.canvas.parentNode.removeChild(render.canvas);
         }
     }
     
-    // Clear object references
     physics.objects = [];
     physics.initialized = false;
 }
@@ -170,16 +152,13 @@ function cleanupPhysics() {
  * Handle window resize with throttling
  */
 function handleWindowResize() {
-    // Clear the previous throttle timeout
     if (physics.resizeThrottle) {
         clearTimeout(physics.resizeThrottle);
     }
     
-    // Set a new throttle timeout
     physics.resizeThrottle = setTimeout(() => {
-        // Completely reinitialize the physics engine
         initializePhysics();
-    }, 300); // 300ms throttle
+    }, 300);
 }
 
 /**
@@ -188,33 +167,26 @@ function handleWindowResize() {
 function resizePhysicsCanvas() {
     if (!physics.initialized) return;
     
-    // Update bounds
     physics.bounds = {
         width: window.innerWidth,
         height: window.innerHeight
     };
     
-    // Update render dimensions
     render.options.width = physics.bounds.width;
     render.options.height = physics.bounds.height;
     render.canvas.width = physics.bounds.width;
     render.canvas.height = physics.bounds.height;
     
-    // Update platform position
     const bodies = Composite.allBodies(engine.world);
     
-    // Find the platform (first static body)
     const platform = bodies.find(body => body.isStatic);
     if (platform) {
-        // New platform dimensions
-        const platformWidth = physics.bounds.width * 0.7; // 70% of screen width
+        const platformWidth = physics.bounds.width * 0.7;
         const platformHeight = 50;
         const platformY = physics.bounds.height - platformHeight / 2;
         
-        // First, remove the old platform
         Composite.remove(engine.world, platform);
         
-        // Create a new platform with proper dimensions and position
         const newPlatform = Bodies.rectangle(
             physics.bounds.width / 2,
             platformY,
@@ -223,7 +195,6 @@ function resizePhysicsCanvas() {
             { isStatic: true, render: { fillStyle: '#ffffff', opacity: 1 } }
         );
         
-        // Add the new platform to the world
         Composite.add(engine.world, newPlatform);
     }
 }
@@ -235,44 +206,40 @@ function resizePhysicsCanvas() {
 function createColorObject(hexColor) {
     if (!physics.initialized) return;
     
-    // Ensure the hex color has a # prefix
     const color = hexColor.startsWith('#') ? hexColor : `#${hexColor}`;
     
-    // Random properties
-    const size = Math.random() * 20 + 10; // Random size between 10 and 30
+    const size = Math.random() * 20 + 10;
     const x = Math.random() * physics.bounds.width; 
     const y = -size * 2; 
-    const isSquare = Math.random() > 0.8;
+    const isSquare = Math.random() > 0.5;
     
-    // Create the object (either circle or square)
     let object;
     
     if (isSquare) {
         object = Bodies.rectangle(x, y, size * 2, size * 2, {
-            restitution: 0.5, // Bounciness
+            restitution: 0.4,
             friction: 0.05,
             frictionAir: 0.005,
-            angle: Math.random() * Math.PI * 2, // Random rotation
+            angle: Math.random() * Math.PI * 2,
             render: {
                 fillStyle: color,
-                strokeStyle: '#fff',
-                lineWidth: 1
+                strokeStyle: '#000000',
+                lineWidth: 2
             }
         });
     } else {
         object = Bodies.circle(x, y, size, {
-            restitution: 0.5, // Bounciness
+            restitution: 0.3,
             friction: 0.05,
             frictionAir: 0.005,
             render: {
                 fillStyle: color,
-                strokeStyle: '#fff',
-                lineWidth: 1
+                strokeStyle: '#000000',
+                lineWidth: 2
             }
         });
     }
     
-    // Add the object to our tracking array and the physics world
     physics.objects.push(object);
     Composite.add(engine.world, object);
 }
@@ -287,10 +254,8 @@ function createColorObjectsFromData(data) {
     const { colors } = data;
     if (!colors || !colors.length) return;
     
-    // Create an object for each color, up to the maximum limit
     const maxToCreate = Math.min(colors.length, 50); 
     for (let i = 0; i < maxToCreate; i++) {
-        // Use either the requested hex or the matched hex
         const colorHex = colors[i].hasOwnProperty('requestedHex') ? 
             colors[i].requestedHex : colors[i].hex;
         
@@ -312,7 +277,6 @@ function getRandomHexColor() {
  * Initialize the color points for the interactive logo
  */
 function initializeLogoPoints() {
-    // Create the color points for the logo
     for (let i = 0; i < maxLogoPoints; i++) {
         const colorPoint = document.createElement('i');
         colorPoint.classList.add('color');
@@ -372,7 +336,7 @@ async function fetchLists() {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        populateListDropdown(data.availableColorNameLists || []); // Ensure it's an array
+        populateListDropdown(data.availableColorNameLists || []);
     } catch (error) {
         console.error('Error fetching color lists:', error);
         listSelect.innerHTML = '<option value="">Error loading lists</option>';
@@ -384,30 +348,28 @@ async function fetchLists() {
  * @param {string[]} lists - An array of available list names.
  */
 function populateListDropdown(lists) {
-    listSelect.innerHTML = ''; // Clear loading/error message
-    availableLists = lists.sort(); // Store sorted lists for URL dropdown
+    listSelect.innerHTML = '';
+    availableLists = lists.sort();
     
     availableLists.forEach(listName => {
         const option = document.createElement('option');
         option.value = listName;
         option.textContent = listName;
-        // Select 'default' if it exists, otherwise the first item
         if (listName === 'default') {
             option.selected = true;
         }
         listSelect.appendChild(option);
     });
-    // Select the first option if 'default' wasn't present and lists exist
+    
     if (!listSelect.querySelector('[value="default"]') && listSelect.options.length > 0) {
           listSelect.options[0].selected = true;
     }
     
-    // Initialize URL builder elements now that we have lists
     initializeUrlInteractiveElements();
     
-    updateApiUrlPreview(); // Update URL preview after lists are loaded
-    isInitialized = true; // Allow fetching after initial setup
-    // Trigger initial fetch if there are colors
+    updateApiUrlPreview();
+    isInitialized = true;
+    
     if (selectedColors.length > 0) {
         fetchColorNames();
     }
@@ -417,16 +379,13 @@ function populateListDropdown(lists) {
  * Sets up the interactive elements in the URL builder
  */
 function initializeUrlInteractiveElements() {
-    // Setup list dropdown in URL
     const urlListSelect = document.createElement('select');
     urlListSelect.classList.add('url-list-select');
     urlListSelect.id = 'url-list-select';
 
-
     const urlListLabel = document.createElement("span");
     urlListLabel.classList.add("url-list-label");
     
-    // Add the same options as the main dropdown
     availableLists.forEach(listName => {
         const option = document.createElement('option');
         option.value = listName;
@@ -434,27 +393,21 @@ function initializeUrlInteractiveElements() {
         urlListSelect.appendChild(option);
     });
     
-    // Sync with main list select
     urlListSelect.value = listSelect.value;
     
-    // Add event listener
     urlListSelect.addEventListener('change', (event) => {
-        // Update the main dropdown when URL dropdown changes
         listSelect.value = event.target.value;
         urlListLabel.textContent = event.target.value;
         updateApiUrlPreview();
     });
 
-    urlListLabel.textContent = urlListSelect.value || 'default'; // Sync main dropdown with URL dropdown
+    urlListLabel.textContent = urlListSelect.value || 'default';
     
-    urlListContainer.innerHTML = ''; // Clear any previous content
-    
+    urlListContainer.innerHTML = '';
     
     urlListContainer.appendChild(urlListSelect);
     urlListContainer.appendChild(urlListLabel);
-
     
-    // Setup noduplicates checkbox in URL
     const checkboxContainer = document.createElement('label');
     checkboxContainer.classList.add('url-checkbox-container');
     
@@ -468,9 +421,7 @@ function initializeUrlInteractiveElements() {
     urlCheckboxLabel.classList.add('url-checkbox-label');
     urlCheckboxLabel.textContent = 'false';
     
-    // Add event listener
     urlCheckbox.addEventListener('change', (event) => {
-        // Update the main checkbox when URL checkbox changes
         noduplicatesCheckbox.checked = event.target.checked;
         urlCheckboxLabel.textContent = event.target.checked ? 'true' : 'false';
         updateApiUrlPreview();
@@ -479,7 +430,7 @@ function initializeUrlInteractiveElements() {
     checkboxContainer.appendChild(urlCheckbox);
     checkboxContainer.appendChild(urlCheckboxLabel);
     
-    urlNoDuplicatesContainer.innerHTML = ''; // Clear any previous content
+    urlNoDuplicatesContainer.innerHTML = '';
     urlNoDuplicatesContainer.appendChild(checkboxContainer);
 }
 
@@ -497,10 +448,8 @@ function removeColor(hexColorToRemove) {
  * Renders the selected color chips in the UI.
  */
 function renderColors() {
-    // Clear existing color chips
     urlColors.innerHTML = '';
     
-    // Add colors to the URL builder
     if (selectedColors.length === 0) {
         const placeholder = document.createElement('span');
         placeholder.classList.add('url-placeholder');
@@ -508,14 +457,12 @@ function renderColors() {
         urlColors.appendChild(placeholder);
     } else {
         selectedColors.forEach((hexColor, index) => {
-            // Create a container for each color in the URL
             const colorContainer = document.createElement('span');
             colorContainer.classList.add('url-color-chip');
 
             const label = document.createElement('label');
             label.classList.add('url-color-label');
             
-            // Create color picker input
             const colorInput = document.createElement('input');
             colorInput.type = 'color';
             colorInput.classList.add('url-color-input');
@@ -528,14 +475,11 @@ function renderColors() {
                 renderColors();
                 updateApiUrlPreview();
             });
-
             
-            // Create text showing hex value
             const colorText = document.createElement('span');
             colorText.classList.add('url-color-text');
             colorText.textContent = hexColor;
             
-            // Create remove button
             const removeBtn = document.createElement('button');
             removeBtn.classList.add('url-color-remove');
             removeBtn.innerHTML = '×';
@@ -549,7 +493,6 @@ function renderColors() {
             colorContainer.appendChild(removeBtn);
             urlColors.appendChild(colorContainer);
             
-            // Add comma after each color except the last one
             if (index < selectedColors.length - 1) {
                 const comma = document.createElement('span');
                 comma.textContent = ',';
@@ -558,7 +501,6 @@ function renderColors() {
         });
     }
     
-    // Add the "+" button to add a new color
     const addBtn = document.createElement('button');
     addBtn.classList.add('url-add-color');
     addBtn.textContent = '+';
@@ -576,48 +518,40 @@ function renderColors() {
  * Updates the API URL preview based on the current selections and triggers fetch.
  */
 function updateApiUrlPreview() {
-    // Build the URL
     let urlString = API_BASE_URL;
     let params = [];
 
-    // Add values parameter if colors are selected
     if (selectedColors.length > 0) {
         params.push(`values=${selectedColors.join(",")}`);
     }
 
     const selectedList = listSelect.value;
-    // Sync URL dropdown with main dropdown
+    
     if (document.getElementById("url-list-select")) {
         document.getElementById("url-list-select").value = selectedList;
     }
 
-    // Add list parameter if not default
     if (selectedList && selectedList !== "default") {
         params.push(`list=${selectedList}`);
     }
 
-    // Sync URL checkbox with main checkbox
     if (document.getElementById("url-noduplicates-checkbox")) {
         document.getElementById("url-noduplicates-checkbox").checked =
         noduplicatesCheckbox.checked;
     }
 
-    // Add noduplicates parameter if checked
     if (noduplicatesCheckbox.checked) {
         params.push("noduplicates=true");
     }
 
-    // Append parameters if any exist
     if (params.length > 0) {
         urlString += `?${params.join("&")}`;
     }
 
-    // Update full URL display
     apiUrlPreview.textContent = urlString;
 
-    // Debounce the fetch call
     clearTimeout(fetchTimeout);
-    // Fetch even if no colors are selected, as long as initialized
+    
     if (isInitialized) {
         fetchTimeout = setTimeout(fetchColorNames, FETCH_DEBOUNCE_MS);
     }
@@ -628,35 +562,30 @@ function updateApiUrlPreview() {
  */
 async function fetchColorNames() {
   const apiUrl = apiUrlPreview.textContent;
-  // Basic check if URL is valid
+  
   if (!apiUrl || !apiUrl.startsWith(API_BASE_URL)) {
-    // Don't fetch if URL is invalid
     return;
   }
 
-  // before doing anything measure the height of #json-viewer and fix the height of the container
   const jsonViewer = document.getElementById("json-viewer");
   const jsonViewerHeight = jsonViewer.getBoundingClientRect().height;
   jsonViewer.style.height = `${jsonViewerHeight}px`;
 
-  // Update status message regardless of color count
   apiResponse.textContent = "Fetching...";
-  document.getElementById("json-viewer").innerHTML = ""; // Clear previous JSON viewer
+  document.getElementById("json-viewer").innerHTML = "";
 
   try {
     const response = await fetch(apiUrl);
     const data = await response.json();
 
-    jsonViewer.style.height = "auto"; // Reset height to auto for error message
-    // Check for API-level errors if the HTTP status was ok but the API returned an error structure
+    jsonViewer.style.height = "auto";
+    
     if (!response.ok || data.error) {
       throw new Error(data.error || `HTTP error! status: ${response.status}`);
     }
 
-    // Hide the text-based response since we're using the viewer
     apiResponse.style.display = "none";
 
-    // Use JSON Viewer to display the data
     new JsonViewer({
       value: data,
       theme: "dark",
@@ -666,15 +595,14 @@ async function fetchColorNames() {
       collapseStringsAfterLength: 20,
     }).render("#json-viewer");
     
-    // Create color balls for the API response
     if (data && data.colors && data.colors.length > 0) {
       createColorObjectsFromData(data);
     }
   } catch (error) {
     console.error("Error fetching color names:", error);
     apiResponse.textContent = `Error: ${error.message}`;
-    apiResponse.style.display = "block"; // Make sure error is visible
-    document.getElementById("json-viewer").innerHTML = ""; // Clear the viewer on error
+    apiResponse.style.display = "block";
+    document.getElementById("json-viewer").innerHTML = "";
   }
 }
 
@@ -685,13 +613,11 @@ async function fetchColorNames() {
  */
 function initializeSocket() {
     try {
-        // Connect to the socket server
         socket = io(SOCKET_URL, {
             transports: ['websocket'],
             reconnectionAttempts: 5
         });
 
-        // Socket connection event handlers
         socket.on('connect', () => {
             console.log('Connected to Socket.io server');
         });
@@ -700,12 +626,9 @@ function initializeSocket() {
             console.log('Disconnected from Socket.io server');
         });
 
-        // Listen for colors events (like in the CodePen)
         socket.on('colors', (msg) => {
             addColorsToVisualization(msg);
-            // Update the interactive logo with the received colors
             updateLogoColors(msg);
-            // Create falling balls for the received colors
             createColorObjectsFromData(msg);
         });
 
@@ -735,7 +658,6 @@ function colorArrToSteppedGradient(colorsArr) {
 function addColorsToVisualization(data) {
     const { paletteTitle, colors } = data;
     
-    // Create container for color visualization if it doesn't exist
     if (!document.getElementById('color-visualization')) {
         const visualizationContainer = document.createElement('div');
         visualizationContainer.id = 'color-visualization';
@@ -745,26 +667,21 @@ function addColorsToVisualization(data) {
     
     const visualizationContainer = document.getElementById('color-visualization');
     
-    // Create a new color item element
     const colorItem = document.createElement('div');
     colorItem.classList.add('color-item');
     
-    // Process colors for display
     const max = Math.min(MAX_COLORS_DISPLAY, colors.length);
     colorItem.style.setProperty('--max', max);
     
-    // Extract colors
     const colorValues = [];
     for (let i = 0; i < max; i++) {
         const color = colors[i].hasOwnProperty('requestedHex') ? colors[i].requestedHex : colors[i].hex;
         colorValues.push(color);
     }
     
-    // Set gradient property
     colorItem.style.setProperty('--g', colorArrToSteppedGradient(colorValues));
     colorItem.style.setProperty("--c", colors[0].bestContrast);
 
-    // Add title if available
     if (paletteTitle) {
         const titleElement = document.createElement('div');
         titleElement.classList.add('color-title');
@@ -772,10 +689,8 @@ function addColorsToVisualization(data) {
         colorItem.appendChild(titleElement);
     }
     
-    // Add to the container at the top
     visualizationContainer.insertBefore(colorItem, visualizationContainer.firstChild);
     
-    // Remove oldest items if exceeding max
     while (visualizationContainer.children.length > MAX_COLOR_ITEMS) {
         visualizationContainer.removeChild(visualizationContainer.lastChild);
     }
@@ -788,7 +703,6 @@ listSelect.addEventListener('change', (event) => {
     updateApiUrlPreview();
 });
 
-// Update URL controls when main noduplicates checkbox changes
 noduplicatesCheckbox.addEventListener('change', (event) => {
     if (document.getElementById('url-noduplicates-checkbox')) {
         document.getElementById('url-noduplicates-checkbox').checked = event.target.checked;
@@ -797,11 +711,10 @@ noduplicatesCheckbox.addEventListener('change', (event) => {
 });
 
 initializeLogoPoints();
-// Initialize physics engine for falling color balls
 initializePhysics();
 
-selectedColors.push(getRandomHexColor()); // Add a random color by default
-fetchLists(); // Fetch lists when the page loads
-renderColors(); // Explicitly render colors immediately (will show placeholder initially)
+selectedColors.push(getRandomHexColor());
+fetchLists();
+renderColors();
 
 initializeSocket();
