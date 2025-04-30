@@ -28,6 +28,276 @@ let maxLogoPoints = 20;
 const logoColors = document.querySelector('[data-log]');
 let logoTimer;
 
+// --- Matter.js Physics Engine Setup ---
+let Engine = Matter.Engine,
+    Render = Matter.Render,
+    Runner = Matter.Runner,
+    Bodies = Matter.Bodies,
+    Composite = Matter.Composite,
+    Events = Matter.Events,
+    Body = Matter.Body;
+let engine, render, runner;
+let physics = {
+    objects: [],
+    maxObjects: 1000,
+    initialized: false,
+    bounds: {
+        width: 0,
+        height: 0
+    },
+    resizeThrottle: null
+};
+
+/**
+ * Initializes the Matter.js physics engine for the color objects animation
+ */
+function initializePhysics() {
+    // Clean up any existing physics engine
+    if (physics.initialized) {
+        cleanupPhysics();
+    }
+    
+    // Create engine
+    engine = Engine.create({
+        gravity: { x: 0, y: 0.5 } // Reduced gravity for slower falling
+    });
+    
+    // Store bounds for reference
+    physics.bounds = {
+        width: window.innerWidth,
+        height: window.innerHeight
+    };
+    
+    // Create renderer in the background
+    render = Render.create({
+        element: document.body,
+        engine: engine,
+        options: {
+            width: physics.bounds.width,
+            height: physics.bounds.height,
+            wireframes: false,
+            background: 'transparent',
+            pixelRatio: window.devicePixelRatio
+        }
+    });
+    
+    // Position the canvas as a background
+    render.canvas.style.position = 'fixed';
+    render.canvas.style.top = '0';
+    render.canvas.style.left = '0';
+    render.canvas.style.width = '100%';
+    render.canvas.style.height = '100%';
+    render.canvas.style.zIndex = '-1';
+    render.canvas.style.pointerEvents = 'none'; // Allow interaction with page elements
+    
+    // Create platform with gaps on the left and right sides
+    const platformWidth = physics.bounds.width * 0.8;
+    const platformHeight = 10;
+    const platformY = physics.bounds.height - platformHeight / 2;
+    
+    const platform = Bodies.rectangle(
+        physics.bounds.width / 2,
+        platformY,
+        platformWidth,
+        platformHeight,
+        { isStatic: true, render: { fillStyle: '#ffffff', opacity: 0.5 } }
+    );
+    
+    // Add the platform to the world
+    Composite.add(engine.world, platform);
+    
+    // Set up event to remove objects that fall off the screen
+    // Use a much larger buffer to ensure objects are well off screen before removal
+    Events.on(engine, 'afterUpdate', () => {
+        const objectsToRemove = [];
+        const buffer = 500; // Large buffer to ensure objects are far off screen
+        
+        physics.objects.forEach(obj => {
+            // Only remove if object is FAR below the screen
+            if (obj.position.y > physics.bounds.height + buffer) {
+                objectsToRemove.push(obj);
+            }
+        });
+        
+        // Remove objects that fell off
+        if (objectsToRemove.length > 0) {
+            objectsToRemove.forEach(obj => {
+                Composite.remove(engine.world, obj);
+                physics.objects = physics.objects.filter(o => o.id !== obj.id);
+            });
+        }
+    });
+    
+    // Remove previous listener and add new one
+    window.removeEventListener('resize', handleWindowResize);
+    window.addEventListener('resize', handleWindowResize);
+    
+    // Run the engine and renderer
+    runner = Runner.create();
+    Render.run(render);
+    Runner.run(runner, engine);
+    
+    // Mark as initialized
+    physics.initialized = true;
+}
+
+/**
+ * Cleans up the physics engine resources
+ */
+function cleanupPhysics() {
+    if (!physics.initialized) return;
+    
+    // Stop the runner
+    if (runner) {
+        Runner.stop(runner);
+    }
+    
+    // Stop the renderer
+    if (render) {
+        Render.stop(render);
+        // Remove the canvas from the DOM
+        if (render.canvas && render.canvas.parentNode) {
+            render.canvas.parentNode.removeChild(render.canvas);
+        }
+    }
+    
+    // Clear object references
+    physics.objects = [];
+    physics.initialized = false;
+}
+
+/**
+ * Handle window resize with throttling
+ */
+function handleWindowResize() {
+    // Clear the previous throttle timeout
+    if (physics.resizeThrottle) {
+        clearTimeout(physics.resizeThrottle);
+    }
+    
+    // Set a new throttle timeout
+    physics.resizeThrottle = setTimeout(() => {
+        // Completely reinitialize the physics engine
+        initializePhysics();
+    }, 300); // 300ms throttle
+}
+
+/**
+ * Resizes the physics canvas when the window size changes
+ */
+function resizePhysicsCanvas() {
+    if (!physics.initialized) return;
+    
+    // Update bounds
+    physics.bounds = {
+        width: window.innerWidth,
+        height: window.innerHeight
+    };
+    
+    // Update render dimensions
+    render.options.width = physics.bounds.width;
+    render.options.height = physics.bounds.height;
+    render.canvas.width = physics.bounds.width;
+    render.canvas.height = physics.bounds.height;
+    
+    // Update platform position
+    const bodies = Composite.allBodies(engine.world);
+    
+    // Find the platform (first static body)
+    const platform = bodies.find(body => body.isStatic);
+    if (platform) {
+        // New platform dimensions
+        const platformWidth = physics.bounds.width * 0.7; // 70% of screen width
+        const platformHeight = 50;
+        const platformY = physics.bounds.height - platformHeight / 2;
+        
+        // First, remove the old platform
+        Composite.remove(engine.world, platform);
+        
+        // Create a new platform with proper dimensions and position
+        const newPlatform = Bodies.rectangle(
+            physics.bounds.width / 2,
+            platformY,
+            platformWidth,
+            platformHeight,
+            { isStatic: true, render: { fillStyle: '#ffffff', opacity: 1 } }
+        );
+        
+        // Add the new platform to the world
+        Composite.add(engine.world, newPlatform);
+    }
+}
+
+/**
+ * Creates a shape with the given color and adds it to the physics world
+ * @param {string} hexColor - Hex color code with or without the # prefix
+ */
+function createColorObject(hexColor) {
+    if (!physics.initialized) return;
+    
+    // Ensure the hex color has a # prefix
+    const color = hexColor.startsWith('#') ? hexColor : `#${hexColor}`;
+    
+    // Random properties
+    const size = Math.random() * 20 + 10; // Random size between 10 and 30
+    const x = Math.random() * physics.bounds.width; 
+    const y = -size * 2; 
+    const isSquare = Math.random() > 0.8;
+    
+    // Create the object (either circle or square)
+    let object;
+    
+    if (isSquare) {
+        object = Bodies.rectangle(x, y, size * 2, size * 2, {
+            restitution: 0.5, // Bounciness
+            friction: 0.05,
+            frictionAir: 0.005,
+            angle: Math.random() * Math.PI * 2, // Random rotation
+            render: {
+                fillStyle: color,
+                strokeStyle: '#fff',
+                lineWidth: 1
+            }
+        });
+    } else {
+        object = Bodies.circle(x, y, size, {
+            restitution: 0.5, // Bounciness
+            friction: 0.05,
+            frictionAir: 0.005,
+            render: {
+                fillStyle: color,
+                strokeStyle: '#fff',
+                lineWidth: 1
+            }
+        });
+    }
+    
+    // Add the object to our tracking array and the physics world
+    physics.objects.push(object);
+    Composite.add(engine.world, object);
+}
+
+/**
+ * Creates objects for all colors in a color palette
+ * @param {Object} data - Color data with colors array
+ */
+function createColorObjectsFromData(data) {
+    if (!physics.initialized) return;
+    
+    const { colors } = data;
+    if (!colors || !colors.length) return;
+    
+    // Create an object for each color, up to the maximum limit
+    const maxToCreate = Math.min(colors.length, 50); 
+    for (let i = 0; i < maxToCreate; i++) {
+        // Use either the requested hex or the matched hex
+        const colorHex = colors[i].hasOwnProperty('requestedHex') ? 
+            colors[i].requestedHex : colors[i].hex;
+        
+        createColorObject(colorHex);
+    }
+}
+
 // --- Functions ---
 
 /**
@@ -395,6 +665,11 @@ async function fetchColorNames() {
       indentWidth: 2,
       collapseStringsAfterLength: 20,
     }).render("#json-viewer");
+    
+    // Create color balls for the API response
+    if (data && data.colors && data.colors.length > 0) {
+      createColorObjectsFromData(data);
+    }
   } catch (error) {
     console.error("Error fetching color names:", error);
     apiResponse.textContent = `Error: ${error.message}`;
@@ -430,6 +705,8 @@ function initializeSocket() {
             addColorsToVisualization(msg);
             // Update the interactive logo with the received colors
             updateLogoColors(msg);
+            // Create falling balls for the received colors
+            createColorObjectsFromData(msg);
         });
 
         socket.on('connect_error', (error) => {
@@ -520,6 +797,8 @@ noduplicatesCheckbox.addEventListener('change', (event) => {
 });
 
 initializeLogoPoints();
+// Initialize physics engine for falling color balls
+initializePhysics();
 
 selectedColors.push(getRandomHexColor()); // Add a random color by default
 fetchLists(); // Fetch lists when the page loads
