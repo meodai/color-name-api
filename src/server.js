@@ -565,8 +565,6 @@ const requestHandler = async (request, response) => { // Make requestHandler asy
     console.info('request from', from);
   }
 
-  const clientIp = requestIp.getClientIp(request);
-
   if (clientIp) {
     console.info('client ip', clientIp);
   }
