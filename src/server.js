@@ -486,15 +486,20 @@ const routes = [
 ];
 
 const getHandlerForPath = (path) => {
-  const route = routes.find((currentRoute) => currentRoute.path === path);
+  // Normalize path by removing trailing slash except for root path
+  const normalizedPath = path === '/' ? '/' : path.replace(/\/+$/, '');
+  
+  // Find a matching route with normalized paths
+  const matchingRoute = routes.find((route) => {
+    const routePath = route.path === '/' ? '/' : route.path.replace(/\/+$/, '');
+    return routePath === normalizedPath || routePath === normalizedPath + '/';
+  });
 
-  if (route) {
-    return route.handler;
+  if (matchingRoute) {
+    return matchingRoute.handler;
   }
 
-  // if the path is not a route, check if it is a color
-  // not super happy about this, but I don't want to
-  // break compatibility with the old API
+  // If no route matches, check if it is a color (for backwards compatibility)
   if (validateColors(path.slice(1))) {
     return respondValueSearch;
   }
