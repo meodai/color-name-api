@@ -4,6 +4,26 @@
  */
 
 export interface paths {
+    "/docs/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get API Documentation
+         * @description Serves the static HTML documentation page for the API.
+         */
+        get: operations["getDocumentation"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/": {
         parameters: {
             query?: {
@@ -28,58 +48,11 @@ export interface paths {
          *
          *     If no colors are provided, returns all colors from the specified list.
          *
+         *     When the server has socket.io enabled, this endpoint will also emit a 'colors' event
+         *     with the same response data to all connected socket clients.
+         *
          */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description The name of the color name list to use (case-sensitive) */
-                    list?: components["schemas"]["possibleLists"];
-                    /** @description A comma-separated list of hex values (e.g., `FF0000,00FF00` do not include the `#`) */
-                    values?: string;
-                    /** @description When true, ensures each color gets a unique name even when colors are similar */
-                    noduplicates?: boolean;
-                    /** @description When true, uses the 'bestOf' list automatically */
-                    goodnamesonly?: boolean;
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            colors?: components["schemas"]["color"][];
-                            /** @description A creatively generated name for the color palette when multiple colors are requested */
-                            paletteTitle?: string;
-                        };
-                    };
-                };
-                /** @description BAD REQUEST */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["error"];
-                    };
-                };
-                /** @description NOT FOUND */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["error"];
-                    };
-                };
-            };
-        };
+        get: operations["getColorNames"];
         put?: never;
         post?: never;
         delete?: never;
@@ -106,43 +79,7 @@ export interface paths {
          *     The search string must be at least 3 characters long.
          *
          */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description The search term to look for in color names (min 3 characters) */
-                    name?: string;
-                    /** @description The name of the color name list to search in */
-                    list?: components["schemas"]["possibleLists"];
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Array of colors matching the search term */
-                            colors?: components["schemas"]["colorBasic"][];
-                        };
-                    };
-                };
-                /** @description NOT FOUND */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["error"];
-                    };
-                };
-            };
-        };
+        get: operations["searchColorsByName"];
         put?: never;
         post?: never;
         delete?: never;
@@ -165,55 +102,7 @@ export interface paths {
          *     only the description for that list will be returned.
          *
          */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description The name of a specific color name list to retrieve details for */
-                    list?: components["schemas"]["possibleLists"];
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description Array of all available list keys */
-                            availableColorNameLists?: string[];
-                            /** @description Object containing descriptions for each list */
-                            listDescriptions?: {
-                                default?: components["schemas"]["listDescription"];
-                                bestOf?: components["schemas"]["listDescription"];
-                            };
-                        } | components["schemas"]["listDescription"];
-                    };
-                };
-                /** @description BAD REQUEST */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["error"];
-                    };
-                };
-                /** @description NOT FOUND */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["error"];
-                    };
-                };
-            };
-        };
+        get: operations["getColorLists"];
         put?: never;
         post?: never;
         delete?: never;
@@ -236,40 +125,7 @@ export interface paths {
          *     and readable across different backgrounds.
          *
          */
-        get: {
-            parameters: {
-                query: {
-                    /** @description The hex value of the color to retrieve without '#' */
-                    color: string;
-                    /** @description The name of the color to display on the swatch */
-                    name?: string;
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "image/svg+xml": string;
-                    };
-                };
-                /** @description BAD REQUEST */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["error"];
-                    };
-                };
-            };
-        };
+        get: operations["getColorSwatch"];
         put?: never;
         post?: never;
         delete?: never;
@@ -297,30 +153,35 @@ export interface components {
             license?: string;
             /** @description Amount of colors in the list */
             colorCount?: number;
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            list: "listOnly";
         };
+        /** ColorBasic */
         colorBasic: {
             /** @description Name of the closest color relative to the hex value provided */
             name: string;
             /** @description Hex value of the color (can differ from the requested hex value) */
             hex: string;
-            /** @description RGB values */
+            /**
+             * RGB
+             * @description RGB values
+             */
             rgb: {
                 r: number;
                 g: number;
                 b: number;
             };
-            /** @description HSL values. All percentages are represented as integers (e.g., 50% as `50`). */
+            /**
+             * HSL
+             * @description HSL values. All percentages are represented as integers (e.g., 50% as `50`).
+             */
             hsl: {
                 h: number;
                 s: number;
                 l: number;
             };
-            /** @description LAB values */
+            /**
+             * LAB
+             * @description LAB values
+             */
             lab: {
                 l: number;
                 a: number;
@@ -335,7 +196,10 @@ export interface components {
              * @enum {string}
              */
             bestContrast?: "black" | "white";
-            /** @description SVG representation of the color */
+            /**
+             * SwatchImage
+             * @description SVG representation of the color
+             */
             swatchImg: {
                 /**
                  * Format: uri
@@ -349,12 +213,15 @@ export interface components {
                 svg: string;
             };
         };
-        color: {
+        /** ColorExtension */
+        colorExtension: {
             /** @description The hex value that was requested by the user */
-            requestedHex?: string;
+            requestedHex: string;
             /** @description The distance between the requested hex value and the closest color (0 = exact match) */
-            distance?: number;
-        } & (components["schemas"]["colorBasic"] & Record<string, never> & unknown);
+            distance: number;
+        };
+        /** Color */
+        color: components["schemas"]["colorBasic"] & components["schemas"]["colorExtension"];
         /**
          * @description Predefined color lists. Names are case-sensitive.
          * @enum {string}
@@ -365,13 +232,17 @@ export interface components {
             list?: components["schemas"]["possibleLists"];
             colors?: components["schemas"]["colorBasic"][];
         };
-        /** @example {
+        /**
+         * Error
+         * @example {
          *       "error": {
          *         "status": 404,
          *         "message": "Not Found"
          *       }
-         *     } */
+         *     }
+         */
         error: {
+            /** ErrorDetails */
             error?: {
                 status?: number;
                 message?: string;
@@ -385,4 +256,208 @@ export interface components {
     pathItems: never;
 }
 export type $defs = Record<string, never>;
-export type operations = Record<string, never>;
+export interface operations {
+    getDocumentation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK - Returns the HTML documentation page. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/html": string;
+                };
+            };
+        };
+    };
+    getColorNames: {
+        parameters: {
+            query?: {
+                /** @description The name of the color name list to use (case-sensitive) */
+                list?: components["schemas"]["possibleLists"];
+                /** @description A comma-separated list of hex values (e.g., `FF0000,00FF00` do not include the `#`) */
+                values?: string;
+                /** @description When true, ensures each color gets a unique name even when colors are similar */
+                noduplicates?: boolean;
+                /** @description When true, uses the 'bestOf' list automatically */
+                goodnamesonly?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        colors?: components["schemas"]["color"][];
+                        /** @description A creatively generated name for the color palette when multiple colors are requested */
+                        paletteTitle?: string;
+                    };
+                };
+            };
+            /** @description BAD REQUEST */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+            /** @description NOT FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+            /** @description CONFLICT - Requested more unique colors than available */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    searchColorsByName: {
+        parameters: {
+            query?: {
+                /** @description The search term to look for in color names (min 3 characters) */
+                name?: string;
+                /** @description The name of the color name list to search in */
+                list?: components["schemas"]["possibleLists"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description Array of colors matching the search term */
+                        colors?: components["schemas"]["colorBasic"][];
+                    };
+                };
+            };
+            /** @description NOT FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    getColorLists: {
+        parameters: {
+            query?: {
+                /** @description The name of a specific color name list to retrieve details for */
+                list?: components["schemas"]["possibleLists"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description Array of all available list keys */
+                        availableColorNameLists?: string[];
+                        /**
+                         * ListDescriptions
+                         * @description Object containing descriptions for each list
+                         */
+                        listDescriptions?: {
+                            default?: components["schemas"]["listDescription"];
+                            bestOf?: components["schemas"]["listDescription"];
+                        };
+                    } | components["schemas"]["listDescription"];
+                };
+            };
+            /** @description BAD REQUEST */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+            /** @description NOT FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    getColorSwatch: {
+        parameters: {
+            query: {
+                /** @description The hex value of the color to retrieve without '#' */
+                color: string;
+                /** @description The name of the color to display on the swatch */
+                name?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/svg+xml": string;
+                };
+            };
+            /** @description BAD REQUEST */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+}

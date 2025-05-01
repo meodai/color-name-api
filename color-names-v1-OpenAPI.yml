@@ -1,7 +1,14 @@
 openapi: 3.0.3
 info:
   title: Color Name API
-  description: An API that provides names for colors based on their hex value
+  description: |
+    An API that provides names for colors based on their hex value.
+    
+    Features:
+    - RESTful HTTP endpoints to search for colors by name or hex value
+    - Real-time color data via Socket.io for instant updates
+    - Optimized responses with gzip compression
+    - Multiple curated color name lists to choose from
   version: 1.1.0
   license:
     name: MIT
@@ -41,6 +48,7 @@ components:
 
     colorBasic:
       type: object
+      title: ColorBasic
       required:
         - name
         - hex
@@ -61,6 +69,7 @@ components:
           pattern: '^#?([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$'
         rgb:
           type: object
+          title: RGB
           description: RGB values
           required: [r, g, b]
           properties:
@@ -78,6 +87,7 @@ components:
               maximum: 255
         hsl:
           type: object
+          title: HSL
           description: HSL values. All percentages are represented as integers (e.g., 50% as `50`).
           required: [h, s, l]
           properties:
@@ -95,6 +105,7 @@ components:
               maximum: 100
         lab:
           type: object
+          title: LAB
           description: LAB values
           required: [l, a, b]
           properties:
@@ -124,6 +135,7 @@ components:
           enum: [black, white]
         swatchImg:
           type: object
+          title: SwatchImage
           description: SVG representation of the color
           required: [svgNamed, svg]
           properties:
@@ -136,20 +148,26 @@ components:
               description: URL to SVG representation of the color without the name
               format: uri
 
-    color:
-      allOf:
-        - $ref: '#/components/schemas/colorBasic'
-        - type: object
-        - required:
-            - distance
-            - requestedHex
-      properties:        
+    colorExtension:
+      type: object
+      title: ColorExtension
+      required:
+        - distance
+        - requestedHex
+      properties:
         requestedHex:
           type: string
           description: The hex value that was requested by the user
         distance:
           type: number
           description: The distance between the requested hex value and the closest color (0 = exact match)
+
+    color:
+      title: Color
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/colorBasic'
+        - $ref: '#/components/schemas/colorExtension'
 
     possibleLists:
       type: string
@@ -194,9 +212,11 @@ components:
 
     error:
       type: object
+      title: Error
       properties:
         error:
           type: object
+          title: ErrorDetails
           properties:
             status:
               type: number
@@ -208,8 +228,23 @@ components:
           message: 'Not Found'
 
 paths:
+  /docs/:
+    get:
+      operationId: getDocumentation
+      summary: Get API Documentation
+      description: Serves the static HTML documentation page for the API.
+      responses:
+        '200':
+          description: OK - Returns the HTML documentation page.
+          content:
+            text/html:
+              schema:
+                type: string
+                format: html
+
   /:
     get:
+      operationId: getColorNames
       summary: Get color names for specific hex values
       description: |
         Returns an array of colors from the specified list, with distance calculations 
@@ -217,6 +252,9 @@ paths:
         values, the endpoint will find the closest match for each color.
         
         If no colors are provided, returns all colors from the specified list.
+
+        When the server has socket.io enabled, this endpoint will also emit a 'colors' event
+        with the same response data to all connected socket clients.
       responses:
         '200':
           description: OK
@@ -224,6 +262,7 @@ paths:
             application/json:
               schema:
                 type: object
+                title: ColorResponse
                 properties:
                   colors:
                     type: array
@@ -271,6 +310,20 @@ paths:
                   status: 404
                   message: "'xyz' is not a valid HEX color"
 
+        '409':
+          description: CONFLICT - Requested more unique colors than available
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              example:
+                error:
+                  status: 409
+                  message: "Could not find enough unique color names: exhausted all available names"
+                  availableCount: 1500
+                  totalCount: 1500
+                  requestedCount: 1600
+
     parameters:
       - name: list
         in: query
@@ -304,6 +357,7 @@ paths:
 
   /names/:
     get:
+      operationId: searchColorsByName
       summary: Search for colors by name
       description: |
         Returns colors whose names contain the search string. The search is case-insensitive.
@@ -315,6 +369,7 @@ paths:
             application/json:
               schema:
                 type: object
+                title: ColorNameSearchResponse
                 properties:
                   colors:
                     type: array
@@ -355,6 +410,7 @@ paths:
 
   /lists/:
     get:
+      operationId: getColorLists
       summary: Get available color name lists
       description: |
         Returns a list of available color name lists with descriptions and URLs to
@@ -366,8 +422,10 @@ paths:
           content:
             application/json:
               schema:
+                title: ColorListsResponse
                 oneOf:
-                  - type: object 
+                  - type: object
+                    title: AllColorLists
                     properties:
                       availableColorNameLists:
                         type: array
@@ -376,6 +434,7 @@ paths:
                         description: Array of all available list keys
                       listDescriptions:
                         type: object
+                        title: ListDescriptions
                         description: Object containing descriptions for each list
                         properties:
                           default:
@@ -384,10 +443,6 @@ paths:
                             $ref: '#/components/schemas/listDescription'
                           # other lists as defined in possibleLists enum
                   - $ref: '#/components/schemas/listDescription'
-                discriminator:
-                  propertyName: list
-                  mapping:
-                    listOnly: '#/components/schemas/listDescription'
 
         '400':
           description: BAD REQUEST
@@ -419,6 +474,7 @@ paths:
     
   /swatch/:
     get:
+      operationId: getColorSwatch
       summary: Generate a color swatch for any color
       description: |
         Generates an SVG swatch representation of a color. The swatch can include 
@@ -463,9 +519,17 @@ paths:
         
 x-socket-io:
   version: "4.x"
+  description: |
+    This API supports real-time communication via Socket.io for receiving color data.
+    Socket.io support is conditionally enabled based on server configuration.
+  connection:
+    url: "{server_url}"  # Uses the same URL as the HTTP API
+    transports: ["websocket", "polling"]
   events:
     - name: colors
-      description: Emitted when new colors are requested
+      description: |
+        Emitted when new colors are requested through the HTTP API.
+        This allows clients to see color requests in real-time.
       payload:
         $ref: '#/components/schemas/socketColorResponse'
       direction: server-to-client
@@ -476,3 +540,16 @@ x-socket-io:
     origins:
       description: Controlled via ALLOWED_SOCKET_ORIGINS environment variable
       default: ["http://localhost:8080"]
+
+x-api-features:
+  compression:
+    gzip: 
+      supported: true
+      description: |
+        The API automatically detects if the client accepts gzip compression
+        and will send compressed responses when possible.
+  caching:
+    supported: true
+    description: |
+      The API uses LRU caching for gzipped responses to improve performance
+      for frequently requested data.
