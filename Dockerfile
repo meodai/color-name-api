@@ -27,6 +27,11 @@ WORKDIR /usr/src/app
 # Copy built application from builder stage
 COPY --from=builder /usr/src/app ./
 
+# Ensure ip-location-api can create its tmp/data directories at runtime
+RUN mkdir -p /usr/src/app/node_modules/ip-location-api/tmp \
+    /usr/src/app/node_modules/ip-location-api/data \
+    && chown -R node:node /usr/src/app/node_modules/ip-location-api
+
 USER node
 
 EXPOSE ${PORT}
