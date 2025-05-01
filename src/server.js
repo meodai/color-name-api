@@ -333,13 +333,24 @@ const respondValueSearch = async (
     // return all colors if no colors were given
     paletteTitle = `All the ${listKey} names`;
   }
+  
 
   // emits the response with the colors on socket.io
   if (socket) {
-    io.emit('colors', {
+    const clientIp = requestIp.getClientIp(request);
+
+    io.emit("colors", {
       paletteTitle,
       colors: colorsResponse,
       list: listKey,
+      // add request info
+      request: {
+        url: request.url,
+        headers: request.headers,
+        method: request.method,
+        location: lookup(clientIp),
+        // ip: requestIp.getClientIp(request),
+      },
     });
   }
 
