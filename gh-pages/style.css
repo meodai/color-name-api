@@ -231,7 +231,7 @@ pre {
 .color-item {
   position: relative;
   background: linear-gradient(to right, var(--g, transparent));
-  height: 4rem;
+  height: 5rem;
   font-weight: 900;
   color: var(--c);
   overflow: hidden;
@@ -241,11 +241,28 @@ pre {
   position: absolute;
   left: var(--inset);
   right: var(--inset);
-  top: 50%;
+  top: calc(50% - .8rem);
   transform: translateY(-50%) translateY(-.05em);
   font-size: 2rem;
   white-space: nowrap;
   margin: 0;
+}
+
+.color-url {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  transform: translateY(-100%);
+  font-size: 0.8rem;
+  white-space: nowrap;
+  background: var(--b);
+  color: var(--w);
+  text-decoration: none;
+  box-sizing: border-box;
+  padding: 0.23em var(--inset) 0.3em;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .color-item + .color-item {

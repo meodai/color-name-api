@@ -621,9 +621,10 @@ function initializeSocket() {
 
 function addColorsToVisualization(data) {
   const { paletteTitle, colors } = data;
+  let url = data.request.url;
+  // replace localhost with the actual domain
+  url = url.replace(/https?:\/\/(localhost|172\.0\.0\.1)(\/v1\/)?/, API_BASE_URL);
 
-  console.log("Received colors:", data);
-  
   if (!document.getElementById('color-visualization')) {
     const visualizationContainer = document.createElement('div');
     visualizationContainer.id = 'color-visualization';
@@ -652,6 +653,15 @@ function addColorsToVisualization(data) {
     titleElement.classList.add('color-title');
     titleElement.textContent = paletteTitle;
     colorItem.appendChild(titleElement);
+  }
+
+  if (url) {
+    const urlElement = document.createElement('a');
+    urlElement.classList.add('color-url');
+    urlElement.href = url;
+    urlElement.target = '_blank';
+    urlElement.textContent = url;
+    colorItem.appendChild(urlElement);
   }
   
   visualizationContainer.insertBefore(colorItem, visualizationContainer.firstChild);
