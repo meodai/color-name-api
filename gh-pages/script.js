@@ -626,7 +626,10 @@ function addColorsToVisualization(data) {
   url = url.replace(
     /https?:\/\/(localhost|172\.0\.0\.1)(\/v1\/)?/,
     API_BASE_URL
-  );
+  )
+
+  // also replace the encoded commas
+  url = url.replace(/%2C/g, ",");
 
   let countryCode = null;
 
