@@ -8,6 +8,7 @@ import {colornames as colorsBestOf } from "color-name-list/bestof";
 import {colornames as colorsShort } from 'color-name-list/short';
 import { Server } from 'socket.io';
 import requestIp from 'request-ip';
+import { lookup } from "ip-location-api";
 import * as dotenv from 'dotenv';
 import { LRUCache } from 'lru-cache'; // Import LRUCache
 
@@ -336,10 +337,22 @@ const respondValueSearch = async (
 
   // emits the response with the colors on socket.io
   if (socket) {
+    const clientIp = requestIp.getClientIp(request);
+    let clientLocation = null;
+    if (clientIp) {
+      clientLocation = lookup(clientIp);
+    }
     io.emit('colors', {
       paletteTitle,
       colors: colorsResponse,
       list: listKey,
+      request: {
+        url: requestUrl.href,
+        method: request.method,
+        headers: request.headers,
+        // clientIp, // don't think its safe to send this
+        clientLocation,
+      }
     });
   }
 
@@ -563,6 +576,7 @@ const requestHandler = async (request, response) => { // Make requestHandler asy
 
   if (clientIp) {
     console.info('client ip', clientIp);
+    console.log('client location', lookup(clientIp));
   }
 
   return await responseHandler(
