@@ -7,7 +7,6 @@ import {colornames as colors} from 'color-name-list';
 import {colornames as colorsBestOf } from "color-name-list/bestof";
 import {colornames as colorsShort } from 'color-name-list/short';
 import { Server } from 'socket.io';
-import requestIp from 'request-ip';
 import * as dotenv from 'dotenv';
 import { LRUCache } from 'lru-cache'; // Import LRUCache
 
@@ -333,13 +332,10 @@ const respondValueSearch = async (
     // return all colors if no colors were given
     paletteTitle = `All the ${listKey} names`;
   }
-  
 
   // emits the response with the colors on socket.io
   if (socket) {
-    const clientIp = requestIp.getClientIp(request);
-
-    io.emit("colors", {
+    io.emit('colors', {
       paletteTitle,
       colors: colorsResponse,
       list: listKey,
@@ -348,8 +344,7 @@ const respondValueSearch = async (
         url: request.url,
         headers: request.headers,
         method: request.method,
-        location: lookup(clientIp),
-        // ip: requestIp.getClientIp(request),
+        //ip: requestIp.getClientIp(request),
       },
     });
   }
