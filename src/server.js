@@ -35,13 +35,13 @@ const baseUrl = `${APIurl}${currentVersion}/`;
 const baseUrlNames = `${baseUrl}${urlNameSubpath}/`;
 const urlColorSeparator = ',';
 const gzipCacheSize = 500; // Max size of the gzip cache
+const ipCacheSize = 1000; // Cache size for IP lookup results
 
 // Declare variables for async loading
 let docsHTML;
 let gzippedDocsHTML; // Cache for gzipped docs
 const gzipCache = new LRUCache({ max: gzipCacheSize });
-
-// ...existing code...
+const ipCache = new LRUCache({ max: ipCacheSize }); // Cache for IP lookups
 
 let io;
 let hasDb = false;
@@ -146,6 +146,31 @@ const getListKey = (searchParams, returnDefault = true) => {
   listKey = listKey || (returnDefault && (goodNamesMode ? 'bestOf' : 'default'));
 
   return listKey && availableColorNameLists.includes(listKey) ? listKey : null;
+};
+
+/**
+ * Gets client IP and location info, with caching
+ * @param {object} request - HTTP request object
+ * @returns {object} Object containing clientIp and clientLocation
+ */
+const getClientInfo = (request) => {
+  const clientIp = requestIp.getClientIp(request);
+  
+  if (!clientIp) {
+    return { clientIp: null, clientLocation: null };
+  }
+  
+  // Check if we already have this IP's location in cache
+  if (ipCache.has(clientIp)) {
+    return ipCache.get(clientIp);
+  }
+  
+  // Look up location and cache the result
+  const clientLocation = lookup(clientIp);
+  const result = { clientIp, clientLocation };
+  ipCache.set(clientIp, result);
+  
+  return result;
 };
 
 /**
@@ -337,11 +362,7 @@ const respondValueSearch = async (
 
   // emits the response with the colors on socket.io
   if (socket) {
-    const clientIp = requestIp.getClientIp(request);
-    let clientLocation = null;
-    if (clientIp) {
-      clientLocation = lookup(clientIp);
-    }
+    const { clientIp, clientLocation } = getClientInfo(request);
     io.emit('colors', {
       paletteTitle,
       colors: colorsResponse,
@@ -572,11 +593,11 @@ const requestHandler = async (request, response) => { // Make requestHandler asy
     console.info('request from', from);
   }
 
-  const clientIp = requestIp.getClientIp(request);
-
+  // Get client info once, log it here but could be reused elsewhere
+  const { clientIp, clientLocation } = getClientInfo(request);
   if (clientIp) {
     console.info('client ip', clientIp);
-    console.log('client location', lookup(clientIp));
+    console.log('client location', clientLocation);
   }
 
   return await responseHandler(
