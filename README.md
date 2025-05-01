@@ -8,9 +8,7 @@
 Rest API that returns a bunch of color names for a given color-value.
 
 Introducing a comprehensive and easy to use color-naming API!
-Easily retrieve the color name for any hexadecimal color value, using a variety 
-of different color name lists. Whether you're working on a design project or 
-building a color-themed application, our API has you covered.
+Easily retrieve the color name for any hexadecimal color value, using a variety of different color name lists. Whether you're working on a design project or building a color-themed application, our API has you covered.
 
 ## Getting started with the REST API
 
@@ -129,6 +127,14 @@ The come from a [large collection](https://github.com/meodai/color-names). If fo
 
 ```shell
 $ curl 'https://api.color.pizza/v1/?values=0d0d0f,f39d91,d4d4d7&list=wikipedia'
+```
+
+### Access API Documentation
+
+The API serves static HTML documentation at the `/docs/` endpoint:
+
+```shell
+$ curl https://api.color.pizza/v1/docs/
 ```
 
 ### Get supported color name lists
