@@ -340,12 +340,12 @@ const respondValueSearch = async (
       colors: colorsResponse,
       list: listKey,
       // add request info
-      request: {
+      /*request: {
         url: request.url,
         headers: request.headers,
         method: request.method,
         //ip: requestIp.getClientIp(request),
-      },
+      },*/
     });
   }
 

@@ -621,6 +621,8 @@ function initializeSocket() {
 
 function addColorsToVisualization(data) {
   const { paletteTitle, colors } = data;
+
+  console.log('Received colors:', colors);
   
   if (!document.getElementById('color-visualization')) {
     const visualizationContainer = document.createElement('div');
@@ -631,7 +633,7 @@ function addColorsToVisualization(data) {
   
   const visualizationContainer = document.getElementById('color-visualization');
   
-  const colorItem = document.createElement('div');
+  const colorItem = document.createElement('aside');
   colorItem.classList.add('color-item');
   
   const max = Math.min(MAX_COLORS_DISPLAY, colors.length);
@@ -646,7 +648,7 @@ function addColorsToVisualization(data) {
   colorItem.style.setProperty("--c", colors[0].bestContrast);
 
   if (paletteTitle) {
-    const titleElement = document.createElement('div');
+    const titleElement = document.createElement('h4');
     titleElement.classList.add('color-title');
     titleElement.textContent = paletteTitle;
     colorItem.appendChild(titleElement);

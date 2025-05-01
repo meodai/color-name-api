@@ -240,10 +240,12 @@ pre {
 .color-title {
   position: absolute;
   left: var(--inset);
+  right: var(--inset);
   top: 50%;
   transform: translateY(-50%) translateY(-.05em);
   font-size: 2rem;
   white-space: nowrap;
+  margin: 0;
 }
 
 .color-item + .color-item {
