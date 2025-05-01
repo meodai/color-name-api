@@ -1,6 +1,6 @@
 {
   "name": "color-name-api",
-  "version": "0.60.0",
+  "version": "0.61.0",
   "description": "Rest API that returns a bunch of color names for a given color-value",
   "main": "src/index.js",
   "type": "module",
