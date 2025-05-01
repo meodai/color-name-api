@@ -265,6 +265,15 @@ pre {
   text-overflow: ellipsis;
 }
 
+.color-country-flag {
+  position: absolute;
+  right: var(--inset);
+  top: calc(50% - .8rem);
+  transform: translateY(-50%);
+  width: 1.5rem;
+  border: 1px solid var(--c);
+} 
+
 .color-item + .color-item {
   margin-top: 0.75em;
 }

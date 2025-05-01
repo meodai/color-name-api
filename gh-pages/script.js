@@ -623,49 +623,77 @@ function addColorsToVisualization(data) {
   const { paletteTitle, colors } = data;
   let url = data.request.url;
   // replace localhost with the actual domain
-  url = url.replace(/https?:\/\/(localhost|172\.0\.0\.1)(\/v1\/)?/, API_BASE_URL);
+  url = url.replace(
+    /https?:\/\/(localhost|172\.0\.0\.1)(\/v1\/)?/,
+    API_BASE_URL
+  );
 
-  if (!document.getElementById('color-visualization')) {
-    const visualizationContainer = document.createElement('div');
-    visualizationContainer.id = 'color-visualization';
-    visualizationContainer.classList.add('color-visualization');
-    elements.requestsContainer.parentNode.insertBefore(visualizationContainer, elements.requestsContainer);
+  let countryCode = null;
+
+  if (
+    data.request.hasOwnProperty("clientLocation") &&
+    data.request.clientLocation.hasOwnProperty("country")
+  ) {
+    countryCode =
+      data.request.clientLocation.country.toUpperCase();
+  } 
+
+  if (!document.getElementById("color-visualization")) {
+    const visualizationContainer = document.createElement("div");
+    visualizationContainer.id = "color-visualization";
+    visualizationContainer.classList.add("color-visualization");
+    elements.requestsContainer.parentNode.insertBefore(
+      visualizationContainer,
+      elements.requestsContainer
+    );
   }
-  
-  const visualizationContainer = document.getElementById('color-visualization');
-  
-  const colorItem = document.createElement('aside');
-  colorItem.classList.add('color-item');
-  
+
+  const visualizationContainer = document.getElementById("color-visualization");
+
+  const colorItem = document.createElement("aside");
+  colorItem.classList.add("color-item");
+
   const max = Math.min(MAX_COLORS_DISPLAY, colors.length);
-  colorItem.style.setProperty('--max', max);
-  
+  colorItem.style.setProperty("--max", max);
+
   const colorValues = [];
   for (let i = 0; i < max; i++) {
     colorValues.push(getColorValue(colors[i]));
   }
-  
-  colorItem.style.setProperty('--g', colorArrToSteppedGradient(colorValues));
+
+  colorItem.style.setProperty("--g", colorArrToSteppedGradient(colorValues));
   colorItem.style.setProperty("--c", colors[0].bestContrast);
 
   if (paletteTitle) {
-    const titleElement = document.createElement('h4');
-    titleElement.classList.add('color-title');
+    const titleElement = document.createElement("h4");
+    titleElement.classList.add("color-title");
     titleElement.textContent = paletteTitle;
     colorItem.appendChild(titleElement);
   }
 
   if (url) {
-    const urlElement = document.createElement('a');
-    urlElement.classList.add('color-url');
+    const urlElement = document.createElement("a");
+    urlElement.classList.add("color-url");
     urlElement.href = url;
-    urlElement.target = '_blank';
+    urlElement.target = "_blank";
     urlElement.textContent = url;
     colorItem.appendChild(urlElement);
   }
-  
-  visualizationContainer.insertBefore(colorItem, visualizationContainer.firstChild);
-  
+
+  if (countryCode) {
+    const countryElement = document.createElement("img");
+    // https://catamphetamine.gitlab.io/country-flag-icons/3x2/AC.svg
+    countryElement.src = `https://catamphetamine.gitlab.io/country-flag-icons/3x2/${countryCode}.svg`;
+    countryElement.alt = countryCode;
+    countryElement.classList.add("color-country-flag");
+    colorItem.appendChild(countryElement);
+  }
+
+  visualizationContainer.insertBefore(
+    colorItem,
+    visualizationContainer.firstChild
+  );
+
   while (visualizationContainer.children.length > MAX_COLOR_ITEMS) {
     visualizationContainer.removeChild(visualizationContainer.lastChild);
   }
