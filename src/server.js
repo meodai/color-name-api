@@ -7,6 +7,7 @@ import {colornames as colors} from 'color-name-list';
 import {colornames as colorsBestOf } from "color-name-list/bestof";
 import {colornames as colorsShort } from 'color-name-list/short';
 import { Server } from 'socket.io';
+import requestIp from 'request-ip';
 import * as dotenv from 'dotenv';
 import { LRUCache } from 'lru-cache'; // Import LRUCache
 
@@ -339,13 +340,6 @@ const respondValueSearch = async (
       paletteTitle,
       colors: colorsResponse,
       list: listKey,
-      // add request info
-      /*request: {
-        url: request.url,
-        headers: request.headers,
-        method: request.method,
-        //ip: requestIp.getClientIp(request),
-      },*/
     });
   }
 
@@ -564,6 +558,8 @@ const requestHandler = async (request, response) => { // Make requestHandler asy
   if (from) {
     console.info('request from', from);
   }
+
+  const clientIp = requestIp.getClientIp(request);
 
   if (clientIp) {
     console.info('client ip', clientIp);
