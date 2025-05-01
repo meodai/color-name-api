@@ -240,8 +240,8 @@ pre {
 .color-title {
   position: absolute;
   left: var(--inset);
-  right: var(--inset);
-  top: calc(50% - .8rem);
+  right: calc(var(--inset) + 1em);
+  top: calc(50% - .9rem);
   transform: translateY(-50%) translateY(-.05em);
   font-size: 2rem;
   white-space: nowrap;
@@ -265,13 +265,12 @@ pre {
   text-overflow: ellipsis;
 }
 
-.color-country-flag {
+.color-country {
   position: absolute;
   right: var(--inset);
   top: calc(50% - .8rem);
   transform: translateY(-50%);
-  width: 1.5rem;
-  border: 1px solid var(--c);
+  font-size: .8em;
 } 
 
 .color-item + .color-item {
@@ -282,4 +281,13 @@ pre {
   margin-left: 3rem;
   margin-top: 2rem;
   display: block;
+}
+.map {
+  margin: 4rem 2rem;
+}
+.map path {
+  fill: var(--b);
+  stroke: var(--b);
+  stroke-width: 0.5;
+  transition: fill 0.3s ease;
 }

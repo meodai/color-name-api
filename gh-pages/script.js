@@ -1,13 +1,16 @@
 const elements = {
-  listSelect: document.getElementById('list-select'),
-  noduplicatesCheckbox: document.getElementById('noduplicates-checkbox'),
-  apiUrlPreview: document.getElementById('api-url-preview'),
-  apiResponse: document.getElementById('api-response'),
-  urlColors: document.getElementById('url-colors'),
-  urlListContainer: document.getElementById('url-list-container'),
-  urlNoDuplicatesContainer: document.getElementById('url-noduplicates-container'),
-  requestsContainer: document.getElementById('requests-container'),
-  jsonViewer: document.getElementById('json-viewer'),
+  listSelect: document.getElementById("list-select"),
+  noduplicatesCheckbox: document.getElementById("noduplicates-checkbox"),
+  apiUrlPreview: document.getElementById("api-url-preview"),
+  apiResponse: document.getElementById("api-response"),
+  urlColors: document.getElementById("url-colors"),
+  urlListContainer: document.getElementById("url-list-container"),
+  urlNoDuplicatesContainer: document.getElementById(
+    "url-noduplicates-container"
+  ),
+  requestsContainer: document.getElementById("requests-container"),
+  jsonViewer: document.getElementById("json-viewer"),
+  svgCountryPaths: document.querySelectorAll("[data-cc]"),
 };
 const API_BASE_URL = 'https://api.color.pizza/v1/';
 const SOCKET_URL = 'https://api.color.pizza';
@@ -20,6 +23,13 @@ let availableLists = [];
 let isInitialized = false;
 let fetchTimeout = null;
 let socket = null;
+
+const countriesMap = new Map();
+
+elements.svgCountryPaths.forEach((path) => {
+  const countryCode = path.getAttribute("data-cc");
+  countriesMap.set(countryCode, path);
+});
 
 const { Engine, Render, Runner, Bodies, Composite, Events, Body, Mouse, MouseConstraint, Common } = Matter;
 let engine, render, runner, mouseConstraint;
@@ -342,6 +352,13 @@ function createColorObject(hexColor) {
   
   physics.objects.push(object);
   Composite.add(engine.world, object);
+}
+
+function highlightMapCountry(countryCode, color) {
+  const path = countriesMap.get(countryCode);
+  if (path) {
+    path.style.fill = color.hex;
+  }
 }
 
 function createColorObjectsFromData(data) {
@@ -684,12 +701,14 @@ function addColorsToVisualization(data) {
   }
 
   if (countryCode) {
-    const countryElement = document.createElement("img");
+    const countryElement = document.createElement("span");
     // https://catamphetamine.gitlab.io/country-flag-icons/3x2/AC.svg
-    countryElement.src = `https://catamphetamine.gitlab.io/country-flag-icons/3x2/${countryCode}.svg`;
-    countryElement.alt = countryCode;
-    countryElement.classList.add("color-country-flag");
+    //countryElement.src = `https://catamphetamine.gitlab.io/country-flag-icons/3x2/${countryCode}.svg`;
+    //countryElement.alt = countryCode;
+    countryElement.classList.add("color-country");
+    countryElement.innerText = countryCode;
     colorItem.appendChild(countryElement);
+    highlightMapCountry(countryCode, colors[0]);
   }
 
   visualizationContainer.insertBefore(
