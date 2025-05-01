@@ -622,7 +622,7 @@ function initializeSocket() {
 function addColorsToVisualization(data) {
   const { paletteTitle, colors } = data;
 
-  console.log('Received colors:', colors);
+  console.log("Received colors:", data);
   
   if (!document.getElementById('color-visualization')) {
     const visualizationContainer = document.createElement('div');

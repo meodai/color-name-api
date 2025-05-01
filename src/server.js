@@ -370,7 +370,7 @@ const respondValueSearch = async (
       request: {
         url: requestUrl.href,
         method: request.method,
-        headers: request.headers,
+        // headers: request.headers,
         // clientIp, // don't think its safe to send this
         clientLocation,
       }
