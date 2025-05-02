@@ -11,6 +11,7 @@ const elements = {
   requestsContainer: document.getElementById("requests-container"),
   jsonViewer: document.getElementById("json-viewer"),
   svgCountryPaths: document.querySelectorAll("[data-cc]"),
+  mapContainer: document.querySelector(".map"),
 };
 const API_BASE_URL = 'https://api.color.pizza/v1/';
 const SOCKET_URL = 'https://api.color.pizza';
@@ -25,10 +26,17 @@ let fetchTimeout = null;
 let socket = null;
 
 const countriesMap = new Map();
+// Store country path data for pixelation
+const countryPathData = new Map();
 
 elements.svgCountryPaths.forEach((path) => {
   const countryCode = path.getAttribute("data-cc");
   countriesMap.set(countryCode, path);
+  // Store the path data for later pixelation
+  countryPathData.set(countryCode, {
+    path: path,
+    bbox: path.getBBox ? path.getBBox() : null
+  });
 });
 
 const { Engine, Render, Runner, Bodies, Composite, Events, Body, Mouse, MouseConstraint, Common } = Matter;
@@ -248,9 +256,12 @@ function createHeadingBodies() {
   
   const bodies = Composite.allBodies(engine.world);
   const headingBodies = bodies.filter(body => body.isHeading);
+  const pixelBodies = bodies.filter(body => body.isPixel);
   
   headingBodies.forEach(body => Composite.remove(engine.world, body));
+  pixelBodies.forEach(body => Composite.remove(engine.world, body));
   
+  // Add heading bodies
   const headings = document.querySelectorAll("h1, h2, h3, p, .pseudo-terminal");
   
   headings.forEach(heading => {
@@ -279,6 +290,12 @@ function createHeadingBodies() {
       Composite.add(engine.world, body);
     }
   });
+  
+  // Re-add pixel bodies from visible pixel map
+  const pixelatedMap = document.querySelector('.pixelated-map');
+  if (pixelatedMap && pixelatedMap.style.display !== 'none') {
+    addPixelsToPhysics(pixelatedMap);
+  }
 }
 
 function updateHeadingBodies() {
@@ -359,6 +376,118 @@ function highlightMapCountry(countryCode, color) {
   if (path) {
     path.style.fill = color.hex;
   }
+  
+  // Also highlight the pixelated version if it exists
+  const pixels = document.querySelectorAll(`.pixel-country[data-cc="${countryCode}"]`);
+  pixels.forEach(pixel => {
+    pixel.style.fill = color.hex;
+    pixel.style.stroke = color.hex;
+  });
+}
+
+// Function to create a pixelated version of the map
+function createPixelatedMap(pixelSize = 10) {
+  // Get the original map
+  const originalMap = elements.mapContainer;
+  if (!originalMap) return;
+  
+  // Create a new SVG for the pixelated map
+  const pixelatedMap = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  pixelatedMap.setAttribute('viewBox', originalMap.getAttribute('viewBox'));
+  pixelatedMap.classList.add('pixelated-map');
+  
+  // Get the viewBox dimensions
+  const viewBox = originalMap.getAttribute('viewBox').split(' ');
+  const mapWidth = parseFloat(viewBox[2]);
+  const mapHeight = parseFloat(viewBox[3]);
+  
+  // Calculate grid dimensions
+  const cols = Math.ceil(mapWidth / pixelSize);
+  const rows = Math.ceil(mapHeight / pixelSize);
+  
+  // Create a pixel grid - each cell can have multiple countries
+  const grid = Array(rows).fill().map(() => Array(cols).fill().map(() => new Set()));
+  
+  // Process all country paths in one pass to identify which pixels they occupy
+  countryPathData.forEach((data, countryCode) => {
+    const path = data.path;
+    const bbox = data.bbox;
+    
+    if (!bbox) return;
+    
+    // Calculate grid area affected by this country
+    const startCol = Math.max(0, Math.floor(bbox.x / pixelSize));
+    const endCol = Math.min(cols - 1, Math.ceil((bbox.x + bbox.width) / pixelSize));
+    const startRow = Math.max(0, Math.floor(bbox.y / pixelSize));
+    const endRow = Math.min(rows - 1, Math.ceil((bbox.y + bbox.height) / pixelSize));
+    
+    // Check each pixel in the bounding box
+    for (let row = startRow; row <= endRow; row++) {
+      for (let col = startCol; col <= endCol; col++) {
+        // Calculate center point of this pixel
+        const x = col * pixelSize + pixelSize / 2;
+        const y = row * pixelSize + pixelSize / 2;
+        
+        // Check if center point is in the path
+        if (isPointInPath(path, x, y)) {
+          grid[row][col].add(countryCode);
+        }
+      }
+    }
+  });
+  
+  // Use document fragment for better performance when adding many elements
+  const fragment = document.createDocumentFragment();
+  
+  // Create pixels only for non-empty grid cells
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < cols; col++) {
+      const countryCodes = Array.from(grid[row][col]);
+      
+      if (countryCodes.length > 0) {
+        const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        rect.setAttribute('x', col * pixelSize);
+        rect.setAttribute('y', row * pixelSize);
+        rect.setAttribute('width', pixelSize);
+        rect.setAttribute('height', pixelSize);
+        
+        // Store countries data
+        rect.setAttribute('data-countries', countryCodes.join(','));
+        rect.setAttribute('data-cc', countryCodes[0]);
+        
+        rect.classList.add('pixel-country');
+        
+        // Add special class for border pixels (multiple countries)
+        if (countryCodes.length > 1) {
+          rect.classList.add('pixel-border');
+        }
+        
+        // Apply styling
+        const originalPath = countriesMap.get(countryCodes[0]);
+        rect.style.fill = (originalPath && originalPath.style.fill) ? originalPath.style.fill : '#202126';
+        rect.style.stroke = (originalPath && originalPath.style.fill) ? originalPath.style.fill : '#fff';
+        
+        fragment.appendChild(rect);
+      }
+    }
+  }
+  
+  pixelatedMap.appendChild(fragment);
+  originalMap.parentNode.insertBefore(pixelatedMap, originalMap.nextSibling);
+  return pixelatedMap;
+}
+
+// Simplified point-in-path check
+function isPointInPath(path, x, y) {
+  // Use native SVG isPointInFill if available
+  if (path.isPointInFill) {
+    const svgPoint = path.ownerSVGElement.createSVGPoint();
+    svgPoint.x = x;
+    svgPoint.y = y;
+    return path.isPointInFill(svgPoint);
+  }
+  
+  return false; // Fallback if native method is unavailable
 }
 
 function createColorObjectsFromData(data) {
@@ -636,6 +765,90 @@ function initializeSocket() {
   }
 }
 
+// Add this function right after the initializeSocket() function
+function initializePixelatedMap() {
+  // Create the pixelated map with pixel size of 10
+  const pixelatedMap = createPixelatedMap(10);
+  
+  if (pixelatedMap) {
+    // Make the pixelated map the default view (hide the original map)
+    const originalMap = elements.mapContainer;
+    originalMap.style.display = 'none';
+    pixelatedMap.style.display = '';
+    
+    // Add pixels to physics simulation - these will stay in the simulation
+    // regardless of which map is displayed
+    addPixelsToPhysics(pixelatedMap);
+    
+    // Create a toggle button
+    const toggleButton = document.createElement('button');
+    toggleButton.textContent = 'Toggle Original Map';
+    toggleButton.classList.add('map-toggle-button');
+    toggleButton.addEventListener('click', () => {
+      const originalMap = elements.mapContainer;
+      if (originalMap.style.display === 'none') {
+        originalMap.style.display = '';
+        pixelatedMap.style.display = 'none';
+        toggleButton.textContent = 'Toggle Pixel Map';
+        // No need to remove pixel bodies, they should remain active
+      } else {
+        originalMap.style.display = 'none';
+        pixelatedMap.style.display = '';
+        toggleButton.textContent = 'Toggle Original Map';
+      }
+    });
+    
+    // Add the toggle button near the map
+    elements.mapContainer.parentNode.insertBefore(toggleButton, elements.mapContainer);
+  }
+}
+
+// Function to add pixel squares to physics simulation
+function addPixelsToPhysics(pixelatedMap) {
+  if (!physics.initialized || !pixelatedMap) return;
+  
+  // Get all pixel rectangles
+  const pixels = pixelatedMap.querySelectorAll('.pixel-country');
+  
+  // Only add a subset of pixels to avoid performance issues
+  const maxPhysicsPixels = 300;
+  const totalPixels = pixels.length;
+  const addEvery = Math.max(1, Math.floor(totalPixels / maxPhysicsPixels));
+  
+  pixels.forEach((pixel, index) => {
+    // Only add every nth pixel to avoid performance issues
+    if (index % addEvery !== 0) return;
+    
+    // Get the SVG bounding box
+    const rect = pixel.getBoundingClientRect();
+    const svgRect = pixelatedMap.getBoundingClientRect();
+    
+    // Skip pixels that are too small
+    if (rect.width < 5 || rect.height < 5) return;
+    
+    // Create a physics body for the pixel
+    const x = rect.left + rect.width / 2;
+    const y = rect.top + rect.height / 2;
+    
+    const body = Bodies.rectangle(
+      x, y, rect.width, rect.height,
+      {
+        isStatic: true,
+        isPixel: true,
+        pixelElement: pixel,
+        friction: 0.2,
+        render: {
+          fillStyle: 'rgba(0, 0, 0, 0)',
+          strokeStyle: 'rgba(0, 0, 0, 0.05)',
+          lineWidth: 0
+        }
+      }
+    );
+    
+    Composite.add(engine.world, body);
+  });
+}
+
 function addColorsToVisualization(data) {
   const { paletteTitle, colors } = data;
   let url = data.request.url;
@@ -731,9 +944,11 @@ elements.noduplicatesCheckbox.addEventListener('change', (event) => {
   updateApiUrlPreview();
 });
 
-initializePhysics();
-
-selectedColors.push(getRandomHexColor());
-fetchLists();
-renderColors();
-initializeSocket();
+window.addEventListener('load', () => {
+  initializePhysics();
+  selectedColors.push(getRandomHexColor());
+  fetchLists();
+  renderColors();
+  initializeSocket();
+  initializePixelatedMap(); // Make pixelated map the default
+});

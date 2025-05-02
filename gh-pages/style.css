@@ -291,3 +291,38 @@ pre {
   stroke-width: 0.5;
   transition: fill 0.3s ease;
 }
+
+/* Pixelated map styles */
+.pixelated-map {
+  margin: 4rem 2rem;
+}
+
+.pixelated-map rect {
+  stroke: var(--w);
+  stroke-width: .75;
+  transition: fill 0.3s ease, stroke 0.3s ease;
+}
+
+.pixel-country:hover {
+  stroke-width: 0.5;
+}
+
+/* Toggle button styles */
+.map-toggle-button {
+  display: block;
+  margin: 1rem auto;
+  padding: 0.5rem 1rem;
+  background-color: var(--b);
+  color: var(--w);
+  border: none;
+  font-family: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+
+  display: none;
+}
+
+.map-toggle-button:hover {
+  background-color: var(--c-interactive);
+}
