@@ -19,6 +19,14 @@ const FETCH_DEBOUNCE_MS = 300;
 const MAX_COLORS_DISPLAY = 100;
 const MAX_COLOR_ITEMS = 100;
 
+// Configuration settings
+const config = {
+  pixelDetection: {
+    permissive: true, // Default to strict pixel detection
+    borderPixelSampling: 3  // Number of sampling points when permissive mode is enabled
+  }
+};
+
 let selectedColors = [];
 let availableLists = [];
 let isInitialized = false;
@@ -381,7 +389,7 @@ function highlightMapCountry(countryCode, color) {
   const pixels = document.querySelectorAll(`.pixel-country[data-cc="${countryCode}"]`);
   pixels.forEach(pixel => {
     pixel.style.fill = color.hex;
-    pixel.style.stroke = color.hex;
+    //pixel.style.stroke = color.hex;
   });
 }
 
@@ -465,7 +473,7 @@ function createPixelatedMap(pixelSize = 10) {
         // Apply styling
         const originalPath = countriesMap.get(countryCodes[0]);
         rect.style.fill = (originalPath && originalPath.style.fill) ? originalPath.style.fill : '#202126';
-        rect.style.stroke = (originalPath && originalPath.style.fill) ? originalPath.style.fill : '#fff';
+        //rect.style.stroke = (originalPath && originalPath.style.fill) ? originalPath.style.fill : '#fff';
         
         fragment.appendChild(rect);
       }
@@ -477,14 +485,49 @@ function createPixelatedMap(pixelSize = 10) {
   return pixelatedMap;
 }
 
-// Simplified point-in-path check
+// Configurable point-in-path check
 function isPointInPath(path, x, y) {
   // Use native SVG isPointInFill if available
   if (path.isPointInFill) {
     const svgPoint = path.ownerSVGElement.createSVGPoint();
+    
+    // In strict mode, just check the center point
+    if (!config.pixelDetection.permissive) {
+      svgPoint.x = x;
+      svgPoint.y = y;
+      return path.isPointInFill(svgPoint);
+    } 
+    
+    // In permissive mode, check multiple points around the border
+    // First check the center
     svgPoint.x = x;
     svgPoint.y = y;
-    return path.isPointInFill(svgPoint);
+    if (path.isPointInFill(svgPoint)) {
+      return true;
+    }
+    
+    // Then check additional points in a grid pattern
+    const offset = 2; // pixels to check from center
+    const samplingPoints = config.pixelDetection.borderPixelSampling;
+    
+    // Create a grid of points to check
+    for (let i = -1; i <= 1; i++) {
+      for (let j = -1; j <= 1; j++) {
+        // Skip center point as we already checked it
+        if (i === 0 && j === 0) continue;
+        
+        // Skip points beyond the sampling radius
+        if (Math.abs(i) + Math.abs(j) > samplingPoints) continue;
+        
+        svgPoint.x = x + (i * offset);
+        svgPoint.y = y + (j * offset);
+        if (path.isPointInFill(svgPoint)) {
+          return true;
+        }
+      }
+    }
+    
+    return false;
   }
   
   return false; // Fallback if native method is unavailable
