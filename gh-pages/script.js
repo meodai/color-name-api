@@ -824,23 +824,18 @@ function addPixelsToPhysics(pixelatedMap) {
   
   const pixels = pixelatedMap.querySelectorAll('.pixel-country');
   
-  // Only add a subset of pixels to avoid performance issues
   const maxPhysicsPixels = 300;
   const totalPixels = pixels.length;
   const addEvery = Math.max(1, Math.floor(totalPixels / maxPhysicsPixels));
   
   pixels.forEach((pixel, index) => {
-    // Only add every nth pixel to avoid performance issues
     if (index % addEvery !== 0) return;
     
-    // Get the SVG bounding box
     const rect = pixel.getBoundingClientRect();
     const svgRect = pixelatedMap.getBoundingClientRect();
     
-    // Skip pixels that are too small
     if (rect.width < 5 || rect.height < 5) return;
     
-    // Create a physics body for the pixel
     const x = rect.left + rect.width / 2;
     const y = rect.top + rect.height / 2;
     
@@ -866,13 +861,17 @@ function addPixelsToPhysics(pixelatedMap) {
 function addColorsToVisualization(data) {
   const { paletteTitle, colors } = data;
   let url = data.request.url;
-  // replace localhost with the actual domain
-  url = url.replace(
-    /https?:\/\/(localhost|172\.0\.0\.1)(\/v1\/)?/,
-    API_BASE_URL
-  )
-
-  // also replace the encoded commas
+  
+  // Simple approach - just append the relative path to API_BASE_URL
+  // No need for complex URL construction
+  if (url && !url.startsWith('http')) {
+    // If it's a relative path, just make sure it doesn't start with a double slash
+    url = url.startsWith('/') ? url : '/' + url;
+    // Add to API base URL
+    url = API_BASE_URL + url.substring(1); // Remove leading slash before appending
+  }
+  
+  // Replace encoded commas with regular commas for readability
   url = url.replace(/%2C/g, ",");
 
   let countryCode = null;

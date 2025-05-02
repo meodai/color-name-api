@@ -363,12 +363,16 @@ const respondValueSearch = async (
   // emits the response with the colors on socket.io
   if (socket) {
     const { clientIp, clientLocation } = getClientInfo(request);
+    
+    // Just use the pathname and search directly, without constructing URL objects
+    const relativePath = requestUrl.pathname + requestUrl.search;
+    
     io.emit('colors', {
       paletteTitle,
       colors: colorsResponse,
       list: listKey,
       request: {
-        url: requestUrl.href,
+        url: relativePath,
         method: request.method,
         // headers: request.headers,
         // clientIp, // don't think its safe to send this
