@@ -157,7 +157,10 @@ const getClientInfo = (request) => {
   const clientIp = requestIp.getClientIp(request);
   
   if (!clientIp) {
-    return { clientIp: null, clientLocation: null };
+    return { 
+      //clientIp: null, 
+      clientLocation: null 
+    };
   }
   
   // Check if we already have this IP's location in cache
@@ -360,12 +363,14 @@ const respondValueSearch = async (
     paletteTitle = `All the ${listKey} names`;
   }
 
-  // emits the response with the colors on socket.io
-  if (socket) {
+ if (socket) {
     const { clientIp, clientLocation } = getClientInfo(request);
     
-    // Just use the pathname and search directly, without constructing URL objects
-    const relativePath = requestUrl.pathname + requestUrl.search;
+    // Extract just the pathname and search parts but remove the version prefix
+    let relativePath = requestUrl.pathname + requestUrl.search;
+    
+    // Remove the API version from the path (e.g., /v1/)
+    relativePath = relativePath.replace(new RegExp(`^${baseUrl}`), '/');
     
     io.emit('colors', {
       paletteTitle,

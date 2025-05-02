@@ -863,12 +863,18 @@ function addColorsToVisualization(data) {
   let url = data.request.url;
   
   // Simple approach - just append the relative path to API_BASE_URL
-  // No need for complex URL construction
   if (url && !url.startsWith('http')) {
-    // If it's a relative path, just make sure it doesn't start with a double slash
-    url = url.startsWith('/') ? url : '/' + url;
-    // Add to API base URL
-    url = API_BASE_URL + url.substring(1); // Remove leading slash before appending
+    // If the path doesn't include the version (from socket.io), add it back
+    if (!url.includes('/v1/') && !url.startsWith('/v1/')) {
+      // Make sure it doesn't start with a double slash
+      url = url.startsWith('/') ? url.substring(1) : url;
+      // Add to API base URL with version
+      url = API_BASE_URL + url;
+    } else {
+      // Already has version, just append to base domain
+      url = url.startsWith('/') ? url : '/' + url;
+      url = API_BASE_URL.split('/v1/')[0] + url;
+    }
   }
   
   // Replace encoded commas with regular commas for readability
@@ -882,7 +888,7 @@ function addColorsToVisualization(data) {
   ) {
     countryCode =
       data.request.clientLocation.country.toUpperCase();
-  } 
+  }
 
   if (!document.getElementById("color-visualization")) {
     const visualizationContainer = document.createElement("div");
