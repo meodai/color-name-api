@@ -19,12 +19,12 @@ const FETCH_DEBOUNCE_MS = 300;
 const MAX_COLORS_DISPLAY = 100;
 const MAX_COLOR_ITEMS = 100;
 
-// Configuration settings
 const config = {
   pixelDetection: {
-    permissive: true, // Default to strict pixel detection
-    borderPixelSampling: 3  // Number of sampling points when permissive mode is enabled
-  }
+    permissive: true,
+    borderPixelSampling: 3,
+  },
+  pixelSize: 10,
 };
 
 let selectedColors = [];
@@ -34,13 +34,11 @@ let fetchTimeout = null;
 let socket = null;
 
 const countriesMap = new Map();
-// Store country path data for pixelation
 const countryPathData = new Map();
 
 elements.svgCountryPaths.forEach((path) => {
   const countryCode = path.getAttribute("data-cc");
   countriesMap.set(countryCode, path);
-  // Store the path data for later pixelation
   countryPathData.set(countryCode, {
     path: path,
     bbox: path.getBBox ? path.getBBox() : null
@@ -179,12 +177,10 @@ function initializePhysics() {
   window.removeEventListener('scroll', handleScroll);
   window.addEventListener('scroll', handleScroll);
   
-  // Remove existing touch event listeners if any
   document.removeEventListener('touchstart', handleTouchStart);
   document.removeEventListener('touchend', handleTouchEnd);
   document.removeEventListener('touchcancel', handleTouchEnd);
   
-  // Add touch event listeners
   document.addEventListener('touchstart', handleTouchStart);
   document.addEventListener('touchend', handleTouchEnd);
   document.addEventListener('touchcancel', handleTouchEnd);
@@ -244,7 +240,6 @@ function handleMouseMove(event) {
 }
 
 function handleWindowResize() {
-  // Ignore resize events during touch gestures (mobile address bar showing/hiding)
   if (physics.isTouchActive) return;
   
   if (physics.resizeThrottle) clearTimeout(physics.resizeThrottle);
@@ -269,7 +264,6 @@ function createHeadingBodies() {
   headingBodies.forEach(body => Composite.remove(engine.world, body));
   pixelBodies.forEach(body => Composite.remove(engine.world, body));
   
-  // Add heading bodies
   const headings = document.querySelectorAll("h1, h2, h3, p, .pseudo-terminal");
   
   headings.forEach(heading => {
@@ -299,7 +293,6 @@ function createHeadingBodies() {
     }
   });
   
-  // Re-add pixel bodies from visible pixel map
   const pixelatedMap = document.querySelector('.pixelated-map');
   if (pixelatedMap && pixelatedMap.style.display !== 'none') {
     addPixelsToPhysics(pixelatedMap);
@@ -385,58 +378,44 @@ function highlightMapCountry(countryCode, color) {
     path.style.fill = color.hex;
   }
   
-  // Also highlight the pixelated version if it exists
   const pixels = document.querySelectorAll(`.pixel-country[data-cc="${countryCode}"]`);
   pixels.forEach(pixel => {
     pixel.style.fill = color.hex;
-    //pixel.style.stroke = color.hex;
   });
 }
 
-// Function to create a pixelated version of the map
 function createPixelatedMap(pixelSize = 10) {
-  // Get the original map
   const originalMap = elements.mapContainer;
   if (!originalMap) return;
   
-  // Create a new SVG for the pixelated map
   const pixelatedMap = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   pixelatedMap.setAttribute('viewBox', originalMap.getAttribute('viewBox'));
   pixelatedMap.classList.add('pixelated-map');
   
-  // Get the viewBox dimensions
   const viewBox = originalMap.getAttribute('viewBox').split(' ');
   const mapWidth = parseFloat(viewBox[2]);
   const mapHeight = parseFloat(viewBox[3]);
   
-  // Calculate grid dimensions
   const cols = Math.ceil(mapWidth / pixelSize);
   const rows = Math.ceil(mapHeight / pixelSize);
   
-  // Create a pixel grid - each cell can have multiple countries
   const grid = Array(rows).fill().map(() => Array(cols).fill().map(() => new Set()));
   
-  // Process all country paths in one pass to identify which pixels they occupy
   countryPathData.forEach((data, countryCode) => {
     const path = data.path;
     const bbox = data.bbox;
     
     if (!bbox) return;
     
-    // Calculate grid area affected by this country
     const startCol = Math.max(0, Math.floor(bbox.x / pixelSize));
     const endCol = Math.min(cols - 1, Math.ceil((bbox.x + bbox.width) / pixelSize));
     const startRow = Math.max(0, Math.floor(bbox.y / pixelSize));
     const endRow = Math.min(rows - 1, Math.ceil((bbox.y + bbox.height) / pixelSize));
     
-    // Check each pixel in the bounding box
     for (let row = startRow; row <= endRow; row++) {
       for (let col = startCol; col <= endCol; col++) {
-        // Calculate center point of this pixel
         const x = col * pixelSize + pixelSize / 2;
         const y = row * pixelSize + pixelSize / 2;
-        
-        // Check if center point is in the path
         if (isPointInPath(path, x, y)) {
           grid[row][col].add(countryCode);
         }
@@ -808,22 +787,17 @@ function initializeSocket() {
   }
 }
 
-// Add this function right after the initializeSocket() function
 function initializePixelatedMap() {
-  // Create the pixelated map with pixel size of 10
-  const pixelatedMap = createPixelatedMap(10);
+  const pixelatedMap = createPixelatedMap(
+    config.pixelSize
+  );
   
   if (pixelatedMap) {
-    // Make the pixelated map the default view (hide the original map)
     const originalMap = elements.mapContainer;
     originalMap.style.display = 'none';
     pixelatedMap.style.display = '';
-    
-    // Add pixels to physics simulation - these will stay in the simulation
-    // regardless of which map is displayed
     addPixelsToPhysics(pixelatedMap);
     
-    // Create a toggle button
     const toggleButton = document.createElement('button');
     toggleButton.textContent = 'Toggle Original Map';
     toggleButton.classList.add('map-toggle-button');
@@ -841,16 +815,13 @@ function initializePixelatedMap() {
       }
     });
     
-    // Add the toggle button near the map
     elements.mapContainer.parentNode.insertBefore(toggleButton, elements.mapContainer);
   }
 }
 
-// Function to add pixel squares to physics simulation
 function addPixelsToPhysics(pixelatedMap) {
   if (!physics.initialized || !pixelatedMap) return;
   
-  // Get all pixel rectangles
   const pixels = pixelatedMap.querySelectorAll('.pixel-country');
   
   // Only add a subset of pixels to avoid performance issues
