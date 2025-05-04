@@ -168,7 +168,11 @@ function initializePhysics() {
     const buffer = 500;
     
     physics.objects.forEach(obj => {
-      if (obj.position.y > physics.bounds.height + buffer) {
+      // Check if object is below the screen with buffer
+      if (obj.position.y > physics.bounds.height + buffer ||
+          // Check if object is too far to the left or right
+          obj.position.x < -buffer ||
+          obj.position.x > physics.bounds.width + buffer) {
         objectsToRemove.push(obj);
       }
     });
@@ -178,6 +182,16 @@ function initializePhysics() {
         Composite.remove(engine.world, obj);
         physics.objects = physics.objects.filter(o => o.id !== obj.id);
       });
+    }
+    
+    // Enforce maximum number of physics objects
+    if (physics.objects.length > physics.maxObjects) {
+      // Remove the oldest objects first (start of the array)
+      const objectsToTrim = physics.objects.slice(0, physics.objects.length - physics.maxObjects);
+      objectsToTrim.forEach(obj => {
+        Composite.remove(engine.world, obj);
+      });
+      physics.objects = physics.objects.slice(physics.objects.length - physics.maxObjects);
     }
   });
   
