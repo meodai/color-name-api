@@ -45,6 +45,16 @@ elements.svgCountryPaths.forEach((path) => {
   });
 });
 
+/**
+ * Returns a random item from an array
+ * @param {Array} array - The array to select from
+ * @returns {*} Random item from the array
+ */
+function getRandomArrayItem(array) {
+  if (!array || array.length === 0) return null;
+  return array[Math.floor(Math.random() * array.length)];
+}
+
 const { Engine, Render, Runner, Bodies, Composite, Events, Body, Mouse, MouseConstraint, Common } = Matter;
 let engine, render, runner, mouseConstraint;
 let physics = {
@@ -372,16 +382,35 @@ function createColorObject(hexColor) {
   Composite.add(engine.world, object);
 }
 
-function highlightMapCountry(countryCode, color) {
+function highlightMapCountry(countryCode, colors) {
   const path = countriesMap.get(countryCode);
+  
+  // For the original SVG path, use a single color (first or random)
+  const randomColor = Array.isArray(colors) && colors.length > 1 
+    ? getRandomArrayItem(colors) 
+    : colors[0];
+    
+  const colorHex = randomColor.hex;
+  
   if (path) {
-    path.style.fill = color.hex;
+    path.style.fill = colorHex;
   }
   
+  // For the pixelated map, assign a different random color to each pixel
   const pixels = document.querySelectorAll(`.pixel-country[data-cc="${countryCode}"]`);
-  pixels.forEach(pixel => {
-    pixel.style.fill = color.hex;
-  });
+  
+  if (Array.isArray(colors) && colors.length > 1) {
+    // If we have multiple colors, apply a random one to each pixel
+    pixels.forEach(pixel => {
+      const pixelRandomColor = getRandomArrayItem(colors);
+      pixel.style.fill = pixelRandomColor.hex;
+    });
+  } else {
+    // If we only have one color, apply it to all pixels
+    pixels.forEach(pixel => {
+      pixel.style.fill = colorHex;
+    });
+  }
 }
 
 function createPixelatedMap(pixelSize = 10) {
@@ -934,13 +963,12 @@ function addColorsToVisualization(data) {
 
   if (countryCode) {
     const countryElement = document.createElement("span");
-    // https://catamphetamine.gitlab.io/country-flag-icons/3x2/AC.svg
-    //countryElement.src = `https://catamphetamine.gitlab.io/country-flag-icons/3x2/${countryCode}.svg`;
-    //countryElement.alt = countryCode;
     countryElement.classList.add("color-country");
     countryElement.innerText = countryCode;
     colorItem.appendChild(countryElement);
-    highlightMapCountry(countryCode, colors[0]);
+    
+    // Pass the entire colors array so that a random color can be selected
+    highlightMapCountry(countryCode, colors);
   }
 
   visualizationContainer.insertBefore(
