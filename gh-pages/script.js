@@ -372,12 +372,16 @@ function createColorObject(hexColor) {
   const size = Math.random() * 18 + 5;
   const x = Math.random() * physics.bounds.width; 
   const y = -size * 2; 
-  const isSquare = Math.random() > 0.5;
+  
+  // Generate random number of sides between 1 and 8
+  const sides = Math.floor(Math.random() * 4) + 1; // 1 to 8
+  const scale = 1;
   
   const commonProps = {
-    restitution: isSquare ? 0.4 : 0.3,
+    restitution: 0.4,
     friction: 0.05,
     frictionAir: 0.005,
+    angle: Math.random() * Math.PI * 2, // Random initial rotation
     render: {
       fillStyle: color,
       strokeStyle: '#000000',
@@ -385,12 +389,15 @@ function createColorObject(hexColor) {
     }
   };
   
-  let object = isSquare 
-    ? Bodies.rectangle(x, y, size * 2, size * 2, {
-        ...commonProps,
-        angle: Math.random() * Math.PI * 2
-      })
-    : Bodies.circle(x, y, size, commonProps);
+  // Create a circle for sides 1-2, or polygon for sides 3-8
+  let object;
+  if (sides <= 2) {
+    // Create a circle
+    object = Bodies.circle(x, y, size, commonProps);
+  } else {
+    // Create a polygon with the random number of sides
+    object = Bodies.polygon(x, y, sides, size * scale, commonProps);
+  }
   
   physics.objects.push(object);
   Composite.add(engine.world, object);
