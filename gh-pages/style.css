@@ -7,8 +7,8 @@
   line-height: 1.5;
 
   --c-interactive: rgb(220, 150, 86);
-  --w: #f8fcff;
-  --b: #202126;
+  --w: #f5eee2;
+  --b: #2c251e;
   
   --inset: 3rem;
 
@@ -83,6 +83,8 @@ pre {
   padding: 1em;
   display: block;
   overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--b) var(--w);
 }
 
 .pseudo-terminal {
@@ -113,6 +115,9 @@ pre {
   
   background-color: var(--b);
   text-shadow: 0 0 1em var(--b);
+
+  scrollbar-width: thin;
+  scrollbar-color: var(--b) var(--w);
 }
 
 .url-part {
@@ -180,7 +185,7 @@ pre {
   background-color: var(--color);
   border-radius: 50%;
   margin-right: 0.3em;
-  box-shadow: 0 0 0 1px #fff;
+  box-shadow: 0 0 0 1px var(--w);
 }
 
 .url-color-remove {
@@ -200,7 +205,7 @@ pre {
   cursor: pointer;
   margin: 0 0.3em;
   color: var(--c-interactive);
-  box-shadow: 0 0 0 1px #fff;
+  box-shadow: 0 0 0 1px var(--w);
   border-radius: 50%;
 }
 
@@ -217,7 +222,7 @@ pre {
 }
 
 #json-viewer {
-  background: #202126;
+  background: var(--b);
   border-radius: 5px;
   padding: 0 var(--inset) 2rem;
 }
@@ -226,6 +231,8 @@ pre {
   margin-bottom: 1.5rem;
   height: 38rem;
   overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--b) var(--w);
 }
 
 .color-item {
@@ -235,6 +242,8 @@ pre {
   font-weight: 900;
   color: var(--c);
   overflow: hidden;
+
+  
 }
 
 .color-title {
