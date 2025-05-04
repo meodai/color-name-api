@@ -32,9 +32,43 @@ let availableLists = [];
 let isInitialized = false;
 let fetchTimeout = null;
 let socket = null;
+let isPageVisible = true;
 
 const countriesMap = new Map();
 const countryPathData = new Map();
+
+document.addEventListener('visibilitychange', handleVisibilityChange);
+
+function handleVisibilityChange() {
+  isPageVisible = document.visibilityState === 'visible';
+  
+  if (isPageVisible) {
+    if (!physics.initialized && physics.wasInitialized) {
+      initializePhysics();
+    } else if (physics.paused) {
+      if (runner) {
+        Runner.run(runner, engine);
+      }
+      physics.paused = false;
+    }
+    
+    if (socket && socket.disconnected && socket.wasConnected) {
+      socket.connect();
+    }
+  } else {
+    if (physics.initialized) {
+      physics.paused = true;
+      if (runner) {
+        Runner.stop(runner);
+      }
+    }
+    
+    if (socket && socket.connected) {
+      socket.wasConnected = true;
+      socket.disconnect();
+    }
+  }
+}
 
 elements.svgCountryPaths.forEach((path) => {
   const countryCode = path.getAttribute("data-cc");
@@ -61,13 +95,15 @@ let physics = {
   objects: [],
   maxObjects: 1000,
   initialized: false,
+  wasInitialized: false,
+  paused: false,
   bounds: { width: 0, height: 0 },
   resizeThrottle: null,
   scrollThrottle: null,
   scrollCheckCounter: 0,
   observer: null,
   mouseBody: null,
-  isTouchActive: false  // Track if touch is currently active
+  isTouchActive: false  
 };
 
 function getRandomHexColor() {
@@ -168,9 +204,9 @@ function initializePhysics() {
     const buffer = 500;
     
     physics.objects.forEach(obj => {
-      // Check if object is below the screen with buffer
+      
       if (obj.position.y > physics.bounds.height + buffer ||
-          // Check if object is too far to the left or right
+          
           obj.position.x < -buffer ||
           obj.position.x > physics.bounds.width + buffer) {
         objectsToRemove.push(obj);
@@ -184,9 +220,9 @@ function initializePhysics() {
       });
     }
     
-    // Enforce maximum number of physics objects
+    
     if (physics.objects.length > physics.maxObjects) {
-      // Remove the oldest objects first (start of the array)
+      
       const objectsToTrim = physics.objects.slice(0, physics.objects.length - physics.maxObjects);
       objectsToTrim.forEach(obj => {
         Composite.remove(engine.world, obj);
@@ -373,15 +409,15 @@ function createColorObject(hexColor) {
   const x = Math.random() * physics.bounds.width; 
   const y = -size * 2; 
   
-  // Generate random number of sides between 1 and 8
-  const sides = Math.floor(Math.random() * 4) + 1; // 1 to 8
+  
+  const sides = Math.floor(Math.random() * 4) + 1; 
   const scale = 1;
   
   const commonProps = {
     restitution: 0.4,
     friction: 0.05,
     frictionAir: 0.005,
-    angle: Math.random() * Math.PI * 2, // Random initial rotation
+    angle: Math.random() * Math.PI * 2, 
     render: {
       fillStyle: color,
       strokeStyle: '#000000',
@@ -389,13 +425,13 @@ function createColorObject(hexColor) {
     }
   };
   
-  // Create a circle for sides 1-2, or polygon for sides 3-8
+  
   let object;
   if (sides <= 2) {
-    // Create a circle
+    
     object = Bodies.circle(x, y, size, commonProps);
   } else {
-    // Create a polygon with the random number of sides
+    
     object = Bodies.polygon(x, y, sides, size * scale, commonProps);
   }
   
@@ -406,7 +442,7 @@ function createColorObject(hexColor) {
 function highlightMapCountry(countryCode, colors) {
   const path = countriesMap.get(countryCode);
   
-  // For the original SVG path, use a single color (first or random)
+  
   const randomColor = Array.isArray(colors) && colors.length > 1 
     ? getRandomArrayItem(colors) 
     : colors[0];
@@ -417,17 +453,17 @@ function highlightMapCountry(countryCode, colors) {
     path.style.fill = colorHex;
   }
   
-  // For the pixelated map, assign a different random color to each pixel
+  
   const pixels = document.querySelectorAll(`.pixel-country[data-cc="${countryCode}"]`);
   
   if (Array.isArray(colors) && colors.length > 1) {
-    // If we have multiple colors, apply a random one to each pixel
+    
     pixels.forEach(pixel => {
       const pixelRandomColor = getRandomArrayItem(colors);
       pixel.style.fill = pixelRandomColor.hex;
     });
   } else {
-    // If we only have one color, apply it to all pixels
+    
     pixels.forEach(pixel => {
       pixel.style.fill = colorHex;
     });
@@ -473,10 +509,10 @@ function createPixelatedMap(pixelSize = 10) {
     }
   });
   
-  // Use document fragment for better performance when adding many elements
+  
   const fragment = document.createDocumentFragment();
   
-  // Create pixels only for non-empty grid cells
+  
   for (let row = 0; row < rows; row++) {
     for (let col = 0; col < cols; col++) {
       const countryCodes = Array.from(grid[row][col]);
@@ -488,18 +524,18 @@ function createPixelatedMap(pixelSize = 10) {
         rect.setAttribute('width', pixelSize);
         rect.setAttribute('height', pixelSize);
         
-        // Store countries data
+        
         rect.setAttribute('data-countries', countryCodes.join(','));
         rect.setAttribute('data-cc', countryCodes[0]);
         
         rect.classList.add('pixel-country');
         
-        // Add special class for border pixels (multiple countries)
+        
         if (countryCodes.length > 1) {
           rect.classList.add('pixel-border');
         }
         
-        // Apply styling
+        
         const originalPath = countriesMap.get(countryCodes[0]);
         rect.style.fill = (originalPath && originalPath.style.fill) ? originalPath.style.fill : '#202126';
         //rect.style.stroke = (originalPath && originalPath.style.fill) ? originalPath.style.fill : '#fff';
@@ -514,38 +550,38 @@ function createPixelatedMap(pixelSize = 10) {
   return pixelatedMap;
 }
 
-// Configurable point-in-path check
+
 function isPointInPath(path, x, y) {
-  // Use native SVG isPointInFill if available
+  
   if (path.isPointInFill) {
     const svgPoint = path.ownerSVGElement.createSVGPoint();
     
-    // In strict mode, just check the center point
+    
     if (!config.pixelDetection.permissive) {
       svgPoint.x = x;
       svgPoint.y = y;
       return path.isPointInFill(svgPoint);
     } 
     
-    // In permissive mode, check multiple points around the border
-    // First check the center
+    
+    
     svgPoint.x = x;
     svgPoint.y = y;
     if (path.isPointInFill(svgPoint)) {
       return true;
     }
     
-    // Then check additional points in a grid pattern
-    const offset = 2; // pixels to check from center
+    
+    const offset = 2; 
     const samplingPoints = config.pixelDetection.borderPixelSampling;
     
-    // Create a grid of points to check
+    
     for (let i = -1; i <= 1; i++) {
       for (let j = -1; j <= 1; j++) {
-        // Skip center point as we already checked it
+        
         if (i === 0 && j === 0) continue;
         
-        // Skip points beyond the sampling radius
+        
         if (Math.abs(i) + Math.abs(j) > samplingPoints) continue;
         
         svgPoint.x = x + (i * offset);
@@ -559,7 +595,7 @@ function isPointInPath(path, x, y) {
     return false;
   }
   
-  return false; // Fallback if native method is unavailable
+  return false; 
 }
 
 function createColorObjectsFromData(data) {
@@ -828,10 +864,17 @@ function initializeSocket() {
     
     socket.on('colors', (msg) => {
       addColorsToVisualization(msg);
-      createColorObjectsFromData(msg);
+      if (isPageVisible) {
+        createColorObjectsFromData(msg);
+      }
     });
 
     socket.on('connect_error', (error) => console.error('Socket connection error:', error));
+    
+    if (!isPageVisible) {
+      socket.wasConnected = true;
+      socket.disconnect();
+    }
   } catch (error) {
     console.error('Error initializing socket:', error);
   }
@@ -857,7 +900,7 @@ function initializePixelatedMap() {
         originalMap.style.display = '';
         pixelatedMap.style.display = 'none';
         toggleButton.textContent = 'Toggle Pixel Map';
-        // No need to remove pixel bodies, they should remain active
+        
       } else {
         originalMap.style.display = 'none';
         pixelatedMap.style.display = '';
@@ -912,22 +955,22 @@ function addColorsToVisualization(data) {
   const { paletteTitle, colors } = data;
   let url = data.request.url;
   
-  // Simple approach - just append the relative path to API_BASE_URL
+  
   if (url && !url.startsWith('http')) {
-    // If the path doesn't include the version (from socket.io), add it back
+    
     if (!url.includes('/v1/') && !url.startsWith('/v1/')) {
-      // Make sure it doesn't start with a double slash
+      
       url = url.startsWith('/') ? url.substring(1) : url;
-      // Add to API base URL with version
+      
       url = API_BASE_URL + url;
     } else {
-      // Already has version, just append to base domain
+      
       url = url.startsWith('/') ? url : '/' + url;
       url = API_BASE_URL.split('/v1/')[0] + url;
     }
   }
   
-  // Replace encoded commas with regular commas for readability
+  
   url = url.replace(/%2C/g, ",");
 
   let countryCode = null;
@@ -988,7 +1031,7 @@ function addColorsToVisualization(data) {
     countryElement.innerText = countryCode;
     colorItem.appendChild(countryElement);
     
-    // Pass the entire colors array so that a random color can be selected
+    
     highlightMapCountry(countryCode, colors);
   }
 
@@ -1012,11 +1055,15 @@ elements.noduplicatesCheckbox.addEventListener('change', (event) => {
   updateApiUrlPreview();
 });
 
-window.addEventListener('load', () => {
+// init stuff
+if (isPageVisible) {
   initializePhysics();
-  selectedColors.push(getRandomHexColor());
-  fetchLists();
-  renderColors();
-  initializeSocket();
-  initializePixelatedMap(); // Make pixelated map the default
-});
+} else {
+  physics.wasInitialized = true;
+}
+
+selectedColors.push(getRandomHexColor());
+fetchLists();
+renderColors();
+initializeSocket();
+initializePixelatedMap(); 
