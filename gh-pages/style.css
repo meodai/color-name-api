@@ -325,7 +325,7 @@ pre {
 }
 
 .scrolling .live-requests {
-  transform: translateY(.5rem);
+  transform: translateY(.25rem);
 }
 
 .scrolling .live-requests:hover {
