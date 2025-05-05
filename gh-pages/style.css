@@ -37,6 +37,16 @@ h1, h2, h3 {
   width: max-content;
 }
 
+a {
+  color: oklch(from var(--c-interactive) calc(l - .1) calc(c + .1) h);
+  text-decoration: none;
+  text-underline-offset: 0.2em;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
 @media (max-width: 600px) {
   h1, h2, h3 {
     font-size: 2.5em;
@@ -502,3 +512,17 @@ pre {
 .color-name-lists__footer > *:has(.color-name-lists__source) {
   flex: 0 1 auto;
 }
+
+.refs {
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    max-width: 45rem;
+    margin-top: 4rem;
+    margin-left: var(--inset);
+  }
+} 

@@ -15,7 +15,7 @@ export const elements = {
   svgCountryPaths: document.querySelectorAll("[data-cc]"),
   mapContainer: document.querySelector(".map"),
   physicsCollisions: document.querySelectorAll(
-    "h1:not([data-physics='ignore']), h2:not([data-physics='ignore']), h3:not([data-physics='ignore']), p:not([data-physics='ignore']), .pseudo-terminal, .color-name-lists"
+    "h1:not([data-physics='ignore']), h2:not([data-physics='ignore']), h3:not([data-physics='ignore']), p:not([data-physics='ignore']), .pseudo-terminal, .color-name-lists, .refs ul"
   ),
   listOverview: document.querySelector(".color-name-lists"),
 };
