@@ -227,61 +227,6 @@ pre {
   padding: 0 var(--inset) 2rem;
 }
 
-#color-visualization {
-  margin-bottom: 1.5rem;
-  height: 38rem;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--b) var(--w);
-}
-
-.color-item {
-  position: relative;
-  background: linear-gradient(to right, var(--g, transparent));
-  height: 5rem;
-  font-weight: 900;
-  color: var(--c);
-  overflow: hidden;
-
-  
-}
-
-.color-title {
-  position: absolute;
-  left: var(--inset);
-  right: calc(var(--inset) + 1em);
-  top: calc(50% - .9rem);
-  transform: translateY(-50%) translateY(-.05em);
-  font-size: 2rem;
-  white-space: nowrap;
-  margin: 0;
-}
-
-.color-url {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 100%;
-  transform: translateY(-100%);
-  font-size: 0.8rem;
-  white-space: nowrap;
-  background: var(--b);
-  color: var(--w);
-  text-decoration: none;
-  box-sizing: border-box;
-  padding: 0.23em var(--inset) 0.3em;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.color-country {
-  position: absolute;
-  right: var(--inset);
-  top: calc(50% - .8rem);
-  transform: translateY(-50%);
-  font-size: .8em;
-} 
-
 .color-item + .color-item {
   margin-top: 0.75em;
 }
@@ -292,7 +237,7 @@ pre {
   display: block;
 }
 .map {
-  margin: 4rem 2rem;
+  margin: 4rem 2rem 4rem 0;
 }
 .map path {
   fill: var(--b);
@@ -334,4 +279,13 @@ pre {
 
 .map-toggle-button:hover {
   background-color: var(--c-interactive);
+}
+
+.live-requests {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 10rem;
 }

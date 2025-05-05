@@ -45,6 +45,17 @@
       </p>
     </article>
   </div>
+
+  <article class="live-requests">
+    <div class="design-width">
+      <h2 data-physics="ignore">Live Color Requests</h2>
+      <p data-physics="ignore">
+        The requests below are all the requests that are currently being made to the API.
+      </p>
+    </div>
+    <div id="requests-container"></div>
+  </article>
+
   <div class="pseudo-terminal">
     <div class="url-builder">
       <span class="url-prefix">$ curl</span>
@@ -62,36 +73,6 @@
   <aside class="design-width">
     <code id="api-url-preview"></code>
     <pre id="api-response"></pre>
-  </aside>
-  
-  <article>
-    <div class="design-width">    
-      <h2>Live Color Requests</h2>
-      <p>
-        The requests below are all the requests that are currently being made to the API.
-      </p>
-    </div>
-    <div id="requests-container"></div>
-  </article>
-
-  <aside>
-    <div class="design-width">
-      <h2>About</h2>
-      <p>
-        This interactive tool lets you explore the API's capabilities in a hands-on way. 
-        While not a comprehensive documentation, you can find more details about the API on its 
-        <a href="https://github.com/meodai/color-name-api" target="_blank">GitHub page</a> or in the 
-        <a href="https://api.color.pizza/v1/docs/" target="_blank">official API reference</a>.
-      </p>
-      <p>
-        The falling particles are powered by <a href="https://brm.io/matter-js/" target="_blank">Matter.js</a>. 
-        Each particle represents a color name fetched from the API in real-time using <a href="https://socket.io/" target="_blank">Socket.IO</a>.
-      </p>
-      <p>
-        As you can imagine from the number of requests, running this service is not free. 
-        If you find this tool useful, consider supporting the project by donating via <a href="https://ko-fi.com/colorparrot" target="_blank">Buy Me a Coffee</a>.
-      </p>
-    </div>
   </aside>
 
   <aside>
@@ -361,6 +342,28 @@
     </svg>
   </aside>
 
+
+
+  <aside>
+    <div class="design-width">
+      <h2>About</h2>
+      <p>
+        This interactive tool lets you explore the API's capabilities in a hands-on way. 
+        While not a comprehensive documentation, you can find more details about the API on its 
+        <a href="https://github.com/meodai/color-name-api" target="_blank">GitHub page</a> or in the 
+        <a href="https://api.color.pizza/v1/docs/" target="_blank">official API reference</a>.
+      </p>
+      <p>
+        The falling particles are powered by <a href="https://brm.io/matter-js/" target="_blank">Matter.js</a>. 
+        Each particle represents a color name fetched from the API in real-time using <a href="https://socket.io/" target="_blank">Socket.IO</a>.
+      </p>
+      <p>
+        As you can imagine from the number of requests, running this service is not free. 
+        If you find this tool useful, consider supporting the project by donating via <a href="https://ko-fi.com/colorparrot" target="_blank">Buy Me a Coffee</a>.
+      </p>
+    </div>
+  </aside>
+
   <!--aside>
     <div class="design-width">
     <h2>Apps and Werbsite</h2>
@@ -399,6 +402,6 @@
     <input type="checkbox" id="noduplicates-checkbox" style="display:none">
   </div>
   
-  <script src="script.js"></script>
+  <script src="js/main.js" type="module"></script>
 </body>
 </html>
