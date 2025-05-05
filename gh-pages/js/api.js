@@ -54,7 +54,7 @@ export function populateListOverview(listsData) {
   */
   elements.listOverview.innerHTML = "";
 
-  Object.keys(listsData).forEach(item => {
+  Object.keys(listsData).reverse().forEach(item => {
     const listItem = listsData[item];
     const listEntry = listEntryTpl.content.firstElementChild.cloneNode(true);
     const title = listEntry.querySelector(".color-name-lists__title");
@@ -83,8 +83,6 @@ export function populateListOverview(listsData) {
 
     elements.listOverview.appendChild(listEntry);
   });
-
-  console.log("lists", listsData);
 }
 
 export function populateListDropdown(lists, availableLists, initializeUrlInteractiveElements, updateApiUrlPreview, isInitialized, selectedColors, fetchColorNames) {
