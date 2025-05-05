@@ -1,9 +1,10 @@
-// DOM element references
 export const elements = {
+  doc: document.documentElement,
   listSelect: document.getElementById("list-select"),
   noduplicatesCheckbox: document.getElementById("noduplicates-checkbox"),
   apiUrlPreview: document.getElementById("api-url-preview"),
   apiResponse: document.getElementById("api-response"),
+  liveView: document.querySelector(".live-requests"),
   urlColors: document.getElementById("url-colors"),
   urlListContainer: document.getElementById("url-list-container"),
   urlNoDuplicatesContainer: document.getElementById(

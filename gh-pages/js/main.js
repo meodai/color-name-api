@@ -18,42 +18,40 @@ function removeColor(hexColorToRemove) {
   updateApiUrlPreview(selectedColors, availableLists, isInitialized);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  // Setup country maps for highlighting
-  setupCountryMaps();
+// Setup country maps for highlighting
+setupCountryMaps();
 
-  // Initialize physics (Matter.js)
-  initializePhysics();
+// Initialize physics (Matter.js)
+initializePhysics();
 
-  // Initialize pixelated map
-  initializePixelatedMap({ pixelSize: 10 });
+// Initialize pixelated map
+initializePixelatedMap({ pixelSize: 10 });
 
-  // Initialize socket.io
-  initializeSocket();
+// Initialize socket.io
+initializeSocket();
 
-  // Color logic
-  selectedColors.push(getRandomHexColor());
-  renderColors(selectedColors, () => updateApiUrlPreview(selectedColors, availableLists, isInitialized), removeColor);
+// Color logic
+selectedColors.push(getRandomHexColor());
+renderColors(selectedColors, () => updateApiUrlPreview(selectedColors, availableLists, isInitialized), removeColor);
 
-  fetchLists((lists) => {
-    populateListDropdown(
-      lists,
-      availableLists,
-      () => initializeUrlInteractiveElements(availableLists, () => updateApiUrlPreview(selectedColors, availableLists, isInitialized)),
-      () => updateApiUrlPreview(selectedColors, availableLists, isInitialized),
-      isInitialized,
-      selectedColors,
-      () => fetchColorNames(elements.apiUrlPreview.textContent)
-    );
-  });
+fetchLists((lists) => {
+  populateListDropdown(
+    lists,
+    availableLists,
+    () => initializeUrlInteractiveElements(availableLists, () => updateApiUrlPreview(selectedColors, availableLists, isInitialized)),
+    () => updateApiUrlPreview(selectedColors, availableLists, isInitialized),
+    isInitialized,
+    selectedColors,
+    () => fetchColorNames(elements.apiUrlPreview.textContent)
+  );
+});
 
-  // Event listeners for hidden controls
-  elements.listSelect.addEventListener('change', (event) => {
-    updateApiUrlPreview(selectedColors, availableLists, isInitialized);
-  });
-  elements.noduplicatesCheckbox.addEventListener('change', (event) => {
-    updateApiUrlPreview(selectedColors, availableLists, isInitialized);
-  });
+// Event listeners for hidden controls
+elements.listSelect.addEventListener('change', (event) => {
+  updateApiUrlPreview(selectedColors, availableLists, isInitialized);
+});
+elements.noduplicatesCheckbox.addEventListener('change', (event) => {
+  updateApiUrlPreview(selectedColors, availableLists, isInitialized);
 });
 
 document.addEventListener('visibilitychange', () => {
@@ -77,3 +75,13 @@ document.addEventListener('visibilitychange', () => {
     }
   }
 });
+
+elements.liveView.addEventListener(
+  "click",
+  (event) => {
+    elements.doc.classList.toggle("color-visualization-open");
+  },
+  {
+    capture: true,
+  }
+);

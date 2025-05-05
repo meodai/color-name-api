@@ -87,9 +87,3 @@ export function addColorsToVisualization(data) {
     visualizationContainer.removeChild(visualizationContainer.lastChild);
   }
 }
-
-let isOpen = false;
-
-elements.requestsContainer.addEventListener("click", (event) => {
-  
-});
