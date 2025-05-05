@@ -18,6 +18,104 @@ function removeColor(hexColorToRemove) {
   updateApiUrlPreview(selectedColors, availableLists, isInitialized);
 }
 
+/**
+ * Abstract function to update the API example settings and scroll to the pseudo-terminal.
+ * @param {string} action - The action to perform (addColor, changeColor, removeAllColors, removeColor, setList, setNoduplicates)
+ * @param {object} payload - The payload for the action
+ */
+function updateApiExampleSetting(action, payload = {}) {
+  switch (action) {
+    case 'addColor': {
+      const { hexColor } = payload;
+      if (hexColor && !selectedColors.includes(hexColor)) {
+        selectedColors.push(hexColor);
+      }
+      break;
+    }
+    case 'changeColor': {
+      const { index, hexColor } = payload;
+      if (typeof index === 'number' && hexColor && selectedColors[index]) {
+        selectedColors[index] = hexColor;
+      }
+      break;
+    }
+    case 'removeAllColors': {
+      selectedColors = [];
+      break;
+    }
+    case 'removeColor': {
+      const { index } = payload;
+      if (typeof index === 'number' && selectedColors[index]) {
+        selectedColors.splice(index, 1);
+      }
+      break;
+    }
+    case 'setList': {
+      const { listKey } = payload;
+      if (listKey && availableLists.includes(listKey)) {
+        elements.listSelect.value = listKey;
+        // Update the visible select in the pseudo-terminal
+        const urlListSelect = document.getElementById('url-list-select');
+        const urlListLabel = document.querySelector('.url-list-label');
+        if (urlListSelect) {
+          urlListSelect.value = listKey;
+          // Also update the label if present
+          if (urlListLabel) urlListLabel.textContent = listKey;
+        }
+      }
+      break;
+    }
+    case 'setNoduplicates': {
+      const { value } = payload;
+      elements.noduplicatesCheckbox.checked = !!value;
+      break;
+    }
+    default:
+      break;
+  }
+  // Scroll pseudo-terminal (API example) into view, then update after a short delay
+  const pseudoTerminal = document.querySelector('.pseudo-terminal');
+  if (pseudoTerminal && typeof pseudoTerminal.scrollIntoView === 'function') {
+    pseudoTerminal.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(() => {
+      // Now update the UI after scrolling
+      switch (action) {
+        case 'setList': {
+          const { listKey } = payload;
+          if (listKey && availableLists.includes(listKey)) {
+            elements.listSelect.value = listKey;
+            const urlListSelect = document.getElementById('url-list-select');
+            const urlListLabel = document.querySelector('.url-list-label');
+            if (urlListSelect) {
+              urlListSelect.value = listKey;
+              if (urlListLabel) urlListLabel.textContent = listKey;
+            }
+          }
+          break;
+        }
+        case 'setNoduplicates': {
+          const { value } = payload;
+          elements.noduplicatesCheckbox.checked = !!value;
+          break;
+        }
+      }
+      renderColors(selectedColors, () => updateApiUrlPreview(selectedColors, availableLists, isInitialized), removeColor);
+      updateApiUrlPreview(selectedColors, availableLists, isInitialized);
+    }, 1000); // 400ms delay for smooth scroll
+    return;
+  }
+  // fallback: update immediately if no scroll
+  renderColors(selectedColors, () => updateApiUrlPreview(selectedColors, availableLists, isInitialized), removeColor);
+  updateApiUrlPreview(selectedColors, availableLists, isInitialized);
+  // Scroll pseudo-terminal (API example) into view
+  const pseudoTerminalFallback = document.querySelector('.pseudo-terminal');
+  if (pseudoTerminalFallback && typeof pseudoTerminalFallback.scrollIntoView === 'function') {
+    pseudoTerminalFallback.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+}
+
+window.updateApiExampleSetting = updateApiExampleSetting;
+
 // Setup country maps for highlighting
 setupCountryMaps();
 

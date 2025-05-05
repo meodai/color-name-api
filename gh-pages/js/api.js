@@ -31,7 +31,7 @@ listEntryTpl.innerHTML = `
         <strong>License</strong>
         <span class="color-name-lists__license"></span>
       </div>
-      <div>
+      <div class="color-name-lists__key-container">
         <strong>Key</strong>
         <code class="color-name-lists__key"></code>
       </div>
@@ -61,6 +61,7 @@ export function populateListOverview(listsData) {
     const description = listEntry.querySelector(".color-name-lists__description");
     const count = listEntry.querySelector(".color-name-lists__count");
     const key = listEntry.querySelector(".color-name-lists__key");
+    const keyContainer = listEntry.querySelector(".color-name-lists__key-container");
     const license = listEntry.querySelector(".color-name-lists__license");
     const source = listEntry.querySelector(".color-name-lists__source");
 
@@ -71,9 +72,17 @@ export function populateListOverview(listsData) {
     license.textContent = listItem.license;
     source.href = listItem.source;
 
+    // Add click event to key to update API example and scroll
+    keyContainer.style.cursor = "pointer";
+    keyContainer.title = "Click to use this list in the API example";
+    keyContainer.addEventListener("click", () => {
+      if (typeof window.updateApiExampleSetting === "function") {
+        window.updateApiExampleSetting("setList", { listKey: listItem.key });
+      }
+    });
+
     elements.listOverview.appendChild(listEntry);
   });
-
 
   console.log("lists", listsData);
 }
