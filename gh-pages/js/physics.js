@@ -266,8 +266,7 @@ function updateHeadingBodies(mode = "full") {
   if (bodiesToRemove.length > 0) {
     bodiesToRemove.forEach(body => Composite.remove(engine.world, body));
   }
-  // Re-add headings that have come back into view
-  const headings = document.querySelectorAll("h1, h2, h3, p, .pseudo-terminal, .color-title, .color-country, .color-url, .color-visualization, .color-item");
+  const headings = elements.physicsCollisions;
   headings.forEach(heading => {
     const rect = heading.getBoundingClientRect();
     // Only add if the TOP is in the viewbox
