@@ -83,24 +83,27 @@ const colorNameListMeta = {
   source: 'https://github.com/meodai/color-names',
   key: 'colors',
   colorCount: colors.length,
+  license: 'MIT',
 };
 
 colorNameLists.meta.default = { ...colorNameListMeta, key: 'default' };
 
 colorNameLists.meta.bestOf = {
-  title: 'Best of Color Names',
-  source: 'https://github.com/meodai/color-names',
-  description: 'Best color names selected from various sources.',
-  key: 'bestOf',
+  title: "Best of Color Names",
+  source: "https://github.com/meodai/color-names",
+  description: "Best color names selected from various sources.",
+  key: "bestOf",
   colorCount: colorsBestOf.length,
+  license: "MIT",
 };
 
 colorNameLists.meta.short = {
-  title: 'Short Color Names',
-  source: 'https://github.com/meodai/color-names',
-  description: 'A list of short color names. (12 characters max)',
-  key: 'short',
+  title: "Short Color Names",
+  source: "https://github.com/meodai/color-names",
+  description: "A list of short color names. (12 characters max)",
+  key: "short",
   colorCount: colorsShort.length,
+  license: "MIT",
 };
 
 // add endpoint urls to the meta data
