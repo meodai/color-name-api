@@ -17,4 +17,5 @@ export const elements = {
   physicsCollisions: document.querySelectorAll(
     "h1:not([data-physics='ignore']), h2:not([data-physics='ignore']), h3:not([data-physics='ignore']), p:not([data-physics='ignore']), .pseudo-terminal"
   ),
+  listOverview: document.querySelector(".color-name-lists"),
 };

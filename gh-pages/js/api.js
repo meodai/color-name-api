@@ -11,10 +11,71 @@ export async function fetchLists(populateListDropdown) {
     }
     const data = await response.json();
     populateListDropdown(data.availableColorNameLists || []);
+    populateListOverview(data.listDescriptions || {});
   } catch (error) {
     console.error('Error fetching color lists:', error);
     elements.listSelect.innerHTML = '<option value="">Error loading lists</option>';
   }
+}
+
+const listEntryTpl = document.createElement("template");
+listEntryTpl.innerHTML = `
+  <li class="color-name-lists__item">
+    <div class="color-name-lists__header">
+      <h4 class="color-name-lists__title"></h4>
+      <sup class="color-name-lists__count" title="color count"></sup>
+    </div>
+    <p class="color-name-lists__description"></p>
+    <div class="color-name-lists__footer">
+      <div>
+        <strong>License</strong>
+        <span class="color-name-lists__license"></span>
+      </div>
+      <div>
+        <strong>Key</strong>
+        <code class="color-name-lists__key"></code>
+      </div>
+      <a class="color-name-lists__source" target="_blank">Source</a>
+    </div>
+  </li>
+`;
+
+export function populateListOverview(listsData) {
+  /*
+  {
+    "title": "Basic",
+    "description": "A set of basic colors. Red, Green, Blue...",
+    "source": "https://github.com/colorjs/color-namer/tree/master/lib/colors",
+    "key": "basic",
+    "license": "MIT",
+    "colorCount": 21,
+    "url": "/v1/?list=basic"
+  }
+  */
+  elements.listOverview.innerHTML = "";
+
+  Object.keys(listsData).forEach(item => {
+    const listItem = listsData[item];
+    const listEntry = listEntryTpl.content.firstElementChild.cloneNode(true);
+    const title = listEntry.querySelector(".color-name-lists__title");
+    const description = listEntry.querySelector(".color-name-lists__description");
+    const count = listEntry.querySelector(".color-name-lists__count");
+    const key = listEntry.querySelector(".color-name-lists__key");
+    const license = listEntry.querySelector(".color-name-lists__license");
+    const source = listEntry.querySelector(".color-name-lists__source");
+
+    title.textContent = listItem.title;
+    description.textContent = listItem.description;
+    count.textContent = listItem.colorCount;
+    key.textContent = listItem.key;
+    license.textContent = listItem.license;
+    source.href = listItem.source;
+
+    elements.listOverview.appendChild(listEntry);
+  });
+
+
+  console.log("lists", listsData);
 }
 
 export function populateListDropdown(lists, availableLists, initializeUrlInteractiveElements, updateApiUrlPreview, isInitialized, selectedColors, fetchColorNames) {

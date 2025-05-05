@@ -289,7 +289,7 @@ pre {
   left: 0;
   right: 0;
   height: 100vh;
-  background: var(--b);
+  background: var(--w);
   color: var(--w);
   border-bottom: 1px solid var(--w);
   transform: translateY(var(--color-entry-height));
@@ -394,4 +394,106 @@ pre {
 .color-item__country {
   font-size: 0.8em;
   font-weight: 100;
+}
+
+
+.color-name-lists {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1px;
+}
+
+.color-name-lists,
+.color-name-lists__item {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.color-name-lists {
+  padding-left: var(--inset);
+  margin-top: 2rem;
+  max-width: 70rem;
+}
+
+.color-name-lists__item {
+  flex: 0 0 calc(100% / 2 - 1px);
+  width: calc(100% / 2 - 1px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 0 0 1px var(--w);
+  padding: 2rem;
+  box-sizing: border-box;
+  background: var(--b);
+  color: var(--w);
+}
+
+@media (max-width: 600px) {
+  .color-name-lists__item {
+    flex: 0 0 calc(100% - 2rem);
+  }
+}
+
+
+.color-name-lists__header,
+.color-name-lists__footer {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.color-name-lists__footer {
+  border-top: 1px solid var(--w);
+  margin: 1rem -2rem -2rem;
+  padding: 0 2rem;
+  & > * {
+    padding: .5em 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  & > * + * {
+    border-left: 1px solid var(--w);
+    padding-left: 1rem;
+  }
+  code {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  a {
+    color: var(--c-interactive);
+  }
+}
+
+.color-name-lists__title {
+  margin: 0;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.color-name-lists__count {
+  background: var(--w);
+  color: var(--b);
+  font-size: 0.6em;
+  padding: 0.15em 0.5em 0.2em;
+  margin-top: -0.5em;
+}
+
+.color-name-lists__description {
+  margin: 1em 0;
+  max-width: 40ch;
+  flex-grow: 1;
+}
+.color-name-lists__footer > *:has(.color-name-lists__license) {
+  flex: 0 0 45%;
+  width: 45%;
+}
+.color-name-lists__footer > *:has(.color-name-lists__key) {
+  flex: 0 1 30%;
+  width: 30%;
+}
+.color-name-lists__footer > *:has(.color-name-lists__source) {
+  flex: 0 1 auto;
 }
