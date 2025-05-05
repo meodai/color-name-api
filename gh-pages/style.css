@@ -98,7 +98,7 @@ pre {
   color: var(--w);
   position: relative;
   overflow: clip;
-
+  margin-top: 6rem;
   margin-bottom: 1rem;
 }
 
@@ -412,7 +412,7 @@ pre {
 
 .color-name-lists {
   padding-left: var(--inset);
-  margin-top: 2rem;
+  margin-top: 6rem;
   max-width: 70rem;
 }
 
