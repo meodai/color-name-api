@@ -480,6 +480,10 @@ pre {
   a {
     color: var(--c-interactive);
   }
+  strong {
+    font-size: 0.6em;
+    margin-right: 0.5em;
+  }
 }
 
 .color-name-lists__title {
