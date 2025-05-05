@@ -85,3 +85,19 @@ elements.liveView.addEventListener(
     capture: true,
   }
 );
+
+let isPageOnTop = true;
+const topThreshold = 10;
+
+function handleScroll() {
+  const scrollTop = window.scrollY || document.documentElement.scrollTop;
+  if (scrollTop > topThreshold && isPageOnTop) {
+    isPageOnTop = false;
+    elements.doc.classList.add("scrolling");
+  } else if (scrollTop <= topThreshold && !isPageOnTop) {
+    isPageOnTop = true;
+    elements.doc.classList.remove("scrolling");
+  }
+}
+
+window.addEventListener("scroll", handleScroll);

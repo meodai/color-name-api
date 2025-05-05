@@ -108,7 +108,7 @@ pre {
 
 .url-builder {
   position: sticky;
-  top: var(--color-entry-height);
+  top: 0;
   z-index: 10;
   font-family: monospace;
   padding: 1.5rem var(--inset) 0.5rem var(--inset);
@@ -291,7 +291,6 @@ pre {
   height: 100vh;
   background: var(--w);
   color: var(--w);
-  border-bottom: 1px solid var(--w);
   transform: translateY(var(--color-entry-height));
   z-index: 20;
 
@@ -313,16 +312,24 @@ pre {
     white-space: nowrap;
   }
 
-    h2::before {
-      content: '';
-      display: inline-block;
-      width: .5em;
-      height: .5em;
-      background: lime;
-      border-radius: 50%;
-      margin-right: .5rem;
-      margin-top: .1em;
-    }
+  h2::before {
+    content: '';
+    display: inline-block;
+    width: .5em;
+    height: .5em;
+    background: lime;
+    border-radius: 50%;
+    margin-right: .5rem;
+    margin-top: .1em;
+  }
+}
+
+.scrolling .live-requests {
+  transform: translateY(.5rem);
+}
+
+.scrolling .live-requests:hover {
+  transform: translateY(var(--color-entry-height));
 }
 
 .color-visualization-open .live-requests {
