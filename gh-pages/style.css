@@ -342,6 +342,7 @@ pre {
   transform: translateY(var(--color-entry-height));
 }
 
+.scrolling.color-visualization-open .live-requests,
 .color-visualization-open .live-requests {
   transform: translateY(
     min(80vh, calc(var(--color-entry-height) * 10))

@@ -183,12 +183,27 @@ elements.liveView.addEventListener(
     capture: true,
   }
 );
+elements.doc.addEventListener(
+  "click",
+  (event) => {
+    if (elements.doc.classList.contains("color-visualization-open")) {
+      const isClickInside = elements.liveView.contains(event.target);
+      if (!isClickInside) {
+        elements.doc.classList.remove("color-visualization-open");
+      }
+    }
+  },
+  {
+    capture: true,
+  }
+);
+
 
 let isPageOnTop = true;
 const topThreshold = 10;
 
 function handleScroll() {
-  const scrollTop = window.scrollY || document.documentElement.scrollTop;
+  const scrollTop = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop;
   if (scrollTop > topThreshold && isPageOnTop) {
     isPageOnTop = false;
     elements.doc.classList.add("scrolling");
@@ -199,3 +214,5 @@ function handleScroll() {
 }
 
 window.addEventListener("scroll", handleScroll);
+
+handleScroll();
