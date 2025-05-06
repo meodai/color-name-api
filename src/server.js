@@ -604,7 +604,7 @@ const requestHandler = async (request, response) => { // Make requestHandler asy
     );
   }
 
-  const from = request.headers.origin || request.headers.host || request.headers.referer;
+  const from = request.headers.origin || request.headers.referer || request.headers.host;
   // understanding where requests come from
   if (from) {
     console.info('request from', from);
