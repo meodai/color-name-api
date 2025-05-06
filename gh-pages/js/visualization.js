@@ -3,7 +3,7 @@ import { elements } from './elements.js';
 import { highlightMapCountry } from './map.js';
 import { getColorValue, colorArrToSteppedGradient } from './colors.js';
 
-const MAX_COLORS_DISPLAY = 100;
+const MAX_COLORS_DISPLAY = 20;
 const MAX_COLOR_ITEMS = 100;
 const API_BASE_URL = 'https://api.color.pizza/v1/';
 
