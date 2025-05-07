@@ -9,6 +9,7 @@ info:
     - Real-time color data via Socket.io for instant updates
     - Optimized responses with gzip compression
     - Multiple curated color name lists to choose from
+    - Custom referrer tracking via X-Referrer header
   version: 1.1.0
   license:
     name: MIT
@@ -355,6 +356,17 @@ paths:
           type: boolean
         required: false
 
+      - name: X-Referrer
+        in: header
+        description: |
+          Custom header for explicit referrer tracking. When provided, this value is used instead of 
+          standard referrer headers and is included in socket.io event data. Useful for attribution
+          and analytics, especially in environments where standard referrer headers might be stripped.
+        required: false
+        schema:
+          type: string
+        example: "my-app-name"
+
   /names/:
     get:
       operationId: searchColorsByName
@@ -553,3 +565,15 @@ x-api-features:
     description: |
       The API uses LRU caching for gzipped responses to improve performance
       for frequently requested data.
+  custom-headers:
+    x-referrer:
+      name: X-Referrer
+      description: |
+        Custom header for explicit referrer tracking. When provided, this value is used instead of 
+        standard referrer headers and is included in socket.io event data. Useful for attribution
+        and analytics, especially in environments where standard referrer headers might be stripped.
+      in: header
+      required: false
+      schema:
+        type: string
+      example: "my-app-name"

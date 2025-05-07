@@ -1206,6 +1206,7 @@ ul.nav-tabs {
 <li>Real-time color data via Socket.io for instant updates</li>
 <li>Optimized responses with gzip compression</li>
 <li>Multiple curated color name lists to choose from</li>
+<li>Custom referrer tracking via X-Referrer header</li>
 </ul>
 
             </div>
@@ -1741,9 +1742,13 @@ public class DefaultApiExample {
         String values = values_example; // String | A comma-separated list of hex values (e.g., `FF0000,00FF00` do not include the `#`)
         Boolean noduplicates = true; // Boolean | When true, ensures each color gets a unique name even when colors are similar
         Boolean goodnamesonly = true; // Boolean | When true, uses the 'bestOf' list automatically
+        String xReferrer = my-app-name; // String | Custom header for explicit referrer tracking. When provided, this value is used instead of 
+standard referrer headers and is included in socket.io event data. Useful for attribution
+and analytics, especially in environments where standard referrer headers might be stripped.
+
 
         try {
-            ColorResponse result = apiInstance.getColorNames(list, values, noduplicates, goodnamesonly);
+            ColorResponse result = apiInstance.getColorNames(list, values, noduplicates, goodnamesonly, xReferrer);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling DefaultApi#getColorNames");
@@ -1764,9 +1769,13 @@ public class DefaultApiExample {
         String values = values_example; // String | A comma-separated list of hex values (e.g., `FF0000,00FF00` do not include the `#`)
         Boolean noduplicates = true; // Boolean | When true, ensures each color gets a unique name even when colors are similar
         Boolean goodnamesonly = true; // Boolean | When true, uses the 'bestOf' list automatically
+        String xReferrer = my-app-name; // String | Custom header for explicit referrer tracking. When provided, this value is used instead of 
+standard referrer headers and is included in socket.io event data. Useful for attribution
+and analytics, especially in environments where standard referrer headers might be stripped.
+
 
         try {
-            ColorResponse result = apiInstance.getColorNames(list, values, noduplicates, goodnamesonly);
+            ColorResponse result = apiInstance.getColorNames(list, values, noduplicates, goodnamesonly, xReferrer);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling DefaultApi#getColorNames");
@@ -1788,12 +1797,17 @@ PossibleLists *list = ; // The name of the color name list to use (case-sensitiv
 String *values = values_example; // A comma-separated list of hex values (e.g., `FF0000,00FF00` do not include the `#`) (optional) (default to null)
 Boolean *noduplicates = true; // When true, ensures each color gets a unique name even when colors are similar (optional) (default to null)
 Boolean *goodnamesonly = true; // When true, uses the 'bestOf' list automatically (optional) (default to null)
+String *xReferrer = my-app-name; // Custom header for explicit referrer tracking. When provided, this value is used instead of 
+standard referrer headers and is included in socket.io event data. Useful for attribution
+and analytics, especially in environments where standard referrer headers might be stripped.
+ (optional) (default to null)
 
 // Get color names for specific hex values
 [apiInstance getColorNamesWith:list
     values:values
     noduplicates:noduplicates
     goodnamesonly:goodnamesonly
+    xReferrer:xReferrer
               completionHandler: ^(ColorResponse output, NSError* error) {
     if (output) {
         NSLog(@"%@", output);
@@ -1814,7 +1828,11 @@ var opts = {
   'list': , // {PossibleLists} The name of the color name list to use (case-sensitive)
   'values': values_example, // {String} A comma-separated list of hex values (e.g., `FF0000,00FF00` do not include the `#`)
   'noduplicates': true, // {Boolean} When true, ensures each color gets a unique name even when colors are similar
-  'goodnamesonly': true // {Boolean} When true, uses the 'bestOf' list automatically
+  'goodnamesonly': true, // {Boolean} When true, uses the 'bestOf' list automatically
+  'xReferrer': my-app-name // {String} Custom header for explicit referrer tracking. When provided, this value is used instead of 
+standard referrer headers and is included in socket.io event data. Useful for attribution
+and analytics, especially in environments where standard referrer headers might be stripped.
+
 };
 
 var callback = function(error, data, response) {
@@ -1851,10 +1869,14 @@ namespace Example
             var values = values_example;  // String | A comma-separated list of hex values (e.g., `FF0000,00FF00` do not include the `#`) (optional)  (default to null)
             var noduplicates = true;  // Boolean | When true, ensures each color gets a unique name even when colors are similar (optional)  (default to null)
             var goodnamesonly = true;  // Boolean | When true, uses the 'bestOf' list automatically (optional)  (default to null)
+            var xReferrer = my-app-name;  // String | Custom header for explicit referrer tracking. When provided, this value is used instead of 
+standard referrer headers and is included in socket.io event data. Useful for attribution
+and analytics, especially in environments where standard referrer headers might be stripped.
+ (optional)  (default to null)
 
             try {
                 // Get color names for specific hex values
-                ColorResponse result = apiInstance.getColorNames(list, values, noduplicates, goodnamesonly);
+                ColorResponse result = apiInstance.getColorNames(list, values, noduplicates, goodnamesonly, xReferrer);
                 Debug.WriteLine(result);
             } catch (Exception e) {
                 Debug.Print("Exception when calling DefaultApi.getColorNames: " + e.Message );
@@ -1875,9 +1897,13 @@ $list = ; // PossibleLists | The name of the color name list to use (case-sensit
 $values = values_example; // String | A comma-separated list of hex values (e.g., `FF0000,00FF00` do not include the `#`)
 $noduplicates = true; // Boolean | When true, ensures each color gets a unique name even when colors are similar
 $goodnamesonly = true; // Boolean | When true, uses the 'bestOf' list automatically
+$xReferrer = my-app-name; // String | Custom header for explicit referrer tracking. When provided, this value is used instead of 
+standard referrer headers and is included in socket.io event data. Useful for attribution
+and analytics, especially in environments where standard referrer headers might be stripped.
+
 
 try {
-    $result = $api_instance->getColorNames($list, $values, $noduplicates, $goodnamesonly);
+    $result = $api_instance->getColorNames($list, $values, $noduplicates, $goodnamesonly, $xReferrer);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling DefaultApi->getColorNames: ', $e->getMessage(), PHP_EOL;
@@ -1896,9 +1922,13 @@ my $list = ; # PossibleLists | The name of the color name list to use (case-sens
 my $values = values_example; # String | A comma-separated list of hex values (e.g., `FF0000,00FF00` do not include the `#`)
 my $noduplicates = true; # Boolean | When true, ensures each color gets a unique name even when colors are similar
 my $goodnamesonly = true; # Boolean | When true, uses the 'bestOf' list automatically
+my $xReferrer = my-app-name; # String | Custom header for explicit referrer tracking. When provided, this value is used instead of 
+standard referrer headers and is included in socket.io event data. Useful for attribution
+and analytics, especially in environments where standard referrer headers might be stripped.
+
 
 eval {
-    my $result = $api_instance->getColorNames(list => $list, values => $values, noduplicates => $noduplicates, goodnamesonly => $goodnamesonly);
+    my $result = $api_instance->getColorNames(list => $list, values => $values, noduplicates => $noduplicates, goodnamesonly => $goodnamesonly, xReferrer => $xReferrer);
     print Dumper($result);
 };
 if ($@) {
@@ -1919,10 +1949,14 @@ list =  # PossibleLists | The name of the color name list to use (case-sensitive
 values = values_example # String | A comma-separated list of hex values (e.g., `FF0000,00FF00` do not include the `#`) (optional) (default to null)
 noduplicates = true # Boolean | When true, ensures each color gets a unique name even when colors are similar (optional) (default to null)
 goodnamesonly = true # Boolean | When true, uses the 'bestOf' list automatically (optional) (default to null)
+xReferrer = my-app-name # String | Custom header for explicit referrer tracking. When provided, this value is used instead of 
+standard referrer headers and is included in socket.io event data. Useful for attribution
+and analytics, especially in environments where standard referrer headers might be stripped.
+ (optional) (default to null)
 
 try:
     # Get color names for specific hex values
-    api_response = api_instance.get_color_names(list=list, values=values, noduplicates=noduplicates, goodnamesonly=goodnamesonly)
+    api_response = api_instance.get_color_names(list=list, values=values, noduplicates=noduplicates, goodnamesonly=goodnamesonly, xReferrer=xReferrer)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling DefaultApi->getColorNames: %s\n" % e)</code></pre>
@@ -1936,9 +1970,10 @@ pub fn main() {
     let values = values_example; // String
     let noduplicates = true; // Boolean
     let goodnamesonly = true; // Boolean
+    let xReferrer = my-app-name; // String
 
     let mut context = DefaultApi::Context::default();
-    let result = client.getColorNames(list, values, noduplicates, goodnamesonly, &context).wait();
+    let result = client.getColorNames(list, values, noduplicates, goodnamesonly, xReferrer, &context).wait();
 
     println!("{:?}", result);
 }
@@ -1954,6 +1989,36 @@ pub fn main() {
                           <h2>Parameters</h2>
 
 
+                            <div class="methodsubtabletitle">Header parameters</div>
+                            <table id="methodsubtable">
+                              <tr>
+                                <th width="150px">Name</th>
+                                <th>Description</th>
+                              </tr>
+                                  <tr><td style="width:150px;">X-Referrer</td>
+<td>
+
+
+    <div id="d2e199_getColorNames_xReferrer">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    String
+                </span>
+
+                    <div class="inner description marked">
+Custom header for explicit referrer tracking. When provided, this value is used instead of 
+standard referrer headers and is included in socket.io event data. Useful for attribution
+and analytics, especially in environments where standard referrer headers might be stripped.
+
+                    </div>
+            </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
 
 
 

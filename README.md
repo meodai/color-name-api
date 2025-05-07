@@ -271,3 +271,27 @@ ALLOWED_SOCKET_ORIGINS=https://yourdomain.com,https://otherdomain.com
 ```
 
 Note that WebSocket support is optional and disabled by default. The REST API endpoints will continue to work regardless of WebSocket configuration.
+
+### Custom Referrer Tracking with X-Referrer Header
+
+The API supports custom referrer tracking via the `X-Referrer` header. This is useful when:
+
+- The standard `Referer` header is stripped by privacy settings
+- You want to explicitly identify your application or service
+- You're making server-to-server requests where standard referrer information isn't available
+
+To use this feature, simply include the `X-Referrer` header in your requests:
+
+```shell
+$ curl -H "X-Referrer: my-awesome-app" 'https://api.color.pizza/v1/?values=aaffcc'
+```
+
+When the API is configured with WebSockets enabled, this referrer information is included in the broadcasted socket events, allowing for tracking and analytics of color requests across different applications or domains.
+
+This header is especially useful for:
+
+- Attribution in multi-platform scenarios
+- Tracking API usage from different client applications
+- Understanding where color lookups are being performed
+
+**Please include the X-Referrer header in your requests to help us understand how the API is being used. This information helps us improve the service and justify continued development and maintenance of this free API. Your support is greatly appreciated!**

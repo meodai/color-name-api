@@ -36,7 +36,16 @@ export interface paths {
                 /** @description When true, uses the 'bestOf' list automatically */
                 goodnamesonly?: boolean;
             };
-            header?: never;
+            header?: {
+                /**
+                 * @description Custom header for explicit referrer tracking. When provided, this value is used instead of
+                 *     standard referrer headers and is included in socket.io event data. Useful for attribution
+                 *     and analytics, especially in environments where standard referrer headers might be stripped.
+                 *
+                 * @example my-app-name
+                 */
+                "X-Referrer"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -289,7 +298,16 @@ export interface operations {
                 /** @description When true, uses the 'bestOf' list automatically */
                 goodnamesonly?: boolean;
             };
-            header?: never;
+            header?: {
+                /**
+                 * @description Custom header for explicit referrer tracking. When provided, this value is used instead of
+                 *     standard referrer headers and is included in socket.io event data. Useful for attribution
+                 *     and analytics, especially in environments where standard referrer headers might be stripped.
+                 *
+                 * @example my-app-name
+                 */
+                "X-Referrer"?: string;
+            };
             path?: never;
             cookie?: never;
         };
