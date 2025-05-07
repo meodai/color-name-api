@@ -101,7 +101,7 @@ function updateApiExampleSetting(action, payload = {}) {
       }
       renderColors(selectedColors, () => updateApiUrlPreview(selectedColors, availableLists, isInitialized), removeColor);
       updateApiUrlPreview(selectedColors, availableLists, isInitialized);
-    }, 1000); // 400ms delay for smooth scroll
+    }, 1000);
     return;
   }
   // fallback: update immediately if no scroll

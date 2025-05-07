@@ -121,7 +121,7 @@ pre {
   top: 0;
   z-index: 10;
   font-family: monospace;
-  padding: 1.5rem var(--inset) 0.5rem var(--inset);
+  padding: 2.2rem var(--inset) 0.5rem var(--inset);
   border-radius: 5px;
   display: flex;
   flex-wrap: wrap;
@@ -240,7 +240,7 @@ pre {
 #json-viewer {
   background: var(--b);
   border-radius: 5px;
-  padding: 0 var(--inset) 2rem;
+  padding: 0 var(--inset) 2.5rem;
 }
 
 #api-url-preview {
@@ -440,7 +440,7 @@ pre {
   flex-direction: column;
   justify-content: space-between;
   box-shadow: 0 0 0 1px var(--w);
-  padding: 2rem;
+  padding: 1.8rem 2rem;
   box-sizing: border-box;
   background: var(--b);
   color: var(--w);

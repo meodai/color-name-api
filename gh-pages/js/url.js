@@ -67,6 +67,8 @@ export function updateApiUrlPreview(selectedColors, availableLists, isInitialize
   }
 }
 
+let timeoutId = null;
+
 export async function fetchColorNames(apiUrl) {
   if (!apiUrl || !apiUrl.startsWith(API_BASE_URL)) return;
   const jsonViewer = elements.jsonViewer;
@@ -74,10 +76,16 @@ export async function fetchColorNames(apiUrl) {
   jsonViewer.style.height = `${jsonViewerHeight}px`;
   elements.apiResponse.textContent = "Fetching...";
   jsonViewer.innerHTML = "";
+
   try {
     const response = await fetch(apiUrl);
     const data = await response.json();
-    jsonViewer.style.height = "auto";
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+    timeoutId = setTimeout(() => {
+      jsonViewer.style.height = "auto";
+    }, 200); // Allow for the JSON viewer to to load before resetting height
     if (!response.ok || data.error) {
       throw new Error(data.error || `HTTP error! status: ${response.status}`);
     }
