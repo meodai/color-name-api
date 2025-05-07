@@ -286,6 +286,16 @@ To use this feature, simply include the `X-Referrer` header in your requests:
 $ curl -H "X-Referrer: my-awesome-app" 'https://api.color.pizza/v1/?values=aaffcc'
 ```
 
+or
+
+```javascript
+fetch('https://api.color.pizza/v1/?values=aaffcc', {
+  headers: {
+    "X-Referrer": "your-app-name",
+  },
+}).then((response) => response.json())
+```
+
 When the API is configured with WebSockets enabled, this referrer information is included in the broadcasted socket events, allowing for tracking and analytics of color requests across different applications or domains.
 
 This header is especially useful for:
@@ -295,3 +305,4 @@ This header is especially useful for:
 - Understanding where color lookups are being performed
 
 **Please include the X-Referrer header in your requests to help us understand how the API is being used. This information helps us improve the service and justify continued development and maintenance of this free API. Your support is greatly appreciated!**
+
