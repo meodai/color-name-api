@@ -47,12 +47,13 @@ let io;
 let hasDb = false;
 
 const responseHeaderObj = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET',
-  'Access-Control-Allow-Credentials': false,
-  'Access-Control-Max-Age': '86400',
-  'Access-Control-Allow-Headers': 'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept',
-  'Content-Type': 'application/json; charset=utf-8',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET",
+  "Access-Control-Allow-Credentials": false,
+  "Access-Control-Max-Age": "86400",
+  "Access-Control-Allow-Headers":
+    "X-Requested-With, X-Referrer, X-HTTP-Method-Override, Content-Type, Accept",
+  "Content-Type": "application/json; charset=utf-8",
 };
 
 const responseHandlerSVG = {
@@ -368,24 +369,25 @@ const respondValueSearch = async (
 
  if (socket) {
     const { clientIp, clientLocation } = getClientInfo(request);
+    const xReferrer = request.headers['x-referrer'];
     
-    // Extract just the pathname and search parts but remove the version prefix
     let relativePath = requestUrl.pathname + requestUrl.search;
     
     // Remove the API version from the path (e.g., /v1/)
     relativePath = relativePath.replace(new RegExp(`^${baseUrl}`), '/');
     
+    const emittedRequestInfo = {
+      url: relativePath,
+      method: request.method,
+      clientLocation,
+      xReferrer: xReferrer || null,
+    };
+    
     io.emit('colors', {
       paletteTitle,
       colors: colorsResponse,
       list: listKey,
-      request: {
-        url: relativePath,
-        method: request.method,
-        // headers: request.headers,
-        // clientIp, // don't think its safe to send this
-        clientLocation,
-      }
+      request: emittedRequestInfo
     });
   }
 
@@ -604,7 +606,8 @@ const requestHandler = async (request, response) => { // Make requestHandler asy
     );
   }
 
-  const from = request.headers.origin || request.headers.referer || request.headers.host;
+  const xReferrer = request.headers['x-referrer']; // Read the custom X-Referrer header
+  const from = xReferrer || request.headers.origin || request.headers.referer || request.headers.host;
   // understanding where requests come from
   if (from) {
     console.info('request from', from);
