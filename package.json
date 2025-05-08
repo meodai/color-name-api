@@ -43,7 +43,7 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.47.10",
     "color-name-list": "^11.13.0",
-    "color-name-lists": "^3.28.0",
+    "color-name-lists": "^3.29.0",
     "culori": "^4.0.1",
     "dotenv": "^16.4.7",
     "ip-location-api": "^2.4.3",
