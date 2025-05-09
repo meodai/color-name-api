@@ -160,10 +160,12 @@ export function createColorObject(hexColor) {
   const y = -size * 2;
   const sides = Math.floor(Math.random() * 4) + 1;
   const scale = 1;
+  const density = Math.max(0.001, (size / 23) ** 2);
   const commonProps = {
     restitution: 0.4,
     friction: 0.05,
-    frictionAir: 0.005,
+    frictionAir: (1 - (size / 23)) * 0.05,
+    density: density,
     angle: Math.random() * Math.PI * 2,
     render: { fillStyle: color, strokeStyle: '#000000', lineWidth: 0 }
   };
