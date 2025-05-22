@@ -322,7 +322,7 @@ pre {
     z-index: 1;
     padding: 0;
     margin: 0;
-    font-size: .7rem;
+    font-size: .9rem;
     font-weight: 100;
     display: flex;
     align-items: center;
@@ -384,7 +384,7 @@ pre {
 .color-item__title {
   font-weight: 100;
   margin: 0;
-  font-size: 1rem;
+  font-size: 1.1rem;
   flex-grow: 1;
   white-space: nowrap;
   overflow: hidden;
@@ -394,7 +394,7 @@ pre {
 
 .color-item__url {
   color: var(--b);
-  font-size: 0.6em;
+  font-size: 0.8em;
   padding: 0.25em var(--inset) 0.25em calc(var(--inset) + 8rem);
   text-align: right;
   
