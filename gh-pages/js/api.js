@@ -35,7 +35,6 @@ listEntryTpl.innerHTML = `
         <strong>Key</strong>
         <code class="color-name-lists__key"></code>
       </div>
-      <a class="color-name-lists__source" target="_blank">Source</a>
     </div>
   </li>
 `;
@@ -63,14 +62,14 @@ export function populateListOverview(listsData) {
     const key = listEntry.querySelector(".color-name-lists__key");
     const keyContainer = listEntry.querySelector(".color-name-lists__key-container");
     const license = listEntry.querySelector(".color-name-lists__license");
-    const source = listEntry.querySelector(".color-name-lists__source");
+    //const source = listEntry.querySelector(".color-name-lists__source");
 
     title.textContent = listItem.title;
     description.textContent = listItem.description;
     count.textContent = listItem.colorCount;
     key.textContent = listItem.key;
     license.textContent = listItem.license;
-    source.href = listItem.source;
+    //source.href = listItem.source;
 
     // Add click event to key to update API example and scroll
     keyContainer.style.cursor = "pointer";
