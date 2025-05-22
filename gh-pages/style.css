@@ -363,13 +363,7 @@ pre {
   color: var(--c);
   display: flex;
   flex-direction: column-reverse;
-  pointer-events: none;
   user-select: none;
-}
-
-.color-visualization-open .color-item {
-  pointer-events: auto;
-  user-select: auto;
 }
 
 .color-item + .color-item {
