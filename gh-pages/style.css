@@ -5,10 +5,14 @@
   font-weight: 100;
 
   line-height: 1.5;
+  color-scheme: light dark;
 
-  --c-interactive: rgb(220, 150, 86);
-  --w: #f5eee2;
-  --b: #2c251e;
+  --c-interactive: light-dark(rgb(203, 75, 22), rgb(220, 150, 86));
+  --w: light-dark(#f5eee2, #2c251e);
+  --b: light-dark(#2c251e, #f5eee2);
+
+  --c-line: var(--b);
+  --c-fill: var(--w);
 
   --color-entry-height: 3.5rem;
   
@@ -100,16 +104,16 @@ pre {
   display: block;
   overflow-x: auto;
   scrollbar-width: thin;
-  scrollbar-color: var(--b) var(--w);
+  scrollbar-color: var(--w) var(--b);
 }
 
 .pseudo-terminal {
-  background-color: var(--b);
-  color: var(--w);
+  color: var(--b);
   position: relative;
   overflow: clip;
   margin-top: 6rem;
   margin-bottom: 1rem;
+  box-shadow: 0 0 0 0.5px var(--b);
 }
 
 .pseudo-terminal .css-mdotot {
@@ -122,15 +126,14 @@ pre {
   z-index: 10;
   font-family: monospace;
   padding: 2.2rem var(--inset) 0.5rem var(--inset);
-  border-radius: 5px;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   overflow-x: auto;
   line-height: 1.8;
   
-  background-color: var(--b);
-  text-shadow: 0 0 1em var(--b);
+  background-color: var(--w);
+  text-shadow: 0 0 1em var(--w);
 
   scrollbar-width: thin;
   scrollbar-color: var(--b) var(--w);
@@ -155,6 +158,7 @@ pre {
 
   text-decoration: underline;
   text-underline-offset: 0.2em;
+  padding: 0 0.1em;
 }
 
 .url-interactive:has(.url-color-chip) {
@@ -201,7 +205,7 @@ pre {
   background-color: var(--color);
   border-radius: 50%;
   margin-right: 0.3em;
-  box-shadow: 0 0 0 1px var(--w);
+  box-shadow: 0 0 0 .5px var(--w);
 }
 
 .url-color-remove {
@@ -221,8 +225,9 @@ pre {
   cursor: pointer;
   margin: 0 0.3em;
   color: var(--c-interactive);
-  box-shadow: 0 0 0 1px var(--w);
+  box-shadow: inset 0 0 0 0.5px var(--b);
   border-radius: 50%;
+  background: var(--w);
 }
 
 .url-add-color:hover {
@@ -238,9 +243,14 @@ pre {
 }
 
 #json-viewer {
-  background: var(--b);
-  border-radius: 5px;
   padding: 0 var(--inset) 2.5rem;
+  background-image: radial-gradient(
+    circle at 50% 50%,
+    transparent 0% 35%,
+    var(--w) 35% 100%
+  );
+  background-repeat: repeat;
+  background-size: 5px 5px;
 }
 
 #api-url-preview {
@@ -264,8 +274,8 @@ pre {
 }
 
 .pixelated-map rect {
-  stroke: var(--w);
-  stroke-width: .75;
+  stroke: var(--b);
+  stroke-width: .5;
   transition: fill 0.3s ease, stroke 0.3s ease;
 }
 
@@ -295,21 +305,20 @@ pre {
 
 .live-requests {
   position: fixed;
-  bottom: 100%;
-  left: 0;
-  right: 0;
-  height: 100vh;
+  top: var(--inset);
+  left: 6vw;
+  right: 6vw;
   background: var(--w);
   color: var(--w);
   transform: translateY(var(--color-entry-height));
-  z-index: 20;
+  z-index: 1;
 
   transition: transform 0.5s cubic-bezier(0.3, 0.7, 0, 1);
 
   h2 {
     position: absolute;
     bottom: var(--color-entry-height);
-    left: 6vw;
+    left: var(--inset);
     z-index: 1;
     padding: 0;
     margin: 0;
@@ -320,33 +329,24 @@ pre {
     justify-content: center;
     transform: translateY(100%) translateY(.2rem);
     white-space: nowrap;
+    color: var(--b);
   }
 
-  h2::before {
+  h2::after {
     content: '';
     display: inline-block;
     width: .5em;
     height: .5em;
     background: lime;
     border-radius: 50%;
-    margin-right: .5rem;
+    margin-left: .5rem;
     margin-top: .1em;
+    box-shadow: 0 0 0 .5px var(--b);
   }
 }
 
 .scrolling .live-requests {
-  transform: translateY(.25rem);
-}
-
-.scrolling .live-requests:hover {
-  transform: translateY(var(--color-entry-height));
-}
-
-.scrolling.color-visualization-open .live-requests,
-.color-visualization-open .live-requests {
-  transform: translateY(
-    min(80vh, calc(var(--color-entry-height) * 10))
-  );
+  transform: translateY(calc(var(--inset) * .25));
 }
 
 .color-visualization {
@@ -360,7 +360,6 @@ pre {
 
 .color-item {
   height: var(--color-entry-height);
-  background: linear-gradient(to right, var(--g));
   color: var(--c);
   display: flex;
   flex-direction: column-reverse;
@@ -382,8 +381,10 @@ pre {
   justify-content: space-between;
   font-size: 1em;
   font-weight: 800;
-  padding: 0 6vw;
+  padding: 0 var(--inset);
   flex-grow: 1;
+  background: linear-gradient(to right, var(--g));
+  border: 0.5px solid var(--b);
 }
 
 .color-item__title {
@@ -398,10 +399,9 @@ pre {
 }
 
 .color-item__url {
-  background: var(--b);
-  color: var(--w);
+  color: var(--b);
   font-size: 0.6em;
-  padding: 0.25em 6vw 0.25em calc(6vw + 8rem);
+  padding: 0.25em var(--inset) 0.25em calc(var(--inset) + 8rem);
   text-align: right;
   
   white-space: nowrap;
@@ -418,7 +418,9 @@ pre {
 .color-name-lists {
   display: flex;
   flex-wrap: wrap;
-  gap: 1px;
+  gap: 1em;
+  position: relative;
+  z-index: 2;
 }
 
 .color-name-lists,
@@ -429,21 +431,31 @@ pre {
 }
 
 .color-name-lists {
+  margin-right: -1em;
+}
+
+.color-name-lists {
   padding-left: 0;
   margin-top: 6rem;
 }
 
 .color-name-lists__item {
-  flex: 0 0 calc(100% / 2 - 1px);
-  width: calc(100% / 2 - 1px);
+  flex: 0 0 calc(100% / 2 - 1em);
+  width: calc(100% / 2 - 1em);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  box-shadow: 0 0 0 1px var(--w);
-  padding: 1.8rem 2rem;
+  box-shadow: 0 0 0 0.5px var(--b),
+              0 0 0 1.5px var(--w);
+  padding: var(--inset);
   box-sizing: border-box;
-  background: var(--b);
-  color: var(--w);
+  color: var(--b);
+
+  background-image: radial-gradient(circle at 50% 50%,
+      transparent 0% 35%,
+      var(--w) 35% 100%);
+  background-repeat: repeat;
+  background-size: 5px 5px;
 }
 
 @media (max-width: 600px) {
@@ -460,9 +472,9 @@ pre {
 }
 
 .color-name-lists__footer {
-  border-top: 1px solid var(--w);
-  margin: 1rem -2rem -2rem;
-  padding: 0 2rem;
+  border-top: 0.5px solid var(--b);
+  margin: var(--inset) calc(var(--inset) * -1) calc(var(--inset) * -1);
+  padding: 0 var(--inset);
   & > * {
     padding: .5em 0;
     white-space: nowrap;
@@ -470,7 +482,7 @@ pre {
     text-overflow: ellipsis;
   }
   & > * + * {
-    border-left: 1px solid var(--w);
+    border-left: 0.5px solid var(--b);
     padding-left: 1rem;
   }
   code {
@@ -494,8 +506,8 @@ pre {
 }
 
 .color-name-lists__count {
-  background: var(--w);
-  color: var(--b);
+  background: var(--b);
+  color: var(--w);
   font-size: 0.6em;
   padding: 0.15em 0.5em 0.2em;
   margin-top: -0.5em;
@@ -516,6 +528,10 @@ pre {
 }
 .color-name-lists__footer > *:has(.color-name-lists__source) {
   flex: 0 1 auto;
+}
+
+.color-name-lists__key {
+  color: var(--c-interactive);
 }
 
 .refs {

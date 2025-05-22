@@ -69,6 +69,9 @@ export function updateApiUrlPreview(selectedColors, availableLists, isInitialize
 
 let timeoutId = null;
 
+// detect dark mode
+const prefersDarkScheme = window.matchMedia("(prefers-color-scheme: dark)").matches
+
 export async function fetchColorNames(apiUrl) {
   if (!apiUrl || !apiUrl.startsWith(API_BASE_URL)) return;
   const jsonViewer = elements.jsonViewer;
@@ -93,7 +96,7 @@ export async function fetchColorNames(apiUrl) {
     // Use @textea/json-viewer for pretty rendering
     new window.JsonViewer({
       value: data,
-      theme: "dark",
+      theme: prefersDarkScheme ? "dark" : "light",
       expanded: false,
       enableClipboard: false,
       indentWidth: 2,

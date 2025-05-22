@@ -63,7 +63,7 @@ export function createPixelatedMap(pixelSize = 10) {
           rect.classList.add('pixel-border');
         }
         const originalPath = countriesMap.get(countryCodes[0]);
-        rect.style.fill = (originalPath && originalPath.style.fill) ? originalPath.style.fill : '#202126';
+        rect.style.fill = (originalPath && originalPath.style.fill) ? originalPath.style.fill : 'var(--c-fill)';
         fragment.appendChild(rect);
       }
     }
