@@ -7,6 +7,37 @@ import { setupCountryMaps, initializePixelatedMap } from './map.js';
 import { initializePhysics, physics } from './physics.js';
 import { initializeSocket, setPageVisibility } from './socket.js';
 
+
+elements.splitText.forEach(element => {
+  const text = element.textContent;
+  element.setAttribute('aria-label', text);
+  const words = text.split(' ');
+  const $warp = document.createElement('span');
+  $warp.classList.add('word-split');
+
+  words.forEach(word => {
+    const $word = document.createElement('span');
+    $word.classList.add('word-split__word');
+    const letters = word.split('');
+    letters.forEach(letter => {
+      const $letter = document.createElement('span');
+      $letter.classList.add('letter-split__letter');
+
+      $letter.dataset.collision = '.27 -.1';
+      // check if letter is uppercase
+      if (letter === letter.toUpperCase() && letter !== letter.toLowerCase()) {
+        $letter.classList.add('letter-split__letter--uppercase');
+        $letter.dataset.collision = ".15 -.1";
+      }
+      $letter.textContent = letter;
+      $word.appendChild($letter);
+    });
+    $warp.appendChild($word);
+  });
+  element.textContent = '';
+  element.appendChild($warp);
+});
+
 // Shared state
 let selectedColors = [];
 let availableLists = [];
@@ -120,7 +151,9 @@ window.updateApiExampleSetting = updateApiExampleSetting;
 setupCountryMaps();
 
 // Initialize physics (Matter.js)
-initializePhysics();
+setTimeout(() => {
+  initializePhysics();
+}, 100);
 
 // Initialize pixelated map
 initializePixelatedMap({ pixelSize: 10 });

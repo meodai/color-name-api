@@ -80,6 +80,8 @@ export function populateListOverview(listsData) {
       }
     });
 
+    listEntry.dataset.collision = '0';
+
     elements.listOverview.appendChild(listEntry);
   });
 }

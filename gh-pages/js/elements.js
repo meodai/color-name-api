@@ -14,8 +14,9 @@ export const elements = {
   jsonViewer: document.getElementById("json-viewer"),
   svgCountryPaths: document.querySelectorAll("[data-cc]"),
   mapContainer: document.querySelector(".map"),
+  splitText: document.querySelectorAll("[data-split]"),
   physicsCollisions: document.querySelectorAll(
-    "h1:not([data-physics='ignore']), h2:not([data-physics='ignore']), h3:not([data-physics='ignore']), p:not([data-physics='ignore']), .pseudo-terminal, .color-name-lists, .refs ul"
+    "[data-collision]"
   ),
   listOverview: document.querySelector(".color-name-lists"),
 };

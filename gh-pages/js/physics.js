@@ -119,6 +119,8 @@ function handleWindowResize() {
   if (physics.isTouchActive) return;
   if (physics.resizeThrottle) clearTimeout(physics.resizeThrottle);
   physics.resizeThrottle = setTimeout(() => {
+    // Update cached viewport height on resize
+    viewportHeight = window.innerHeight;
     initializePhysics();
     updateHeadingBodies("full");
   }, 300);
@@ -159,21 +161,26 @@ export function createColorObject(hexColor) {
   const x = Math.random() * physics.bounds.width;
   const y = -size * 2;
   const sides = Math.floor(Math.random() * 4) + 1;
-  const scale = 1;
-  const density = Math.max(0.001, (size / 23) ** 2);
+  
+  // Calculate density based on size - larger objects are heavier
+  const sizeRatio = size / 23;
+  const density = Math.max(0.001, sizeRatio ** 2);
+  const frictionAir = (1 - sizeRatio) * 0.05;
+  
   const commonProps = {
     restitution: 0.4,
     friction: 0.05,
-    frictionAir: (1 - (size / 23)) * 0.05,
+    frictionAir: frictionAir,
     density: density,
     angle: Math.random() * Math.PI * 2,
     render: { fillStyle: color, strokeStyle: '#000000', lineWidth: 0 }
   };
+  
   let object;
   if (sides <= 2) {
     object = Bodies.circle(x, y, size, commonProps);
   } else {
-    object = Bodies.polygon(x, y, sides, size * scale, commonProps);
+    object = Bodies.polygon(x, y, sides, size, commonProps);
   }
   physics.objects.push(object);
   Composite.add(engine.world, object);
@@ -187,50 +194,89 @@ export function createColorObjectsFromData(data) {
   }
 }
 
+// Cache viewport dimensions to avoid repeated calculations
+let viewportHeight = window.innerHeight;
+
+// Helper function to check if element is in viewport
+function isElementInViewport(rect) {
+  return rect.top < viewportHeight && rect.top >= 0 && rect.width > 0 && rect.height > 0;
+}
+
+// Helper function to create a heading body with consistent properties
+function createHeadingBodyHelper(heading, x, y, width, height, renderProps = {}) {
+  const defaultRender = {
+    fillStyle: 'rgba(255, 0, 0, 0)',
+    strokeStyle: 'rgba(255, 0, 0, 0)',
+    lineWidth: 1
+  };
+  
+  const body = Bodies.rectangle(
+    x, y, width, height,
+    {
+      isStatic: true,
+      isHeading: true,
+      headingElement: heading,
+      headingType: heading.tagName.toLowerCase(),
+      friction: 0.2,
+      render: { ...defaultRender, ...renderProps }
+    }
+  );
+  Composite.add(engine.world, body);
+  return body;
+}
+
 function createHeadingBodies() {
   if (!physics.initialized) return;
+  
+  // Update cached viewport height
+  viewportHeight = window.innerHeight;
+  
   const bodies = Composite.allBodies(engine.world);
   const headingBodies = bodies.filter(body => body.isHeading);
   const pixelBodies = bodies.filter(body => body.isPixel);
   headingBodies.forEach(body => Composite.remove(engine.world, body));
   pixelBodies.forEach(body => Composite.remove(engine.world, body));
-  const headings = elements.physicsCollisions
+  
+  const headings = document.querySelectorAll('[data-collision]');
   headings.forEach(heading => {
+    let offsetTop = 0;
+    let offsetBottom = 0;
+
+    heading.dataset.collision.split(' ').forEach((offset, i) => {
+      const offsetValue = parseFloat(offset);
+      if (i === 0) {
+        offsetTop = offsetValue;
+      } else if (i === 1) {
+        offsetBottom = offsetValue;
+      }
+    });
     const rect = heading.getBoundingClientRect();
-    // Only add if the TOP is in the viewbox
-    if (rect.top < window.innerHeight && rect.top >= 0 && rect.width > 0 && rect.height > 0) {
+    const offsetTopInPixels = Math.floor(offsetTop * rect.height);
+    const offsetBottomInPixels = Math.floor(offsetBottom * rect.height);
+
+    // Only add if the element is in the viewport
+    if (isElementInViewport(rect)) {
       const x = rect.left + rect.width / 2;
-      const y = rect.top + rect.height / 2;
-      const body = Bodies.rectangle(
-        x, y, rect.width, rect.height,
-        {
-          isStatic: true,
-          isHeading: true,
-          headingElement: heading,
-          headingType: heading.tagName.toLowerCase(),
-          friction: 0.2,
-          render: {
-            fillStyle: 'rgba(0, 0, 0, 0)',
-            strokeStyle: 'rgba(0, 0, 0, 0.1)',
-            lineWidth: 0
-          }
-        }
-      );
-      Composite.add(engine.world, body);
+      const y = rect.top + rect.height / 2 + offsetTopInPixels;
+      const effectiveHeight = rect.height - (offsetTopInPixels + offsetBottomInPixels);
+      
+      createHeadingBodyHelper(heading, x, y, rect.width, effectiveHeight);
     }
   });
+  
   const pixelatedMap = document.querySelector('.pixelated-map');
   if (pixelatedMap && pixelatedMap.style.display !== 'none') {
     addPixelsToPhysics(pixelatedMap);
   }
 }
 
-function updateHeadingBodies(mode = "full") {
+function updateHeadingBodies(mode = "yOnly") {
   if (!physics.initialized) return;
   const bodies = Composite.allBodies(engine.world);
   const headingBodies = bodies.filter(body => body.isHeading);
   const pixelBodies = bodies.filter(body => body.isPixel);
   const bodiesToRemove = [];
+  
   headingBodies.forEach(body => {
     if (body.headingElement) {
       const rect = body.headingElement.getBoundingClientRect();
@@ -239,8 +285,9 @@ function updateHeadingBodies(mode = "full") {
       if (mode === "full") {
         x = rect.left + rect.width / 2;
       }
-      // Remove from simulation if the TOP is out of the viewbox
-      if (rect.top < window.innerHeight && rect.top >= 0 && rect.width > 0 && rect.height > 0) {
+  
+      // Remove from simulation if the element is out of the viewport
+      if (isElementInViewport(rect)) {
         Body.setPosition(body, { x, y });
         body.render.opacity = 1;
       } else {
@@ -248,6 +295,7 @@ function updateHeadingBodies(mode = "full") {
       }
     }
   });
+  
   // Update pixel bodies positions
   pixelBodies.forEach(body => {
     if (body.pixelElement) {
@@ -257,8 +305,8 @@ function updateHeadingBodies(mode = "full") {
       if (mode === "full") {
         x = rect.left + rect.width / 2;
       }
-      // Remove from simulation if the TOP is out of the viewbox
-      if (rect.top < window.innerHeight && rect.top >= 0 && rect.width > 0 && rect.height > 0) {
+      // Remove from simulation if the element is out of the viewport
+      if (isElementInViewport(rect)) {
         Body.setPosition(body, { x, y });
       } else {
         bodiesToRemove.push(body);
@@ -268,34 +316,30 @@ function updateHeadingBodies(mode = "full") {
   if (bodiesToRemove.length > 0) {
     bodiesToRemove.forEach(body => Composite.remove(engine.world, body));
   }
-  const headings = elements.physicsCollisions;
-  headings.forEach(heading => {
-    const rect = heading.getBoundingClientRect();
-    // Only add if the TOP is in the viewbox
-    if (rect.top < window.innerHeight && rect.top >= 0 && rect.width > 0 && rect.height > 0) {
-      const alreadyExists = headingBodies.some(body => body.headingElement === heading);
-      if (!alreadyExists) {
-        const x = rect.left + rect.width / 2;
-        const y = rect.top + rect.height / 2;
-        const body = Bodies.rectangle(
-          x, y, rect.width, rect.height,
-          {
-            isStatic: true,
-            isHeading: true,
-            headingElement: heading,
-            headingType: heading.tagName.toLowerCase(),
-            friction: 0.2,
-            render: {
-              fillStyle: 'rgba(0, 0, 0, 0)',
-              strokeStyle: 'rgba(0, 0, 0, 0.1)',
-              lineWidth: 0
-            }
-          }
-        );
-        Composite.add(engine.world, body);
+  
+  // Only check for new headings if we're doing a full update
+  if (mode === "full") {
+    const headings = document.querySelectorAll('[data-collision]');
+    headings.forEach(heading => {
+      const rect = heading.getBoundingClientRect();
+      // Only add if element is in viewport
+      if (isElementInViewport(rect)) {
+        const alreadyExists = headingBodies.some(body => body.headingElement === heading);
+        if (!alreadyExists) {
+          const x = rect.left + rect.width / 2;
+          const y = rect.top + rect.height / 2;
+          
+          // Use the helper function with different render style for updateHeadingBodies
+          const renderProps = {
+            fillStyle: 'rgba(0, 0, 0, 0)',
+            strokeStyle: 'rgba(0, 0, 0, 0.1)',
+            lineWidth: 0
+          };
+          createHeadingBodyHelper(heading, x, y, rect.width, rect.height, renderProps);
+        }
       }
-    }
-  });
+    });
+  }
 }
 
 function handleScroll() {
@@ -307,6 +351,26 @@ function handleScroll() {
       createHeadingBodies();
     }
   });
+}
+
+// Helper function to create a pixel body with consistent properties
+function createPixelBodyHelper(pixel, x, y, width, height) {
+  const body = Bodies.rectangle(
+    x, y, width, height,
+    {
+      isStatic: true,
+      isPixel: true,
+      pixelElement: pixel,
+      friction: 0.2,
+      render: {
+        fillStyle: 'rgba(0, 0, 0, 0)',
+        strokeStyle: 'rgba(0, 0, 0, 0.05)',
+        lineWidth: 0
+      }
+    }
+  );
+  Composite.add(engine.world, body);
+  return body;
 }
 
 export function addPixelsToPhysics(pixelatedMap) {
@@ -328,20 +392,7 @@ export function addPixelsToPhysics(pixelatedMap) {
     if (rect.width < 5 || rect.height < 5) return;
     const x = rect.left + rect.width / 2;
     const y = rect.top + rect.height / 2;
-    const body = Bodies.rectangle(
-      x, y, rect.width, rect.height,
-      {
-        isStatic: true,
-        isPixel: true,
-        pixelElement: pixel,
-        friction: 0.2,
-        render: {
-          fillStyle: 'rgba(0, 0, 0, 0)',
-          strokeStyle: 'rgba(0, 0, 0, 0.05)',
-          lineWidth: 0
-        }
-      }
-    );
-    Composite.add(engine.world, body);
+    
+    createPixelBodyHelper(pixel, x, y, rect.width, rect.height);
   });
 }

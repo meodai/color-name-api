@@ -41,6 +41,24 @@ h1, h2, h3 {
   width: max-content;
 }
 
+.word-split {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2em;
+}
+
+.word-split__word {
+  display: inline-flex;
+  line-height: .8;
+  align-items: flex-end;
+}
+
+
+.letter-split__letter {
+  margin-top: -0.12em;
+}
+
+
 a {
   color: oklch(from var(--c-interactive) calc(l - .1) calc(c + .1) h);
   text-decoration: none;
