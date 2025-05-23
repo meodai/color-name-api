@@ -344,12 +344,8 @@ function updateHeadingBodies(mode = "yOnly") {
 
 function handleScroll() {
   physics.scrollThrottle = requestAnimationFrame(() => {
-    updateHeadingBodies("yOnly");
-    physics.scrollCheckCounter = physics.scrollCheckCounter || 0;
-    physics.scrollCheckCounter++;
-    if (physics.scrollCheckCounter % 10 === 0) {
-      createHeadingBodies();
-    }
+    //updateHeadingBodies("yOnly");
+    createHeadingBodies();
   });
 }
 
