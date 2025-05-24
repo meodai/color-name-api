@@ -158,8 +158,18 @@ export function createColorObject(hexColor) {
   if (!physics.initialized) return;
   const color = hexColor.startsWith('#') ? hexColor : `#${hexColor}`;
   const size = Math.random() * 18 + 5;
-  const x = Math.random() * physics.bounds.width;
-  const y = -size * 2;
+  
+  // Get spawn position from .color-visualization element
+  let x = Math.random() * physics.bounds.width;
+  let y = -size * 2; // default fallback
+  
+  const colorVisualization = document.querySelector('.color-visualization');
+  if (colorVisualization) {
+    const rect = colorVisualization.getBoundingClientRect();
+    // Spawn from a random position within the color visualization element
+    x = rect.left + Math.random() * rect.width;
+    y = rect.height + rect.top;
+  }
   const sides = Math.floor(Math.random() * 4) + 1;
   
   // Calculate density based on size - larger objects are heavier
