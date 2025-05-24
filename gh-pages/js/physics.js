@@ -1,5 +1,3 @@
-// Physics and visualization logic
-import { elements } from './elements.js';
 import { getColorValue } from './colors.js';
 
 export let engine, render, runner;
@@ -53,7 +51,7 @@ export function initializePhysics() {
     platformY,
     platformWidth,
     platformHeight,
-    { isStatic: true, render: { fillStyle: '#ffffff', opacity: 0.5 } }
+    { isStatic: true, render: { fillStyle: '#ffffff', opacity: 0 } }
   );
   Composite.add(engine.world, platform);
   physics.mouseBody = Bodies.circle(0, 0, 35, {
