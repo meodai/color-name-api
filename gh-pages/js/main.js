@@ -25,7 +25,12 @@ elements.splitText.forEach(element => {
 
       $letter.dataset.collision = '.27 -.1';
       // check if letter is uppercase
-      if (letter === letter.toUpperCase() && letter !== letter.toLowerCase()) {
+      if (
+        letter === letter.toUpperCase() && letter !== letter.toLowerCase() ||
+        letter === 'l' ||
+        letter === 'i' ||
+        letter === 't'
+      ) {
         $letter.classList.add('letter-split__letter--uppercase');
         $letter.dataset.collision = ".15 -.1";
       }

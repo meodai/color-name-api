@@ -70,6 +70,9 @@ a:hover {
 }
 
 @media (max-width: 600px) {
+  :root {
+    --inset: 2rem;
+  }
   h1, h2, h3 {
     font-size: 2.5em;
     width: min-content;
@@ -223,7 +226,7 @@ pre {
   background-color: var(--color);
   border-radius: 50%;
   margin-right: 0.3em;
-  box-shadow: 0 0 0 .5px var(--w);
+  box-shadow: 0 0 0 .5px var(--b);
 }
 
 .url-color-remove {
@@ -246,10 +249,12 @@ pre {
   box-shadow: inset 0 0 0 0.5px var(--b);
   border-radius: 50%;
   background: var(--w);
+  transition: background 0.1s ease, color 0.1s ease;
 }
 
 .url-add-color:hover {
-  background: transparent;
+  background: var(--b);
+  color: var(--w);
 }
 
 .url-placeholder {
@@ -343,9 +348,7 @@ pre {
     font-size: .9rem;
     font-weight: 100;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    transform: translateY(100%) translateY(.2rem);
+    transform: translateY(100%) translateY(.4rem);
     white-space: nowrap;
     color: var(--b);
   }
@@ -358,13 +361,13 @@ pre {
     background: lime;
     border-radius: 50%;
     margin-left: .5rem;
-    margin-top: .1em;
+    margin-top: .25em;
     box-shadow: 0 0 0 .5px var(--b);
   }
 }
 
 .scrolling .live-requests {
-  transform: translateY(calc(var(--inset) * .25));
+  transform: translateY(calc(var(--inset) * .15));
 }
 
 .color-visualization {
@@ -382,11 +385,14 @@ pre {
   display: flex;
   flex-direction: column-reverse;
   user-select: none;
+
+  background-image: radial-gradient(circle at 50% 50%,
+        transparent 0% 35%,
+        var(--w) 35% 100%);
+  background-repeat: repeat;
+  background-size: 5px 5px;
 }
 
-.color-item + .color-item {
-  margin-top: 0.5rem;
-}
 .color-item__header {
   display: flex;
   align-items: center;
@@ -472,7 +478,7 @@ pre {
 
 @media (max-width: 600px) {
   .color-name-lists__item {
-    flex: 0 0 calc(100% - 2rem);
+    flex: 0 0 calc(100% - 1rem);
   }
 }
 
@@ -486,12 +492,15 @@ pre {
 .color-name-lists__footer {
   border-top: 0.5px solid var(--b);
   margin: var(--inset) calc(var(--inset) * -1) calc(var(--inset) * -1);
-  padding: 0 var(--inset);
+  padding: 0;
   & > * {
     padding: .5em 0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+  & > *:first-child {
+    padding-left: var(--inset);
   }
   & > * + * {
     border-left: 0.5px solid var(--b);
@@ -544,6 +553,10 @@ pre {
 
 .color-name-lists__key {
   color: var(--c-interactive);
+}
+
+.color-name-lists__key:hover {
+  text-decoration: underline;
 }
 
 .refs {
