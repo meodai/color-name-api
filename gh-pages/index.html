@@ -48,11 +48,6 @@
 
   <article class="live-requests">
     <h2>Live Color Requests</h2>
-    <!--div class="design-width">
-      <p data-physics="ignore">
-        The requests below are all the requests that are currently being made to the API.
-      </p>
-    </div-->
     <div id="requests-container"></div>
   </article>
 
@@ -71,15 +66,25 @@
   </div>
   
   <aside class="design-width">
-    <code id="api-url-preview"></code>
+    <code id="api-url-preview" data-collision="0"></code>
     <pre id="api-response"></pre>
+  </aside>
+
+  <aside>
+    <div  class="section--right">
+      <h2 data-split>No Duplicate Names</h2>
+      <p data-collision=".07 0">
+        What makes the Color Name API unique is its ability to return a single, most relevant color name for each color value. When the <code>noduplicates</code> parameter is set to <code>true</code>, the API ensures that every color requested carries a unique name, avoiding redundancy and confusion.
+      </p>
+    </div>
   </aside>
 
   <aside>
     <h2 data-split>Color Name Lists</h2>
     <p data-collision=".07 0">
       The Color Name API uses a variety of open-source color name lists to provide accurate and diverse results. 
-      The lists are sourced from various projects and communities, ensuring a wide range of color names.
+      You can choose from these lists to get the most relevant color names for your needs. <strong>Click the list keys</strong>
+      below to preview the names in your request.
     </p>
     <ul class="color-name-lists">
     </ul>
@@ -353,22 +358,24 @@
 
 
   <aside>
-    <div class="design-width">
-      <h2 data-split>About</h2>
-      <p data-collision="0">
-        This interactive tool lets you explore the API's capabilities in a hands-on way. 
-        While not a comprehensive documentation, you can find more details about the API on its 
-        <a href="https://github.com/meodai/color-name-api" target="_blank">GitHub page</a> or in the 
-        <a href="https://api.color.pizza/v1/docs/" target="_blank">official API reference</a>.
-      </p>
-      <p data-collision="0">
-        The falling particles are powered by <a href="https://brm.io/matter-js/" target="_blank">Matter.js</a>. 
-        Each particle represents a color name fetched from the API in real-time using <a href="https://socket.io/" target="_blank">Socket.IO</a>.
-      </p>
-      <p data-collision="0">
-        As you can imagine from the number of requests, running this service is not free. 
-        If you find this tool useful, consider supporting the project by donating via <a href="https://ko-fi.com/colorparrot" target="_blank">Buy Me a Coffee</a>.
-      </p>
+    <div class="design-width">  
+      <div  class="section--right">
+        <h2 data-split>About</h2>
+        <p data-collision="0">
+          This interactive tool lets you explore the API's capabilities in a hands-on way. 
+          While not a comprehensive documentation, you can find more details about the API on its 
+          <a href="https://github.com/meodai/color-name-api" target="_blank">GitHub page</a> or in the 
+          <a href="https://api.color.pizza/v1/docs/" target="_blank">official API reference</a>.
+        </p>
+        <p data-collision="0">
+          The falling particles are powered by <a href="https://brm.io/matter-js/" target="_blank">Matter.js</a>. 
+          Each particle represents a color name fetched from the API in real-time using <a href="https://socket.io/" target="_blank">Socket.IO</a>.
+        </p>
+        <p data-collision="0">
+          As you can imagine from the number of requests, running this service is not free. 
+          If you find this tool useful, consider supporting the project by donating via <a href="https://ko-fi.com/colorparrot" target="_blank">Buy Me a Coffee</a>.
+        </p>
+      </div>
     </div>
   </aside>
 
