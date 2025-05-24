@@ -608,5 +608,13 @@ pre {
 
 .ellogo {
   --c0: var(--b);
-  --c1: var(--c-interactive);
+  --c1: var(--last-color, var(--c-interactive));
+}
+
+.ellogo path {
+  transition: fill .2s linear;
+}
+
+.ellogo:hover path {
+  --c1: #e2a9c8;
 }

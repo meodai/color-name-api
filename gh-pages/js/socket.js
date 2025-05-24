@@ -15,6 +15,7 @@ export function initializeSocket() {
     socket.on('connect', () => console.log('Connected to Socket.io server'));
     socket.on('disconnect', () => console.log('Disconnected from Socket.io server'));
     socket.on('colors', (msg) => {
+      document.documentElement.style.setProperty('--last-color', msg.colors[0].hex);
       addColorsToVisualization(msg);
       if (isPageVisible) {
         createColorObjectsFromData(msg);
