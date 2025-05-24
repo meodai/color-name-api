@@ -590,3 +590,23 @@ pre {
     margin-left: var(--inset);
   }
 } 
+
+.sponsor-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--inset);
+  padding-left: var(--inset);
+  margin-top: 4rem;
+
+
+  a {
+    display: block;
+    flex: 0 0 calc(100% / 2 - var(--inset));
+    width: calc(100% / 2 - var(--inset));
+  }
+}
+
+.ellogo {
+  --c0: var(--b);
+  --c1: var(--c-interactive);
+}
