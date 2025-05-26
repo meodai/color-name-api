@@ -618,3 +618,11 @@ pre {
 .ellogo:hover path {
   --c1: #e2a9c8;
 }
+
+p code {
+  font-family: monospace;
+  font-size: 0.9em;
+  background: var(--b);
+  color: var(--w);
+  padding: 0.2em 0.5em;
+}
