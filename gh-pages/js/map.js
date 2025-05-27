@@ -58,6 +58,8 @@ export function createPixelatedMap(pixelSize = 10) {
         rect.setAttribute('height', pixelSize);
         rect.setAttribute('data-countries', countryCodes.join(','));
         rect.setAttribute('data-cc', countryCodes[0]);
+        rect.setAttribute('vector-effect', 'non-scaling-stroke');
+        rect.setAttribute('stroke-width', '1.5');
         rect.classList.add('pixel-country');
         if (countryCodes.length > 1) {
           rect.classList.add('pixel-border');
