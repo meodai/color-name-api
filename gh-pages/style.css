@@ -318,6 +318,8 @@ pre {
   stroke: var(--b);
   stroke-width: .5;
   transition: fill 0.3s ease, stroke 0.3s ease;
+  transform-box: fill-box;
+  transform: scale(0.87);
 }
 
 .pixel-country:hover {
