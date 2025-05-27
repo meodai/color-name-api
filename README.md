@@ -38,7 +38,7 @@ $ curl https://api.color.pizza/v1/?values=aaffcc
 ➜  }
 ```
 
-The response will be a a JSON Object containing two keys: `colors` and `paletteTitle` 
+The response will be a JSON Object containing two keys: `colors` and `paletteTitle` 
 *colors* will contain an array of all the colors you have asked for, with some useful information like `name` or `hsl`.
 
 Now, let's `GET` the names for multiple colors:
