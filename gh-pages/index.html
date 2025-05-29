@@ -51,24 +51,51 @@
     <div id="requests-container"></div>
   </article>
 
-  <div class="pseudo-terminal" data-collision="0">
-    <div class="url-builder">
-      <span class="url-prefix">$ curl</span>
-      <span class="url-part url-base">https://api.color.pizza/v1/</span>
-      <span class="url-part">?values=</span>
-      <span id="url-colors" class="url-interactive"></span>
-      <span class="url-part">&list=</span>
-      <label id="url-list-container" class="url-interactive"></label>
-      <span class="url-part">&noduplicates=</span>
-      <label id="url-noduplicates-container" class="url-interactive"></label>
+  <!--article>
+    <div class="section--right">
+      <h2 data-split>Color Namer</h2>
+      <p data-collision=".07 0">
+        Just want to know the name of a color? Paste your hex code below.
+        Looking to use the API? Keep scrolling for a quick overview of the API endpoints and parameters.
+        Or read the code on <a href="https://github.com/meodai/color-name-api">GitHub</a> or the full API
+        <a href="https://api.color.pizza/v1/docs/">documentation</a>.
+      </p>
+      <form class="color-namer">
+        <input type="color" data-colorpicker />
+        <input type="text" placeholder="Enter hex code" data-colorvalue />
+        <div class="color-preview" data-colorpreview></div>
+      </form>
     </div>
-    <div id="json-viewer"></div>
-  </div>
-  
-  <aside class="design-width">
-    <code id="api-url-preview" data-collision="0"></code>
-    <pre id="api-response"></pre>
+  </article-->
+
+  <aside>
+    <div class="section--right">
+      <h2 data-split>API Color Query Builder</h2>
+      <p data-collision=".07 0">
+        The Color Name API allows you to query for color names based on hex values. 
+        You can specify multiple colors, choose a color name list, and control whether to return unique names.
+        Use the interactive URL builder below to construct your API request.
+      </p>
+    </div>
   </aside>
+    <div class="pseudo-terminal" data-collision="0">
+      <div class="url-builder">
+        <span class="url-prefix">$ curl</span>
+        <span class="url-part url-base">https://api.color.pizza/v1/</span>
+        <span class="url-part">?values=</span>
+        <span id="url-colors" class="url-interactive"></span>
+        <span class="url-part">&list=</span>
+        <label id="url-list-container" class="url-interactive"></label>
+        <span class="url-part">&noduplicates=</span>
+        <label id="url-noduplicates-container" class="url-interactive"></label>
+      </div>
+      <div id="json-viewer"></div>
+    </div>
+    
+    <aside class="design-width">
+      <code id="api-url-preview" data-collision="0"></code>
+      <pre id="api-response"></pre>
+    </aside>
 
   <aside>
     <div  class="section--right">

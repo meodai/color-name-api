@@ -42,14 +42,16 @@ h1, h2, h3 {
   width: max-content;
 }
 
-aside:has(.section--right) {
+aside:has(.section--right),
+article:has(.section--right) {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
 }
 
 @media screen and (max-width: 600px) {
-  aside:has(.section--right) {
+  aside:has(.section--right),
+  article:has(.section--right) {
     align-items: flex-start;
   }
 }

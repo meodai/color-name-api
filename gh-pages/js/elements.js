@@ -15,8 +15,10 @@ export const elements = {
   svgCountryPaths: document.querySelectorAll("[data-cc]"),
   mapContainer: document.querySelector(".map"),
   splitText: document.querySelectorAll("[data-split]"),
-  physicsCollisions: document.querySelectorAll(
-    "[data-collision]"
-  ),
+  physicsCollisions: document.querySelectorAll("[data-collision]"),
   listOverview: document.querySelector(".color-name-lists"),
+
+  colorPicker: document.querySelector("[data-colorpicker]"),
+  colorValue: document.querySelector("[data-colorvalue]"),
+  colorPreview: document.querySelector("[data-colorpreview]"),
 };
