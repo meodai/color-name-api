@@ -21,4 +21,6 @@ export const elements = {
   colorPicker: document.querySelector("[data-colorpicker]"),
   colorValue: document.querySelector("[data-colorvalue]"),
   colorPreview: document.querySelector("[data-colorpreview]"),
+
+  favicon: document.querySelector("[data-favicon]"),
 };

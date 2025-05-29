@@ -2,6 +2,7 @@
 import { createColorObjectsFromData } from './physics.js';
 import { elements } from './elements.js';
 import { addColorsToVisualization } from './visualization.js'; // We'll modularize this next
+import { generateFavicon } from './favicon.js';
 
 let socket = null;
 let isPageVisible = true;
@@ -16,6 +17,7 @@ export function initializeSocket() {
     socket.on('disconnect', () => console.log('Disconnected from Socket.io server'));
     socket.on('colors', (msg) => {
       document.documentElement.style.setProperty('--last-color', msg.colors[0].hex);
+      generateFavicon(msg.colors[0].hex);
       addColorsToVisualization(msg);
       if (isPageVisible) {
         createColorObjectsFromData(msg);

@@ -7,6 +7,7 @@ import { setupCountryMaps, initializePixelatedMap } from './map.js';
 import { initializePhysics, physics } from './physics.js';
 import { initializeSocket, setPageVisibility } from './socket.js';
 import { initColorPicker } from './picker.js';
+import { generateFavicon } from './favicon.js';
 
 elements.splitText.forEach(element => {
   const text = element.textContent;
@@ -254,5 +255,7 @@ function handleScroll() {
 window.addEventListener("scroll", handleScroll);
 
 handleScroll();
+
+generateFavicon(`#${getRandomHexColor()}`);
 
 // initColorPicker();
