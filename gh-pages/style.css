@@ -19,6 +19,7 @@
   --inset: 3rem;
 
   background: var(--w);
+  color: var(--b);
 }
 
 ::selection {
