@@ -81,7 +81,11 @@ export async function fetchColorNames(apiUrl) {
   jsonViewer.innerHTML = "";
 
   try {
-    const response = await fetch(apiUrl);
+    const response = await fetch(apiUrl, {
+      headers: {
+        "X-Referrer": "color-name-api-demo",
+      },
+    });
     const data = await response.json();
     if (timeoutId) {
       clearTimeout(timeoutId);

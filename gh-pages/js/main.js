@@ -110,12 +110,10 @@ function updateApiExampleSetting(action, payload = {}) {
     default:
       break;
   }
-  // Scroll pseudo-terminal (API example) into view, then update after a short delay
   const pseudoTerminal = document.querySelector('.pseudo-terminal');
   if (pseudoTerminal && typeof pseudoTerminal.scrollIntoView === 'function') {
     pseudoTerminal.scrollIntoView({ behavior: 'smooth', block: 'center' });
     setTimeout(() => {
-      // Now update the UI after scrolling
       switch (action) {
         case 'setList': {
           const { listKey } = payload;
