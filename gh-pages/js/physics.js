@@ -13,14 +13,16 @@ export function setupMotionPreferenceListener() {
   function handleMotionPreferenceChange(event) {
     physics.reducedMotionEnabled = event.matches;
     
-    if (event.matches && physics.initialized) {
+    if (event.matches && physics.initialized && !physics.manuallyDisabled) {
       // User prefers reduced motion and physics is running - disable it
       cleanupPhysics();
       physics.wasInitialized = true;
-    } else if (!event.matches && physics.wasInitialized && !physics.initialized) {
+    } else if (!event.matches && physics.wasInitialized && !physics.initialized && !physics.manuallyDisabled) {
       // User no longer prefers reduced motion and physics was previously running - re-enable it
       initializePhysics();
     }
+    
+    updateToggleButton();
   }
   
   // Set initial state
@@ -44,16 +46,17 @@ export let physics = {
   observer: null,
   mouseBody: null,
   isTouchActive: false,
-  reducedMotionEnabled: false
+  reducedMotionEnabled: false,
+  manuallyDisabled: false
 };
 
 let Matter = window.Matter;
 const { Engine, Render, Runner, Bodies, Composite, Events, Body } = Matter;
 
 export function initializePhysics() {
-  // Don't initialize physics if user prefers reduced motion
-  if (prefersReducedMotion()) {
-    physics.reducedMotionEnabled = true;
+  // Don't initialize physics if user prefers reduced motion or manually disabled
+  if (prefersReducedMotion() || physics.manuallyDisabled) {
+    physics.reducedMotionEnabled = prefersReducedMotion();
     physics.wasInitialized = true; // Remember that physics was requested
     return;
   }
@@ -191,7 +194,7 @@ function afterUpdateHandler() {
 }
 
 export function createColorObject(hexColor) {
-  if (!physics.initialized) return;
+  if (!physics.initialized || physics.manuallyDisabled) return;
   const color = hexColor.startsWith('#') ? hexColor : `#${hexColor}`;
   const size = Math.random() * 18 + 5;
   
@@ -437,4 +440,38 @@ export function addPixelsToPhysics(pixelatedMap) {
     
     createPixelBodyHelper(pixel, x, y, rect.width, rect.height);
   });
+}
+
+// Manual physics toggle functions
+export function togglePhysics() {
+  physics.manuallyDisabled = !physics.manuallyDisabled;
+  
+  if (physics.manuallyDisabled) {
+    // Disable physics
+    if (physics.initialized) {
+      cleanupPhysics();
+    }
+  } else {
+    // Enable physics (unless user prefers reduced motion)
+    if (!prefersReducedMotion()) {
+      initializePhysics();
+    }
+  }
+  
+  updateToggleButton();
+}
+
+export function updateToggleButton() {
+  const toggleButton = document.getElementById('physics-toggle');
+  if (!toggleButton) return;
+  
+  const isDisabled = physics.manuallyDisabled || prefersReducedMotion();
+  
+  if (isDisabled) {
+    toggleButton.classList.add('physics-disabled');
+    toggleButton.setAttribute('aria-label', 'Enable physics animation');
+  } else {
+    toggleButton.classList.remove('physics-disabled');
+    toggleButton.setAttribute('aria-label', 'Disable physics animation');
+  }
 }

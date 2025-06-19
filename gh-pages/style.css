@@ -33,6 +33,43 @@ body {
   padding-bottom: 20vmin;
 }
 
+/* Physics Toggle Button */
+.physics-toggle {
+  display: flex;
+  width: max-content;
+  margin-left: auto;
+  margin-top: -1em;
+  font-size: .8em;
+  background: transparent;
+  gap: 0.5em;
+  margin-right: 2.5rem;
+}
+
+.physics-toggle::after {
+  content: '';
+  display: inline-block;
+  width: 2em;
+  height: 1.1em;
+  border-radius: 0.75em;
+  background-image: radial-gradient(
+    circle at 29% 50%,
+    transparent 0% 35%,
+    var(--c-interactive) 35% 100%
+  );
+  border: 0.5px solid var(--b);
+}
+
+
+.physics-toggle.physics-disabled::after {
+  background-image: radial-gradient(circle at 70% 50%,
+        transparent 0% 35%,
+        var(--b) 35% 100%);
+}
+
+.physics-toggle.physics-disabled:hover {
+
+}
+
 h1, h2, h3 {
   font-weight: 800;
   margin: 4em 0 .75em;

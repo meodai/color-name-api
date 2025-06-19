@@ -4,7 +4,7 @@ import { getRandomHexColor, renderColors } from './colors.js';
 import { fetchLists, populateListDropdown } from './api.js';
 import { initializeUrlInteractiveElements, updateApiUrlPreview, fetchColorNames } from './url.js';
 import { setupCountryMaps, initializePixelatedMap } from './map.js';
-import { initializePhysics, physics, setupMotionPreferenceListener } from './physics.js';
+import { initializePhysics, physics, setupMotionPreferenceListener, togglePhysics, updateToggleButton } from './physics.js';
 import { initializeSocket, setPageVisibility } from './socket.js';
 import { initColorPicker } from './picker.js';
 import { generateFavicon } from './favicon.js';
@@ -161,6 +161,16 @@ setupMotionPreferenceListener();
 setTimeout(() => {
   initializePhysics();
 }, 100);
+
+// Setup physics toggle button
+const physicsToggle = document.getElementById('physics-toggle');
+if (physicsToggle) {
+  physicsToggle.addEventListener('click', togglePhysics);
+  // Initialize button state after a brief delay to ensure physics state is set
+  setTimeout(() => {
+    updateToggleButton();
+  }, 200);
+}
 
 // Initialize pixelated map
 initializePixelatedMap({ pixelSize: 10 });
