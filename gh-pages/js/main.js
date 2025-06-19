@@ -4,7 +4,7 @@ import { getRandomHexColor, renderColors } from './colors.js';
 import { fetchLists, populateListDropdown } from './api.js';
 import { initializeUrlInteractiveElements, updateApiUrlPreview, fetchColorNames } from './url.js';
 import { setupCountryMaps, initializePixelatedMap } from './map.js';
-import { initializePhysics, physics } from './physics.js';
+import { initializePhysics, physics, setupMotionPreferenceListener } from './physics.js';
 import { initializeSocket, setPageVisibility } from './socket.js';
 import { initColorPicker } from './picker.js';
 import { generateFavicon } from './favicon.js';
@@ -153,6 +153,9 @@ window.updateApiExampleSetting = updateApiExampleSetting;
 
 // Setup country maps for highlighting
 setupCountryMaps();
+
+// Setup motion preference listener
+setupMotionPreferenceListener();
 
 // Initialize physics (Matter.js)
 setTimeout(() => {

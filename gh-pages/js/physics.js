@@ -1,5 +1,35 @@
 import { getColorValue } from './colors.js';
 
+// Utility functions for motion preference detection
+export function prefersReducedMotion() {
+  return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+export function setupMotionPreferenceListener() {
+  if (!window.matchMedia) return;
+  
+  const motionMediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+  
+  function handleMotionPreferenceChange(event) {
+    physics.reducedMotionEnabled = event.matches;
+    
+    if (event.matches && physics.initialized) {
+      // User prefers reduced motion and physics is running - disable it
+      cleanupPhysics();
+      physics.wasInitialized = true;
+    } else if (!event.matches && physics.wasInitialized && !physics.initialized) {
+      // User no longer prefers reduced motion and physics was previously running - re-enable it
+      initializePhysics();
+    }
+  }
+  
+  // Set initial state
+  physics.reducedMotionEnabled = motionMediaQuery.matches;
+  
+  // Listen for changes
+  motionMediaQuery.addEventListener('change', handleMotionPreferenceChange);
+}
+
 export let engine, render, runner;
 export let physics = {
   objects: [],
@@ -13,13 +43,21 @@ export let physics = {
   scrollCheckCounter: 0,
   observer: null,
   mouseBody: null,
-  isTouchActive: false
+  isTouchActive: false,
+  reducedMotionEnabled: false
 };
 
 let Matter = window.Matter;
 const { Engine, Render, Runner, Bodies, Composite, Events, Body } = Matter;
 
 export function initializePhysics() {
+  // Don't initialize physics if user prefers reduced motion
+  if (prefersReducedMotion()) {
+    physics.reducedMotionEnabled = true;
+    physics.wasInitialized = true; // Remember that physics was requested
+    return;
+  }
+
   if (physics.initialized) {
     cleanupPhysics();
   }
