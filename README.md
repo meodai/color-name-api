@@ -402,7 +402,6 @@ The `distance` field in API responses represents the CIEDE2000 ΔE value:
 
 ### Implementation
 
-The API leverages the excellent [Culori](https://culorjs.org/) library for color space conversions and CIEDE2000 calculations, combined with a custom Vantage Point Tree (VP-tree) data structure for efficient nearest-neighbor searches across our extensive color database.
+The API leverages the excellent [Culori](https://culorijs.org/api/) library for color space conversions and CIEDE2000 calculations, combined with a custom Vantage Point Tree (VP-tree) data structure for efficient nearest-neighbor searches across our extensive color database.
 
 This ensures both accuracy and performance when matching colors to their closest named equivalents.
-
