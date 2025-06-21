@@ -46,7 +46,6 @@ This API solves real-world problems across various domains:
 
 - **E-commerce**: Name product colors automatically from uploaded images
 - **Brand Guidelines**: Maintain consistent color naming across teams
-- **Print Production**: Bridge digital hex codes with traditional color naming systems
 
 ### 🎮 **Gaming & Interactive Media**
 
