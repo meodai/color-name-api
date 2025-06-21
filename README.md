@@ -10,6 +10,79 @@ Rest API that returns a bunch of color names for a given color-value.
 Introducing a comprehensive and easy to use color-naming API!
 Easily retrieve the color name for any hexadecimal color value, using a variety of different color name lists. Whether you're working on a design project or building a color-themed application, our API has you covered.
 
+## Why Use Color Names?
+
+While hex codes are precise, they're not intuitive for humans. Color names bridge the gap between technical accuracy and human understanding. Instead of saying "#fa8072", you can say "Salmon" – which immediately conveys meaning and context.
+
+## Use Cases
+
+This API solves real-world problems across various domains:
+
+### 🎨 **Design & Creative Tools**
+
+- **Design Software**: Show human-readable color names in color pickers and palettes
+- **Generative Art**: [Poline gradient generator](https://meodai.github.io/poline/) uses named colors for more intuitive palette creation
+- **Color Palette Tools**: [Farbvelo](https://farbvelo.elastiq.ch/) demonstrates real-time color naming for palette exploration
+
+### ♿ **Accessibility & Screen Readers**
+
+- **Screen Reader Support**: Provide meaningful color descriptions instead of just RGB values
+- **Color Blind Users**: Offer descriptive names alongside visual color representations
+- **Voice Interfaces**: Enable color selection through spoken color names
+
+### 🛠️ **Development & Debugging**
+
+- **CSS Development**: Generate human-readable color variable names automatically
+- **Debug Logs**: Make color values in logs more readable ("Midnight Blue" vs "#191970")
+- **API Documentation**: Auto-generate color examples with intuitive names
+
+### 📊 **Data Visualization**
+
+- **Chart Libraries**: Automatically name data series colors for legends
+- **Dashboard Tools**: Provide accessible color descriptions for data points
+- **Reporting**: Generate color-coded reports with named color categories
+
+### 🏢 **Business Applications**
+
+- **E-commerce**: Name product colors automatically from uploaded images
+- **Brand Guidelines**: Maintain consistent color naming across teams
+- **Print Production**: Bridge digital hex codes with traditional color naming systems
+
+### 🎮 **Gaming & Interactive Media**
+
+- **Customization Systems**: Let users describe and share custom color schemes
+- **World Generation**: Procedurally name environmental colors
+- **UI Themes**: Provide descriptive names for theme variations
+
+### 📱 **Mobile & Web Apps**
+
+- **Color Picker Widgets**: Enhance user experience with named color feedback
+- **Theme Builders**: Help users understand and communicate color choices
+- **Content Management**: Auto-tag content based on dominant colors
+
+## Reverse Lookup: Search by Color Name
+
+The API also works in reverse – you can search by color name to get hex values, making it perfect for natural language color interfaces. This enables users to say "I want salmon pink" instead of having to know "#fa8072".
+
+```shell
+# Search for colors by name
+$ curl 'https://api.color.pizza/v1/docs/#api-Default-getColorNames'
+```
+
+This reverse functionality is particularly useful for:
+
+- Voice-controlled design applications
+- Conversational interfaces for color selection
+- Natural language processing in creative tools
+- Accessibility features where users describe colors verbally
+
+## Technical Details
+
+- **Distance Metric**: Uses CIEDE2000 ΔE for perceptually accurate color matching
+- **Multiple Lists**: Choose from various color naming systems (Wikipedia, RAL, Pantone, etc.)
+- **Unique Names**: Optional `noduplicates` parameter ensures each color gets a distinct name
+- **Real-time Updates**: WebSocket support for live color naming applications
+
 ## Getting started with the REST API
 
 ### Hello World
