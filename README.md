@@ -379,3 +379,30 @@ This header is especially useful for:
 
 **Please include the X-Referrer header in your requests to help us understand how the API is being used. This information helps us improve the service and justify continued development and maintenance of this free API. Your support is greatly appreciated!**
 
+## Distance Function & Color Matching Algorithm
+
+The Color Name API uses the **CIEDE2000 ΔE** (Delta E) distance metric for perceptually accurate color matching. This advanced algorithm ensures that the color names returned are as close as possible to human visual perception.
+
+### How It Works
+
+1. **Input colors** are converted to the LAB color space (a perceptually uniform color space)
+2. **Distance calculation** uses the CIEDE2000 formula to compute the ΔE between the input color and each color in our database
+3. **Closest matches** are returned based on the smallest ΔE values
+4. **Distance values** in the API response represent the calculated ΔE difference
+
+### Understanding Distance Values
+
+The `distance` field in API responses represents the CIEDE2000 ΔE value:
+
+- **0.0**: Perfect match (identical colors)
+- **< 1.0**: Differences not perceptible to most people
+- **1.0 - 2.0**: Perceptible under ideal viewing conditions
+- **2.0 - 10.0**: Perceptible at a glance
+- **> 10.0**: Colors appear quite different
+
+### Implementation
+
+The API leverages the excellent [Culori](https://culorjs.org/) library for color space conversions and CIEDE2000 calculations, combined with a custom Vantage Point Tree (VP-tree) data structure for efficient nearest-neighbor searches across our extensive color database.
+
+This ensures both accuracy and performance when matching colors to their closest named equivalents.
+
