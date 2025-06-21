@@ -65,7 +65,7 @@ The API also works in reverse – you can search by color name to get hex values
 
 ```shell
 # Search for colors by name
-$ curl 'https://api.color.pizza/v1/docs/#api-Default-getColorNames'
+$ curl 'https://api.color.pizza/v1/names/?name=red'
 ```
 
 This reverse functionality is particularly useful for:
