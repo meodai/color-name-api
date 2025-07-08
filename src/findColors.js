@@ -9,6 +9,7 @@ import {
 import { lib } from './lib.js';
 import ClosestColor from './closestColor.js';
 import { LRUCache } from 'lru-cache';
+import { distance as levenshteinDistance } from 'fastest-levenshtein';
 
 const distanceMetric = differenceCiede2000();
 
@@ -135,24 +136,53 @@ export class FindColors {
   }
 
   /**
-   * returns all colors that match a name
+   * returns all colors that match a name, ranked by similarity
    * @param {string} searchStr search term
-   * @param {boolean} bestOf    if set only returns good names
+   * @param {string} listKey the color list to use
+   * @param {number} maxResults maximum number of results to return (default: 50)
    */
-  searchNames(searchStr, listKey = 'default') {
+  searchNames(searchStr, listKey = 'default', maxResults = 20) {
     this.validateListKey(listKey);
     const cache = this.colorNameCache[listKey];
 
-    if (cache.has(searchStr)) {
-      return cache.get(searchStr);
+    // Create cache key that includes maxResults to avoid conflicts
+    const cacheKey = `${searchStr}:${maxResults}`;
+    
+    if (cache.has(cacheKey)) {
+      return cache.get(cacheKey);
     }
 
-    const results = this.colorLists[listKey].filter(
-      (color) => color.name.toLowerCase().includes(searchStr.toLowerCase()),
-    );
+    const searchLower = searchStr.toLowerCase();
+    const scoredResults = [];
+
+    // Score all colors for similarity
+    for (const color of this.colorLists[listKey]) {
+      const nameLower = color.name.toLowerCase();
+      const score = calculateSimilarityScore(searchStr, color.name, searchLower, nameLower);
+      
+      if (score > 0) {
+        scoredResults.push({
+          ...color,
+          similarity: score
+        });
+      }
+    }
+
+    // Sort by similarity score (descending) then by name length (ascending) for tiebreaking
+    scoredResults.sort((a, b) => {
+      if (Math.abs(a.similarity - b.similarity) < 0.001) {
+        return a.name.length - b.name.length; // Shorter names first for same similarity
+      }
+      return b.similarity - a.similarity;
+    });
+
+    // Limit results but keep similarity score in output
+    const results = scoredResults
+      .slice(0, maxResults)
+      .map((color) => ({ ...color }));
 
     // Add to cache - LRUCache handles size limit and eviction automatically
-    cache.set(searchStr, results);
+    cache.set(cacheKey, results);
 
     return results;
   }
@@ -219,4 +249,14 @@ export class FindColors {
       };
     }).filter(Boolean); // Remove any null values
   }
+}
+
+// Calculate similarity score (0-1, where 1 is perfect match)
+function calculateSimilarityScore(searchStr, colorName, searchLower, nameLower) {
+  // Pure Levenshtein similarity only
+  const maxLen = Math.max(searchStr.length, colorName.length);
+  const distance = levenshteinDistance(searchLower, nameLower);
+  const similarity = 1 - (distance / maxLen);
+  // Only return matches above threshold to avoid too many irrelevant results
+  return similarity > 0.5 ? similarity : 0;
 }

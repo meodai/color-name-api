@@ -66,6 +66,51 @@ The API also works in reverse – you can search by color name to get hex values
 ```shell
 # Search for colors by name
 $ curl 'https://api.color.pizza/v1/names/?name=red'
+
+➜ {
+➜   "colors": [
+➜     {
+➜       "name": "Red",
+➜       "hex": "#ff0000",
+➜       "rgb": {"r": 255, "g": 0, "b": 0},
+➜       "hsl": {"h": 0, "s": 100, "l": 50},
+➜       "similarity": 1.0
+➜     },
+➜     {
+➜       "name": "Dark Red", 
+➜       "hex": "#8b0000",
+➜       "rgb": {"r": 139, "g": 0, "b": 0},
+➜       "hsl": {"h": 0, "s": 100, "l": 27.25},
+➜       "similarity": 0.75
+➜     }
+➜   ]
+➜ }
+```
+
+### Similarity Scoring
+
+Each search result includes a `similarity` score (0-1) that indicates how closely the color name matches your search term:
+
+- **1.0**: Exact match (e.g., searching "red" finds "Red")
+- **0.8-0.9**: Very close match (substring or minor variations)
+- **0.6-0.8**: Good match (fuzzy matching, handles typos)
+- **Below 0.6**: Filtered out (too dissimilar)
+
+The similarity is calculated using **Levenshtein distance**, which measures the minimum number of single-character edits needed to transform one string into another. This enables intelligent fuzzy matching that can handle:
+
+- **Typos**: "grren" finds "Green"
+- **Partial matches**: "sal" finds "Salmon"
+- **Case variations**: "RED" finds "Red"
+- **Common misspellings**: "bleu" finds "Blue"
+
+### Search Parameters
+
+```shell
+# Limit results (default: 20, max: 50)
+$ curl 'https://api.color.pizza/v1/names/?name=red&maxResults=5'
+
+# Use different color lists
+$ curl 'https://api.color.pizza/v1/names/?name=red&list=wikipedia'
 ```
 
 This reverse functionality is particularly useful for:
@@ -74,10 +119,12 @@ This reverse functionality is particularly useful for:
 - Conversational interfaces for color selection
 - Natural language processing in creative tools
 - Accessibility features where users describe colors verbally
+- Building search-as-you-type color pickers
 
 ## Technical Details
 
 - **Distance Metric**: Uses CIEDE2000 ΔE for perceptually accurate color matching
+- **Similarity Scoring**: Name search uses Levenshtein distance for fuzzy matching with typo tolerance
 - **Multiple Lists**: Choose from various color naming systems (Wikipedia, RAL, Pantone, etc.)
 - **Unique Names**: Optional `noduplicates` parameter ensures each color gets a distinct name
 - **Real-time Updates**: WebSocket support for live color naming applications

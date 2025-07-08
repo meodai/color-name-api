@@ -265,6 +265,12 @@ const respondNameSearch = async ( // Make async
 
   const searchString = decodeURI(nameString || nameQuery).trim();
 
+  // Get maxResults parameter (default to 20, max 50 for performance)
+  const maxResults = Math.min(
+    parseInt(searchParams.get('maxResults') || '20', 10),
+    50
+  );
+
   if (searchString.length < 3) {
     return await httpRespond(
       response,
@@ -280,7 +286,7 @@ const respondNameSearch = async ( // Make async
   }
 
   return await httpRespond(response, {
-    colors: findColors.searchNames(searchString, listKey),
+    colors: findColors.searchNames(searchString, listKey, maxResults),
   }, 200, responseHeader);
 };
 
