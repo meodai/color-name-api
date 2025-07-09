@@ -345,6 +345,26 @@ For example, if you use the "basic" list (which has only 21 colors) and request 
 
 This behavior ensures the API maintains its promise of providing truly unique names for each color, even in edge cases. If you need to name a large number of colors uniquely, make sure to use one of the larger color lists mentioned above.
 
+## Request Limits
+
+To ensure reliable performance and prevent abuse, the API enforces a maximum number of colors that can be requested at once:
+
+- **Maximum colors per request:** 100 (default, configurable by the server admin)
+- If you request more than this limit, the API will return an HTTP 400 error:
+
+```json
+{
+  "error": {
+    "status": 400,
+    "message": "You can request up to 100 colors at once. You requested N."
+  }
+}
+```
+
+If you need to process more colors, please split your requests accordingly.
+
+---
+
 ### Using WebSockets
 
 The Color Name API also supports real-time color updates via WebSocket connections. It

@@ -24,6 +24,7 @@ const gzip = promisify(zlib.gzip);
 
 const port = process.env.PORT || 8080;
 const socket = process.env.SOCKET || false;
+const maxColorsPerRequest = parseInt(process.env.MAX_COLORS_PER_REQUEST, 10) || 100;
 const allowedSocketOrigins = (
   process.env.ALLOWED_SOCKET_ORIGINS
   && process.env.ALLOWED_SOCKET_ORIGINS.split(',')
@@ -314,6 +315,21 @@ const respondValueSearch = async (
   const urlColorList = (colorQuery || colorListString).toLowerCase()
     .split(urlColorSeparator)
     .filter((hex) => hex);
+
+  // Enforce maxColorsPerRequest limit
+  if (urlColorList.length > maxColorsPerRequest) {
+    return await httpRespond(
+      response,
+      {
+        error: {
+          status: 400,
+          message: `You can request up to ${maxColorsPerRequest} colors at once. You requested ${urlColorList.length}.`,
+        },
+      },
+      400,
+      responseHeader,
+    );
+  }
 
   // creates a list of invalid colors
   const invalidColors = urlColorList.filter((hex) => (
