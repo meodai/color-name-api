@@ -24,7 +24,7 @@ const gzip = promisify(zlib.gzip);
 
 const port = process.env.PORT || 8080;
 const socket = process.env.SOCKET || false;
-const maxColorsPerRequest = parseInt(process.env.MAX_COLORS_PER_REQUEST, 10) || 100;
+const maxColorsPerRequest = parseInt(process.env.MAX_COLORS_PER_REQUEST, 10) || 170;
 const allowedSocketOrigins = (
   process.env.ALLOWED_SOCKET_ORIGINS
   && process.env.ALLOWED_SOCKET_ORIGINS.split(',')
