@@ -11,6 +11,7 @@ import requestIp from 'request-ip';
 import { lookup } from "ip-location-api";
 import * as dotenv from 'dotenv';
 import { LRUCache } from 'lru-cache'; // Import LRUCache
+import { parse as parseYAML } from 'yaml';
 
 import { FindColors } from './findColors.js';
 import { getPaletteTitle } from './generatePaletteName.js';
@@ -43,6 +44,10 @@ let docsHTML;
 let gzippedDocsHTML; // Cache for gzipped docs
 const gzipCache = new LRUCache({ max: gzipCacheSize });
 const ipCache = new LRUCache({ max: ipCacheSize }); // Cache for IP lookups
+
+// OpenAPI spec content (loaded asynchronously on startup)
+let openApiYAMLString;
+let openApiJSONObject;
 
 let io;
 let hasDb = false;
@@ -220,6 +225,29 @@ const httpRespond = async ( // Make httpRespond async
         response.end(svgString);
      }
      return;
+  }
+
+  // Generic text handler (for YAML or other text content)
+  if (type === 'text') {
+    const textResponse = String(responseObj);
+    if (responseHeader['Content-Encoding'] === 'gzip') {
+      let gzippedText = gzipCache.get(textResponse);
+      if (!gzippedText) {
+        try {
+          gzippedText = await gzip(textResponse);
+          gzipCache.set(textResponse, gzippedText);
+        } catch (err) {
+          console.error('Gzip compression failed:', err);
+          response.writeHead(statusCode, { ...responseHeader, 'Content-Encoding': undefined });
+          response.end(textResponse);
+          return;
+        }
+      }
+      response.end(gzippedText);
+    } else {
+      response.end(textResponse);
+    }
+    return;
   }
 
   // Default to JSON handling
@@ -469,6 +497,58 @@ const routes = [
     ),
   },
   {
+    path: '/openapi.yaml',
+    handler: async (
+      searchParams,
+      requestUrl,
+      request,
+      response,
+      responseHeader
+    ) => {
+      if (!openApiYAMLString) {
+        return await httpRespond(
+          response,
+          { error: { status: 500, message: 'OpenAPI spec not loaded' } },
+          500,
+          responseHeader
+        );
+      }
+      return await httpRespond(
+        response,
+        openApiYAMLString,
+        200,
+        { ...responseHeader, 'Content-Type': 'application/yaml; charset=utf-8' },
+        'text',
+      );
+    }
+  },
+  {
+    path: '/openapi.json',
+    handler: async (
+      searchParams,
+      requestUrl,
+      request,
+      response,
+      responseHeader
+    ) => {
+      if (!openApiJSONObject) {
+        return await httpRespond(
+          response,
+          { error: { status: 500, message: 'OpenAPI spec not loaded' } },
+          500,
+          responseHeader
+        );
+      }
+      // default JSON handling will stringify and optionally gzip with cache
+      return await httpRespond(
+        response,
+        openApiJSONObject,
+        200,
+        responseHeader
+      );
+    }
+  },
+  {
     path: '/names/',
     handler: respondNameSearch,
   },
@@ -558,6 +638,28 @@ const getHandlerForPath = (path) => {
 
 const requestHandler = async (request, response) => { // Make requestHandler async
   const requestUrl = new URL(request.url, 'http://localhost');
+  // Support standard discovery path for OpenAPI without version prefix
+  if (requestUrl.pathname === '/.well-known/openapi.json') {
+    const responseHeader = { ...responseHeaderObj };
+    const acceptEncoding = request.headers['accept-encoding'] || '';
+    if (acceptEncoding.toLowerCase().includes('gzip')) {
+      responseHeader['Content-Encoding'] = 'gzip';
+    }
+    if (!openApiJSONObject) {
+      return await httpRespond(
+        response,
+        { error: { status: 500, message: 'OpenAPI spec not loaded' } },
+        500,
+        responseHeader
+      );
+    }
+    return await httpRespond(
+      response,
+      openApiJSONObject,
+      200,
+      { ...responseHeader, 'Content-Type': 'application/json; charset=utf-8' }
+    );
+  }
   const isAPI = requestUrl.pathname.includes(baseUrl);
   const path = requestUrl.pathname.replace(baseUrl, '');
   const responseHeader = { ...responseHeaderObj };
@@ -612,7 +714,7 @@ const requestHandler = async (request, response) => { // Make requestHandler asy
 
   // Validate list key before proceeding
   const listKeyValidation = getListKey(searchParams); // Check if list key is valid or default is applicable
-  const requiresListKey = !['/docs/', '/swatch/'].includes(path); // Some paths don't need a list key
+  const requiresListKey = !['/docs/', '/swatch/', '/openapi.yaml', '/openapi.json'].includes(path); // Some paths don't need a list key
 
   if (requiresListKey && !listKeyValidation) {
     return await httpRespond(
@@ -676,6 +778,16 @@ async function initializeServer() {
     // Pre-gzip docs HTML
     gzippedDocsHTML = await gzip(docsHTML);
     console.log('Documentation HTML loaded and pre-gzipped.');
+
+    // Load OpenAPI spec (YAML) and parse to JSON
+    try {
+      openApiYAMLString = await fs.readFile('./color-names-v1-OpenAPI.yml', 'utf8');
+      openApiJSONObject = parseYAML(openApiYAMLString);
+      console.log('OpenAPI spec loaded.');
+    } catch (specErr) {
+      console.error('Failed to load OpenAPI spec:', specErr);
+      // Continue startup; endpoints will return 500 if accessed
+    }
 
     // Initialize database if configured
     if (
