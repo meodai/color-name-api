@@ -5,12 +5,13 @@
   "main": "src/index.js",
   "type": "module",
   "scripts": {
-    "test": "npm run test:local && npm run test:vptree && npm run test:exhausted && npm run test:compare-api",
+    "test": "npm run test:local && npm run test:vptree && npm run test:exhausted && npm run test:compare-api && npm run test:well-known",
     "test:local": "node test/test.js",
     "test:vptree": "node test/vptree.test.js",
     "test:compare-api": "node test/compare-api.js",
     "test:benchmark": "node test/benchmark.js",
     "test:exhausted": "node test/test-exhausted-colors.js",
+    "test:well-known": "node test/test-well-known.js",
     "start": "node src/server.js",
     "apidocs": "openapi-generator-cli generate -i color-names-v1-OpenAPI.yml -g html2 -o ./docs/",
     "openapitypes": "npx openapi-typescript color-names-v1-OpenAPI.yml -o generated/types.ts"

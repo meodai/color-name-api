@@ -18,6 +18,7 @@ import { getPaletteTitle } from './generatePaletteName.js';
 import { svgTemplate } from './colorSwatchSVG.js';
 import { createColorRecord } from './lib.js';
 import { initDatabase, addResponseToTable } from './database.js';
+import { initWellKnown } from './wellKnown.js';
 
 dotenv.config();
 
@@ -45,12 +46,13 @@ let gzippedDocsHTML; // Cache for gzipped docs
 const gzipCache = new LRUCache({ max: gzipCacheSize });
 const ipCache = new LRUCache({ max: ipCacheSize }); // Cache for IP lookups
 
-// OpenAPI spec content (loaded asynchronously on startup)
-let openApiYAMLString;
-let openApiJSONObject;
+// OpenAPI spec content via wellKnown module
+let getOpenApiYAMLString;
+let getOpenApiJSONObject;
 
 let io;
 let hasDb = false;
+let handleWellKnown; // assigned during initialization
 
 const responseHeaderObj = {
   "Access-Control-Allow-Origin": "*",
@@ -506,12 +508,13 @@ const routes = [
       response,
       responseHeader
     ) => {
-      if (!openApiYAMLString) {
+      const yml = getOpenApiYAMLString && getOpenApiYAMLString();
+      if (!yml) {
         return await sendError(response, 500, 'OpenAPI spec not loaded', responseHeader);
       }
       return await httpRespond(
         response,
-        openApiYAMLString,
+        yml,
         200,
         { ...responseHeader, 'Content-Type': 'application/yaml; charset=utf-8' },
         'text',
@@ -527,13 +530,13 @@ const routes = [
       response,
       responseHeader
     ) => {
-      if (!openApiJSONObject) {
+      const json = getOpenApiJSONObject && getOpenApiJSONObject();
+      if (!json) {
         return await sendError(response, 500, 'OpenAPI spec not loaded', responseHeader);
       }
-      // default JSON handling will stringify and optionally gzip with cache
       return await httpRespond(
         response,
-        openApiJSONObject,
+        json,
         200,
         responseHeader
       );
@@ -623,28 +626,9 @@ const getHandlerForPath = (path) => {
 
 const requestHandler = async (request, response) => { // Make requestHandler async
   const requestUrl = new URL(request.url, 'http://localhost');
-  // Support standard discovery path for OpenAPI without version prefix
-  if (requestUrl.pathname === '/.well-known/openapi.json') {
-    const responseHeader = { ...responseHeaderObj };
-    const acceptEncoding = request.headers['accept-encoding'] || '';
-    if (acceptEncoding.toLowerCase().includes('gzip')) {
-      responseHeader['Content-Encoding'] = 'gzip';
-    }
-    if (!openApiJSONObject) {
-      return await httpRespond(
-        response,
-        { error: { status: 500, message: 'OpenAPI spec not loaded' } },
-        500,
-        responseHeader
-      );
-    }
-    return await httpRespond(
-      response,
-      openApiJSONObject,
-      200,
-      { ...responseHeader, 'Content-Type': 'application/json; charset=utf-8' }
-    );
-  }
+  // Handle .well-known endpoints centrally
+  const handled = await handleWellKnown(request, response);
+  if (handled) return;
   const isAPI = requestUrl.pathname.startsWith(`/${baseUrl}`);
   const path = requestUrl.pathname.replace(`/${baseUrl}`, '/');
   const responseHeader = { ...responseHeaderObj };
@@ -749,15 +733,14 @@ async function initializeServer() {
     gzippedDocsHTML = await gzip(docsHTML);
     console.log('Documentation HTML loaded and pre-gzipped.');
 
-    // Load OpenAPI spec (YAML) and parse to JSON
-    try {
-      openApiYAMLString = await fs.readFile('./color-names-v1-OpenAPI.yml', 'utf8');
-      openApiJSONObject = parseYAML(openApiYAMLString);
-      console.log('OpenAPI spec loaded.');
-    } catch (specErr) {
-      console.error('Failed to load OpenAPI spec:', specErr);
-      // Continue startup; endpoints will return 500 if accessed
-    }
+    // Initialize well-known module (loads OpenAPI and builds handler)
+    const wellKnown = await initWellKnown({
+      httpRespond,
+      responseHeaderObj,
+    });
+    handleWellKnown = wellKnown.handleWellKnown;
+    getOpenApiYAMLString = wellKnown.getOpenApiYAMLString;
+    getOpenApiJSONObject = wellKnown.getOpenApiJSONObject;
 
     // Initialize database if configured
     if (

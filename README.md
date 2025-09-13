@@ -456,6 +456,21 @@ The Color Name API uses the **CIEDE2000 ΔE** (Delta E) distance metric for perc
 3. **Closest matches** are returned based on the smallest ΔE values
 4. **Distance values** in the API response represent the calculated ΔE difference
 
+## Well-known endpoints
+
+This API exposes a few standardized discovery endpoints:
+
+- `/.well-known/openapi.json` — Machine-discoverable OpenAPI JSON (same content as `/openapi.json`).
+- `/.well-known/security.txt` — Security disclosure file (RFC 9116) with contact details and expiry.
+- `/.well-known/ai-plugin.json` — Assistant/ChatGPT plugin manifest that references `/openapi.yaml` on the current host.
+
+Environment variables:
+
+- `SECURITY_CONTACT` — Email address used in `security.txt`.
+- `CONTACT_EMAIL` — Contact email in `ai-plugin.json`.
+
+All responses support gzip when the client sends `Accept-Encoding: gzip`.
+
 ### Understanding Distance Values
 
 The `distance` field in API responses represents the CIEDE2000 ΔE value:

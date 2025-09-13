@@ -20,6 +20,9 @@ info:
     email: color-name-api@elastiq.click
 servers:
   - url: https://api.color.pizza/v1/
+externalDocs:
+  description: HTML documentation for this API
+  url: https://api.color.pizza/v1/docs/
 components:
   schemas:
     listDescription:
