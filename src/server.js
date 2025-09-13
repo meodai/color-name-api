@@ -167,9 +167,9 @@ const getClientInfo = (request) => {
   const clientIp = requestIp.getClientIp(request);
   
   if (!clientIp) {
-    return { 
-      //clientIp: null, 
-      clientLocation: null 
+    return {
+      /* clientIp: null, */ // don't log client IPs
+      clientLocation: null,
     };
   }
   
@@ -185,6 +185,23 @@ const getClientInfo = (request) => {
   
   return result;
 };
+
+/**
+ * Helper to send standardized error responses
+ * @param {object} response - HTTP response
+ * @param {number} status - HTTP status code
+ * @param {string} message - Error message
+ * @param {object} responseHeader - Headers to use
+ * @param {object} extra - Extra fields inside error object
+ */
+const sendError = async (response, status, message, responseHeader, extra = {}) => (
+  httpRespond(
+    response,
+    { error: { status, message, ...extra } },
+    status,
+    responseHeader,
+  )
+);
 
 /**
  * responds to the client
@@ -301,15 +318,10 @@ const respondNameSearch = async ( // Make async
   );
 
   if (searchString.length < 3) {
-    return await httpRespond(
+    return await sendError(
       response,
-      {
-        error: {
-          status: 404,
-          message: 'the color name your are looking for must be at least 3 characters long.',
-        },
-      },
       404,
+      'the color name your are looking for must be at least 3 characters long.',
       responseHeader,
     );
   }
@@ -346,15 +358,10 @@ const respondValueSearch = async (
 
   // Enforce maxColorsPerRequest limit
   if (urlColorList.length > maxColorsPerRequest) {
-    return await httpRespond(
+    return await sendError(
       response,
-      {
-        error: {
-          status: 400,
-          message: `You can request up to ${maxColorsPerRequest} colors at once. You requested ${urlColorList.length}.`,
-        },
-      },
       400,
+      `You can request up to ${maxColorsPerRequest} colors at once. You requested ${urlColorList.length}.`,
       responseHeader,
     );
   }
@@ -365,15 +372,10 @@ const respondValueSearch = async (
   ));
 
   if (invalidColors.length) {
-    return await httpRespond(
+    return await sendError(
       response,
-      {
-        error: {
-          status: 404,
-          message: `'${invalidColors.join(', ')}' is not a valid HEX color`,
-        },
-      },
       404,
+      `'${invalidColors.join(', ')}' is not a valid HEX color`,
       responseHeader,
     );
   }
@@ -387,19 +389,16 @@ const respondValueSearch = async (
     // Check if we've exhausted all colors in unique mode
     if (uniqueMode && colorsResponse.some(color => color.error)) {
       const exhaustedColor = colorsResponse.find(color => color.error);
-      return await httpRespond(
+      return await sendError(
         response,
-        {
-          error: {
-            status: 409, // Conflict - best status code for "resource exhausted"
-            message: exhaustedColor.error,
-            availableCount: exhaustedColor.availableCount,
-            totalCount: exhaustedColor.totalCount,
-            requestedCount: urlColorList.length
-          },
-        },
         409,
+        exhaustedColor.error,
         responseHeader,
+        {
+          availableCount: exhaustedColor.availableCount,
+          totalCount: exhaustedColor.totalCount,
+          requestedCount: urlColorList.length,
+        }
       );
     }
   } else {
@@ -421,10 +420,10 @@ const respondValueSearch = async (
     const { clientIp, clientLocation } = getClientInfo(request);
     const xReferrer = request.headers['x-referrer'];
     
-    let relativePath = requestUrl.pathname + requestUrl.search;
+  let relativePath = requestUrl.pathname + requestUrl.search;
     
-    // Remove the API version from the path (e.g., /v1/)
-    relativePath = relativePath.replace(new RegExp(`^${baseUrl}`), '/');
+  // Remove the API version from the path (e.g., /v1/)
+  relativePath = relativePath.replace(new RegExp(`^\/${baseUrl}`), '/');
     
     const emittedRequestInfo = {
       url: relativePath,
@@ -472,12 +471,14 @@ const respondLists = async (
     );
   }
 
-  const localAvailableColorNameLists = Object.keys(colorsLists);
   return await httpRespond(response, {
-    availableColorNameLists: localAvailableColorNameLists,
+    availableColorNameLists,
     listDescriptions: colorNameLists.meta,
   }, 200, responseHeader);
 };
+
+// Small helper to normalize paths (keeps root as '/').
+const normalizePath = (p) => (p === '/' ? '/' : p.replace(/\/+$/, ''));
 
 const routes = [
   {
@@ -506,12 +507,7 @@ const routes = [
       responseHeader
     ) => {
       if (!openApiYAMLString) {
-        return await httpRespond(
-          response,
-          { error: { status: 500, message: 'OpenAPI spec not loaded' } },
-          500,
-          responseHeader
-        );
+        return await sendError(response, 500, 'OpenAPI spec not loaded', responseHeader);
       }
       return await httpRespond(
         response,
@@ -532,12 +528,7 @@ const routes = [
       responseHeader
     ) => {
       if (!openApiJSONObject) {
-        return await httpRespond(
-          response,
-          { error: { status: 500, message: 'OpenAPI spec not loaded' } },
-          500,
-          responseHeader
-        );
+        return await sendError(response, 500, 'OpenAPI spec not loaded', responseHeader);
       }
       // default JSON handling will stringify and optionally gzip with cache
       return await httpRespond(
@@ -570,15 +561,10 @@ const routes = [
       const nameParam = searchParams.get('name'); // Optional
 
       if (!colorParam || !/^[0-9a-fA-F]+$/.test(colorParam)) {
-        return await httpRespond(
+        return await sendError(
           response,
-          {
-            error: {
-              status: 400, // Use 400 for bad request
-              message: 'A valid hex color parameter (without #) is required.',
-            },
-          },
-          400, // Bad Request
+          400,
+          'A valid hex color parameter (without #) is required.',
           responseHeader,
         );
       }
@@ -602,13 +588,12 @@ const routes = [
 ];
 
 const getHandlerForPath = (path) => {
-  // Normalize path by removing trailing slash except for root path
-  const normalizedPath = path === '/' ? '/' : path.replace(/\/+$/, '');
+  const normalizedPath = normalizePath(path);
   
   // Find a matching route with normalized paths
   const matchingRoute = routes.find((route) => {
-    const routePath = route.path === '/' ? '/' : route.path.replace(/\/+$/, '');
-    return routePath === normalizedPath || routePath === normalizedPath + '/';
+    const routePath = normalizePath(route.path);
+    return routePath === normalizedPath || routePath === `${normalizedPath}/`;
   });
 
   if (matchingRoute) {
@@ -660,8 +645,8 @@ const requestHandler = async (request, response) => { // Make requestHandler asy
       { ...responseHeader, 'Content-Type': 'application/json; charset=utf-8' }
     );
   }
-  const isAPI = requestUrl.pathname.includes(baseUrl);
-  const path = requestUrl.pathname.replace(baseUrl, '');
+  const isAPI = requestUrl.pathname.startsWith(`/${baseUrl}`);
+  const path = requestUrl.pathname.replace(`/${baseUrl}`, '/');
   const responseHeader = { ...responseHeaderObj };
   const responseHandler = getHandlerForPath(path);
   const isSocket = request.headers.upgrade === 'websocket';
@@ -682,29 +667,19 @@ const requestHandler = async (request, response) => { // Make requestHandler asy
 
   // makes sure the API is beeing requested
   if (!isAPI) {
-    return await httpRespond(
+    return await sendError(
       response,
-      {
-        error: {
-          status: 404,
-          message: 'invalid URL: make sure to provide the API version',
-        },
-      },
       404,
+      'invalid URL: make sure to provide the API version',
       responseHeader,
     );
   }
 
   if (responseHandler === null) {
-    return await httpRespond(
+    return await sendError(
       response,
-      {
-        error: {
-          status: 404,
-          message: `invalid URL: you provided '${path}', available endpoints are ${routes.map((route) => `'${route.path}'`).join(', ')}`,
-        },
-      },
       404,
+      `invalid URL: you provided '${path}', available endpoints are ${routes.map((route) => `'${route.path}'`).join(', ')}`,
       responseHeader,
     );
   }
@@ -717,16 +692,11 @@ const requestHandler = async (request, response) => { // Make requestHandler asy
   const requiresListKey = !['/docs/', '/swatch/', '/openapi.yaml', '/openapi.json'].includes(path); // Some paths don't need a list key
 
   if (requiresListKey && !listKeyValidation) {
-    return await httpRespond(
+    return await sendError(
       response,
-      {
-        error: {
-          status: 400, // Use 400 for bad request
-          message: `Invalid or missing list key: '${searchParams.get('list') || ''}'. Available keys are: ${availableColorNameLists.join(', ')}. Check /lists/ for more info.`,
-        },
-      },
-      400, // Bad Request
-      responseHeader // Pass header which might include gzip
+      400,
+      `Invalid or missing list key: '${searchParams.get('list') || ''}'. Available keys are: ${availableColorNameLists.join(', ')}. Check /lists/ for more info.`,
+      responseHeader,
     );
   }
 
