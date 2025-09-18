@@ -1,4 +1,4 @@
-import seedrandom from "seedrandom";
+import seedrandom from 'seedrandom';
 
 /**
  * Removes adjacent duplicate words from a parts array.
@@ -38,14 +38,14 @@ export function getPaletteTitle(namesArr, separatorRegex = /(\s|-)+/) {
 
   // 2. Handle edge cases.
   if (uniqueNames.length === 0) {
-    return "";
+    return '';
   }
   if (uniqueNames.length === 1) {
     return uniqueNames[0];
   }
 
   // 3. Initialize a deterministic random number generator.
-  const rng = seedrandom(namesArr.join("-"));
+  const rng = seedrandom(namesArr.join('-'));
 
   // 4. Select two distinct random names efficiently.
   const n = uniqueNames.length;
@@ -79,7 +79,7 @@ export function getPaletteTitle(namesArr, separatorRegex = /(\s|-)+/) {
       partsFirst.length > 1 ? partsFirst.slice(0, -1) : partsFirst;
     const head =
       partsFirst.length > 1
-        ? deduplicateParts(headParts).join("").trim()
+        ? deduplicateParts(headParts).join('').trim()
         : partsFirst[0].trim();
     const tail = partsLast[partsLast.length - 1].trim();
     return `${head} ${tail}`;
@@ -89,7 +89,7 @@ export function getPaletteTitle(namesArr, separatorRegex = /(\s|-)+/) {
     const tailParts = partsLast.length > 1 ? partsLast.slice(1) : partsLast;
     const tail =
       partsLast.length > 1
-        ? deduplicateParts(tailParts).join("").trim()
+        ? deduplicateParts(tailParts).join('').trim()
         : partsLast[0].trim();
     return `${head} ${tail}`;
   }

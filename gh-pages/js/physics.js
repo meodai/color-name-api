@@ -1,10 +1,10 @@
-import { getColorValue } from "./colors.js";
+import { getColorValue } from './colors.js';
 
 // Utility functions for motion preference detection
 export function prefersReducedMotion() {
   return (
     window.matchMedia &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches
   );
 }
 
@@ -12,7 +12,7 @@ export function setupMotionPreferenceListener() {
   if (!window.matchMedia) return;
 
   const motionMediaQuery = window.matchMedia(
-    "(prefers-reduced-motion: reduce)",
+    '(prefers-reduced-motion: reduce)'
   );
 
   function handleMotionPreferenceChange(event) {
@@ -39,11 +39,11 @@ export function setupMotionPreferenceListener() {
   physics.reducedMotionEnabled = motionMediaQuery.matches;
 
   // Listen for changes
-  motionMediaQuery.addEventListener("change", handleMotionPreferenceChange);
+  motionMediaQuery.addEventListener('change', handleMotionPreferenceChange);
 }
 
 export let engine, render, runner;
-export let physics = {
+export const physics = {
   objects: [],
   maxObjects: 1000,
   initialized: false,
@@ -60,7 +60,7 @@ export let physics = {
   manuallyDisabled: false,
 };
 
-let Matter = window.Matter;
+const Matter = window.Matter;
 const { Engine, Render, Runner, Bodies, Composite, Events, Body } = Matter;
 
 export function initializePhysics() {
@@ -83,17 +83,17 @@ export function initializePhysics() {
       width: physics.bounds.width,
       height: physics.bounds.height,
       wireframes: false,
-      background: "transparent",
+      background: 'transparent',
       pixelRatio: window.devicePixelRatio,
     },
   });
-  render.canvas.style.position = "fixed";
-  render.canvas.style.top = "0";
-  render.canvas.style.left = "0";
-  render.canvas.style.width = "100%";
-  render.canvas.style.height = "100%";
-  render.canvas.style.zIndex = "-1";
-  render.canvas.style.pointerEvents = "none";
+  render.canvas.style.position = 'fixed';
+  render.canvas.style.top = '0';
+  render.canvas.style.left = '0';
+  render.canvas.style.width = '100%';
+  render.canvas.style.height = '100%';
+  render.canvas.style.zIndex = '-1';
+  render.canvas.style.pointerEvents = 'none';
   const platformWidth = physics.bounds.width * 0.8;
   const platformHeight = 10;
   const platformY = physics.bounds.height - platformHeight / 2;
@@ -102,28 +102,28 @@ export function initializePhysics() {
     platformY,
     platformWidth,
     platformHeight,
-    { isStatic: true, render: { fillStyle: "#ffffff", opacity: 0 } },
+    { isStatic: true, render: { fillStyle: '#ffffff', opacity: 0 } }
   );
   Composite.add(engine.world, platform);
   physics.mouseBody = Bodies.circle(0, 0, 35, {
     isStatic: true,
     collisionFilter: { group: 1, category: 0x0002 },
-    render: { fillStyle: "rgba(0, 0, 0, 0)", opacity: 0 },
+    render: { fillStyle: 'rgba(0, 0, 0, 0)', opacity: 0 },
   });
   Composite.add(engine.world, physics.mouseBody);
-  document.addEventListener("mousemove", handleMouseMove);
+  document.addEventListener('mousemove', handleMouseMove);
   createHeadingBodies();
-  Events.on(engine, "afterUpdate", afterUpdateHandler);
-  window.removeEventListener("resize", handleWindowResize);
-  window.addEventListener("resize", handleWindowResize);
-  window.removeEventListener("scroll", handleScroll);
-  window.addEventListener("scroll", handleScroll);
-  document.removeEventListener("touchstart", handleTouchStart);
-  document.removeEventListener("touchend", handleTouchEnd);
-  document.removeEventListener("touchcancel", handleTouchEnd);
-  document.addEventListener("touchstart", handleTouchStart);
-  document.addEventListener("touchend", handleTouchEnd);
-  document.addEventListener("touchcancel", handleTouchEnd);
+  Events.on(engine, 'afterUpdate', afterUpdateHandler);
+  window.removeEventListener('resize', handleWindowResize);
+  window.addEventListener('resize', handleWindowResize);
+  window.removeEventListener('scroll', handleScroll);
+  window.addEventListener('scroll', handleScroll);
+  document.removeEventListener('touchstart', handleTouchStart);
+  document.removeEventListener('touchend', handleTouchEnd);
+  document.removeEventListener('touchcancel', handleTouchEnd);
+  document.addEventListener('touchstart', handleTouchStart);
+  document.addEventListener('touchend', handleTouchEnd);
+  document.addEventListener('touchcancel', handleTouchEnd);
   if (physics.observer) physics.observer.disconnect();
   physics.observer = new MutationObserver(() => createHeadingBodies());
   physics.observer.observe(document.body, { childList: true, subtree: true });
@@ -142,11 +142,11 @@ export function cleanupPhysics() {
       render.canvas.parentNode.removeChild(render.canvas);
     }
   }
-  window.removeEventListener("scroll", handleScroll);
-  document.removeEventListener("mousemove", handleMouseMove);
-  document.removeEventListener("touchstart", handleTouchStart);
-  document.removeEventListener("touchend", handleTouchEnd);
-  document.removeEventListener("touchcancel", handleTouchEnd);
+  window.removeEventListener('scroll', handleScroll);
+  document.removeEventListener('mousemove', handleMouseMove);
+  document.removeEventListener('touchstart', handleTouchStart);
+  document.removeEventListener('touchend', handleTouchEnd);
+  document.removeEventListener('touchcancel', handleTouchEnd);
   if (physics.observer) {
     physics.observer.disconnect();
     physics.observer = null;
@@ -171,7 +171,7 @@ function handleWindowResize() {
     // Update cached viewport height on resize
     viewportHeight = window.innerHeight;
     initializePhysics();
-    updateHeadingBodies("full");
+    updateHeadingBodies('full');
   }, 300);
 }
 
@@ -185,7 +185,7 @@ function handleTouchEnd() {
 function afterUpdateHandler() {
   const objectsToRemove = [];
   const buffer = 500;
-  physics.objects.forEach((obj) => {
+  physics.objects.forEach(obj => {
     if (
       obj.position.y > physics.bounds.height + buffer ||
       obj.position.x < -buffer ||
@@ -195,35 +195,35 @@ function afterUpdateHandler() {
     }
   });
   if (objectsToRemove.length > 0) {
-    objectsToRemove.forEach((obj) => {
+    objectsToRemove.forEach(obj => {
       Composite.remove(engine.world, obj);
-      physics.objects = physics.objects.filter((o) => o.id !== obj.id);
+      physics.objects = physics.objects.filter(o => o.id !== obj.id);
     });
   }
   if (physics.objects.length > physics.maxObjects) {
     const objectsToTrim = physics.objects.slice(
       0,
-      physics.objects.length - physics.maxObjects,
+      physics.objects.length - physics.maxObjects
     );
-    objectsToTrim.forEach((obj) => {
+    objectsToTrim.forEach(obj => {
       Composite.remove(engine.world, obj);
     });
     physics.objects = physics.objects.slice(
-      physics.objects.length - physics.maxObjects,
+      physics.objects.length - physics.maxObjects
     );
   }
 }
 
 export function createColorObject(hexColor) {
   if (!physics.initialized || physics.manuallyDisabled) return;
-  const color = hexColor.startsWith("#") ? hexColor : `#${hexColor}`;
+  const color = hexColor.startsWith('#') ? hexColor : `#${hexColor}`;
   const size = Math.random() * 18 + 5;
 
   // Get spawn position from .color-visualization element
   let x = Math.random() * physics.bounds.width;
   let y = -size * 2; // default fallback
 
-  const colorVisualization = document.querySelector(".color-visualization");
+  const colorVisualization = document.querySelector('.color-visualization');
   if (colorVisualization) {
     const rect = colorVisualization.getBoundingClientRect();
     // Spawn from a random position within the color visualization element
@@ -243,7 +243,7 @@ export function createColorObject(hexColor) {
     frictionAir: frictionAir,
     density: density,
     angle: Math.random() * Math.PI * 2,
-    render: { fillStyle: color, strokeStyle: "#000000", lineWidth: 0 },
+    render: { fillStyle: color, strokeStyle: '#000000', lineWidth: 0 },
   };
 
   let object;
@@ -284,11 +284,11 @@ function createHeadingBodyHelper(
   y,
   width,
   height,
-  renderProps = {},
+  renderProps = {}
 ) {
   const defaultRender = {
-    fillStyle: "rgba(255, 0, 0, 0)",
-    strokeStyle: "rgba(255, 0, 0, 0)",
+    fillStyle: 'rgba(255, 0, 0, 0)',
+    strokeStyle: 'rgba(255, 0, 0, 0)',
     lineWidth: 1,
   };
 
@@ -311,17 +311,17 @@ function createHeadingBodies() {
   viewportHeight = window.innerHeight;
 
   const bodies = Composite.allBodies(engine.world);
-  const headingBodies = bodies.filter((body) => body.isHeading);
-  const pixelBodies = bodies.filter((body) => body.isPixel);
-  headingBodies.forEach((body) => Composite.remove(engine.world, body));
-  pixelBodies.forEach((body) => Composite.remove(engine.world, body));
+  const headingBodies = bodies.filter(body => body.isHeading);
+  const pixelBodies = bodies.filter(body => body.isPixel);
+  headingBodies.forEach(body => Composite.remove(engine.world, body));
+  pixelBodies.forEach(body => Composite.remove(engine.world, body));
 
-  const headings = document.querySelectorAll("[data-collision]");
-  headings.forEach((heading) => {
+  const headings = document.querySelectorAll('[data-collision]');
+  headings.forEach(heading => {
     let offsetTop = 0;
     let offsetBottom = 0;
 
-    heading.dataset.collision.split(" ").forEach((offset, i) => {
+    heading.dataset.collision.split(' ').forEach((offset, i) => {
       const offsetValue = parseFloat(offset);
       if (i === 0) {
         offsetTop = offsetValue;
@@ -344,25 +344,25 @@ function createHeadingBodies() {
     }
   });
 
-  const pixelatedMap = document.querySelector(".pixelated-map");
-  if (pixelatedMap && pixelatedMap.style.display !== "none") {
+  const pixelatedMap = document.querySelector('.pixelated-map');
+  if (pixelatedMap && pixelatedMap.style.display !== 'none') {
     addPixelsToPhysics(pixelatedMap);
   }
 }
 
-function updateHeadingBodies(mode = "yOnly") {
+function updateHeadingBodies(mode = 'yOnly') {
   if (!physics.initialized) return;
   const bodies = Composite.allBodies(engine.world);
-  const headingBodies = bodies.filter((body) => body.isHeading);
-  const pixelBodies = bodies.filter((body) => body.isPixel);
+  const headingBodies = bodies.filter(body => body.isHeading);
+  const pixelBodies = bodies.filter(body => body.isPixel);
   const bodiesToRemove = [];
 
-  headingBodies.forEach((body) => {
+  headingBodies.forEach(body => {
     if (body.headingElement) {
       const rect = body.headingElement.getBoundingClientRect();
       let x = body.position.x;
-      let y = rect.top + rect.height / 2;
-      if (mode === "full") {
+      const y = rect.top + rect.height / 2;
+      if (mode === 'full') {
         x = rect.left + rect.width / 2;
       }
 
@@ -377,12 +377,12 @@ function updateHeadingBodies(mode = "yOnly") {
   });
 
   // Update pixel bodies positions
-  pixelBodies.forEach((body) => {
+  pixelBodies.forEach(body => {
     if (body.pixelElement) {
       const rect = body.pixelElement.getBoundingClientRect();
       let x = body.position.x;
-      let y = rect.top + rect.height / 2;
-      if (mode === "full") {
+      const y = rect.top + rect.height / 2;
+      if (mode === 'full') {
         x = rect.left + rect.width / 2;
       }
       // Remove from simulation if the element is out of the viewport
@@ -394,18 +394,18 @@ function updateHeadingBodies(mode = "yOnly") {
     }
   });
   if (bodiesToRemove.length > 0) {
-    bodiesToRemove.forEach((body) => Composite.remove(engine.world, body));
+    bodiesToRemove.forEach(body => Composite.remove(engine.world, body));
   }
 
   // Only check for new headings if we're doing a full update
-  if (mode === "full") {
-    const headings = document.querySelectorAll("[data-collision]");
-    headings.forEach((heading) => {
+  if (mode === 'full') {
+    const headings = document.querySelectorAll('[data-collision]');
+    headings.forEach(heading => {
       const rect = heading.getBoundingClientRect();
       // Only add if element is in viewport
       if (isElementInViewport(rect)) {
         const alreadyExists = headingBodies.some(
-          (body) => body.headingElement === heading,
+          body => body.headingElement === heading
         );
         if (!alreadyExists) {
           const x = rect.left + rect.width / 2;
@@ -413,8 +413,8 @@ function updateHeadingBodies(mode = "yOnly") {
 
           // Use the helper function with different render style for updateHeadingBodies
           const renderProps = {
-            fillStyle: "rgba(0, 0, 0, 0)",
-            strokeStyle: "rgba(0, 0, 0, 0.1)",
+            fillStyle: 'rgba(0, 0, 0, 0)',
+            strokeStyle: 'rgba(0, 0, 0, 0.1)',
             lineWidth: 0,
           };
           createHeadingBodyHelper(
@@ -423,7 +423,7 @@ function updateHeadingBodies(mode = "yOnly") {
             y,
             rect.width,
             rect.height,
-            renderProps,
+            renderProps
           );
         }
       }
@@ -446,8 +446,8 @@ function createPixelBodyHelper(pixel, x, y, width, height) {
     pixelElement: pixel,
     friction: 0.2,
     render: {
-      fillStyle: "rgba(0, 0, 0, 0)",
-      strokeStyle: "rgba(0, 0, 0, 0.05)",
+      fillStyle: 'rgba(0, 0, 0, 0)',
+      strokeStyle: 'rgba(0, 0, 0, 0.05)',
       lineWidth: 0,
     },
   });
@@ -460,10 +460,10 @@ export function addPixelsToPhysics(pixelatedMap) {
 
   // Remove existing pixel bodies to avoid duplicates
   const bodies = Composite.allBodies(engine.world);
-  const pixelBodies = bodies.filter((body) => body.isPixel);
-  pixelBodies.forEach((body) => Composite.remove(engine.world, body));
+  const pixelBodies = bodies.filter(body => body.isPixel);
+  pixelBodies.forEach(body => Composite.remove(engine.world, body));
 
-  const pixels = pixelatedMap.querySelectorAll(".pixel-country");
+  const pixels = pixelatedMap.querySelectorAll('.pixel-country');
   const maxPhysicsPixels = 300;
   const totalPixels = pixels.length;
   const addEvery = Math.max(1, Math.floor(totalPixels / maxPhysicsPixels));
@@ -499,16 +499,16 @@ export function togglePhysics() {
 }
 
 export function updateToggleButton() {
-  const toggleButton = document.getElementById("physics-toggle");
+  const toggleButton = document.getElementById('physics-toggle');
   if (!toggleButton) return;
 
   const isDisabled = physics.manuallyDisabled || prefersReducedMotion();
 
   if (isDisabled) {
-    toggleButton.classList.add("physics-disabled");
-    toggleButton.setAttribute("aria-label", "Enable physics animation");
+    toggleButton.classList.add('physics-disabled');
+    toggleButton.setAttribute('aria-label', 'Enable physics animation');
   } else {
-    toggleButton.classList.remove("physics-disabled");
-    toggleButton.setAttribute("aria-label", "Disable physics animation");
+    toggleButton.classList.remove('physics-disabled');
+    toggleButton.setAttribute('aria-label', 'Disable physics animation');
   }
 }

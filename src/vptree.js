@@ -83,8 +83,8 @@ class MaxHeap {
     const item = this.data[i];
 
     while (true) {
-      let left = 2 * i + 1;
-      let right = 2 * i + 2;
+      const left = 2 * i + 1;
+      const right = 2 * i + 2;
       let largest = i;
 
       if (left < length && this.data[left].dist > this.data[largest].dist) {
@@ -140,7 +140,7 @@ export class VPTree {
     }
 
     // Calculate distances from vantage point to all other points
-    const distances = rest.map((p) => ({
+    const distances = rest.map(p => ({
       point: p,
       dist: this.distance(p, node.point),
     }));
@@ -151,8 +151,8 @@ export class VPTree {
     node.threshold = distances[median].dist;
 
     // Build left subtree (closer points) and right subtree (further points)
-    node.left = this._build(distances.slice(0, median).map((d) => d.point));
-    node.right = this._build(distances.slice(median).map((d) => d.point));
+    node.left = this._build(distances.slice(0, median).map(d => d.point));
+    node.right = this._build(distances.slice(median).map(d => d.point));
 
     return node;
   }
@@ -166,7 +166,7 @@ export class VPTree {
   search(target, maxResults = 1) {
     const heap = new MaxHeap(maxResults);
 
-    const searchNode = (node) => {
+    const searchNode = node => {
       if (!node) return;
 
       // Calculate distance between target and current vantage point
@@ -178,8 +178,8 @@ export class VPTree {
       }
 
       // Determine which subtree to search first (closer one has priority)
-      const side = dist < node.threshold ? "left" : "right";
-      const other = side === "left" ? "right" : "left";
+      const side = dist < node.threshold ? 'left' : 'right';
+      const other = side === 'left' ? 'right' : 'left';
 
       // Search the closer subtree first
       if (node[side]) searchNode(node[side]);
@@ -194,6 +194,6 @@ export class VPTree {
     };
 
     searchNode(this.root);
-    return heap.toSortedArray().map((h) => h.point);
+    return heap.toSortedArray().map(h => h.point);
   }
 }

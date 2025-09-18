@@ -4,14 +4,14 @@
  * in unique mode with the basic list (which has 21 colors)
  */
 
-const localhost = "127.0.0.1";
+const localhost = '127.0.0.1';
 const port = process.env.PORT || 8080;
-const currentVersion = "v1";
-const APIurl = "";
+const currentVersion = 'v1';
+const APIurl = '';
 const baseUrl = `${APIurl}${currentVersion}`;
 
 // We'll use the "basic" list which has 21 colors
-const listToTest = "basic";
+const listToTest = 'basic';
 const colorCount = 21; // Number of colors in the basic list
 const testColorCount = colorCount + 1; // Request one more than available
 
@@ -20,34 +20,34 @@ function generateTestColors(count) {
   const colors = [];
   for (let i = 0; i < count; i++) {
     // Generate colors from 000000 to ffffff (padding with zeros)
-    const hex = i.toString(16).padStart(6, "0");
+    const hex = i.toString(16).padStart(6, '0');
     colors.push(hex);
   }
   return colors;
 }
 
 async function runTest() {
-  console.log("=== Exhausted Colors Test ===");
+  console.log('=== Exhausted Colors Test ===');
   console.log(
-    `Testing with list "${listToTest}" which has ${colorCount} colors`,
+    `Testing with list "${listToTest}" which has ${colorCount} colors`
   );
   console.log(
-    `Requesting ${testColorCount} colors to trigger the exhausted colors error`,
+    `Requesting ${testColorCount} colors to trigger the exhausted colors error`
   );
 
   // First check if the server is running
   try {
     await fetch(`http://${localhost}:${port}/${baseUrl}/`);
-    console.log("✅ Server is running");
+    console.log('✅ Server is running');
   } catch (err) {
-    console.error("❌ ERROR: Server is not running!");
+    console.error('❌ ERROR: Server is not running!');
     console.error(`Make sure the server is running on port ${port}`);
     process.exit(1);
   }
 
   // Generate colors for our test
   const testColors = generateTestColors(testColorCount);
-  const testUrl = `/?noduplicates=true&list=${listToTest}&values=${testColors.join(",")}`;
+  const testUrl = `/?noduplicates=true&list=${listToTest}&values=${testColors.join(',')}`;
 
   console.log(`Testing URL: http://${localhost}:${port}/${baseUrl}${testUrl}`);
 
@@ -64,43 +64,43 @@ async function runTest() {
 
     // Validate error response structure
     if (!response.error) {
-      throw new Error("Response missing error object");
+      throw new Error('Response missing error object');
     }
 
     if (!response.error.message) {
-      throw new Error("Error response missing message");
+      throw new Error('Error response missing message');
     }
 
-    if (!response.error.hasOwnProperty("availableCount")) {
-      throw new Error("Error response missing availableCount property");
+    if (!response.error.hasOwnProperty('availableCount')) {
+      throw new Error('Error response missing availableCount property');
     }
 
-    if (!response.error.hasOwnProperty("totalCount")) {
-      throw new Error("Error response missing totalCount property");
+    if (!response.error.hasOwnProperty('totalCount')) {
+      throw new Error('Error response missing totalCount property');
     }
 
-    if (!response.error.hasOwnProperty("requestedCount")) {
-      throw new Error("Error response missing requestedCount property");
+    if (!response.error.hasOwnProperty('requestedCount')) {
+      throw new Error('Error response missing requestedCount property');
     }
 
     // Validate error response values
     if (response.error.requestedCount !== testColorCount) {
       throw new Error(
-        `Expected requestedCount to be ${testColorCount} but got ${response.error.requestedCount}`,
+        `Expected requestedCount to be ${testColorCount} but got ${response.error.requestedCount}`
       );
     }
 
     if (response.error.totalCount !== colorCount) {
       throw new Error(
-        `Expected totalCount to be ${colorCount} but got ${response.error.totalCount}`,
+        `Expected totalCount to be ${colorCount} but got ${response.error.totalCount}`
       );
     }
 
     // Print the successful test result
     console.log(
-      "\n✅ Test PASSED! The server correctly handles exhausted colors scenario.",
+      '\n✅ Test PASSED! The server correctly handles exhausted colors scenario.'
     );
-    console.log("Error response received:");
+    console.log('Error response received:');
     console.log(`- Status: ${response.error.status}`);
     console.log(`- Message: ${response.error.message}`);
     console.log(`- Available Count: ${response.error.availableCount}`);

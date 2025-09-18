@@ -1,4 +1,4 @@
-const localhost = "127.0.0.1";
+const localhost = '127.0.0.1';
 const port = process.env.PORT || 8080;
 
 async function run() {
@@ -6,7 +6,7 @@ async function run() {
   try {
     await fetch(`http://${localhost}:${port}/v1/`);
   } catch (err) {
-    console.error("ERROR: Server is not running!");
+    console.error('ERROR: Server is not running!');
     process.exit(1);
   }
 
@@ -15,17 +15,17 @@ async function run() {
   // 1) .well-known/openapi.json
   try {
     const res = await fetch(
-      `http://${localhost}:${port}/.well-known/openapi.json`,
+      `http://${localhost}:${port}/.well-known/openapi.json`
     );
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     if (!(data && (data.openapi || data.swagger))) {
-      throw new Error("Missing openapi/swagger field in JSON");
+      throw new Error('Missing openapi/swagger field in JSON');
     }
     if (!data.info || !data.paths) {
-      throw new Error("OpenAPI JSON missing required fields (info/paths)");
+      throw new Error('OpenAPI JSON missing required fields (info/paths)');
     }
-    console.log("✅ /.well-known/openapi.json OK");
+    console.log('✅ /.well-known/openapi.json OK');
   } catch (e) {
     errors.push(`/.well-known/openapi.json failed: ${e.message}`);
   }
@@ -33,13 +33,13 @@ async function run() {
   // 2) .well-known/security.txt
   try {
     const res = await fetch(
-      `http://${localhost}:${port}/.well-known/security.txt`,
+      `http://${localhost}:${port}/.well-known/security.txt`
     );
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const txt = await res.text();
-    if (!/Contact:/i.test(txt)) throw new Error("Missing Contact line");
-    if (!/Expires:/i.test(txt)) throw new Error("Missing Expires line");
-    console.log("✅ /.well-known/security.txt OK");
+    if (!/Contact:/i.test(txt)) throw new Error('Missing Contact line');
+    if (!/Expires:/i.test(txt)) throw new Error('Missing Expires line');
+    console.log('✅ /.well-known/security.txt OK');
   } catch (e) {
     errors.push(`/.well-known/security.txt failed: ${e.message}`);
   }
@@ -47,28 +47,28 @@ async function run() {
   // 3) .well-known/ai-plugin.json
   try {
     const res = await fetch(
-      `http://${localhost}:${port}/.well-known/ai-plugin.json`,
+      `http://${localhost}:${port}/.well-known/ai-plugin.json`
     );
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    if (data.schema_version !== "v1")
-      throw new Error("schema_version is not v1");
-    if (!data.api || data.api.type !== "openapi")
-      throw new Error("api.type is not openapi");
-    if (!data.api.url || !data.api.url.endsWith("/openapi.yaml"))
-      throw new Error("api.url does not point to /openapi.yaml");
-    console.log("✅ /.well-known/ai-plugin.json OK");
+    if (data.schema_version !== 'v1')
+      throw new Error('schema_version is not v1');
+    if (!data.api || data.api.type !== 'openapi')
+      throw new Error('api.type is not openapi');
+    if (!data.api.url || !data.api.url.endsWith('/openapi.yaml'))
+      throw new Error('api.url does not point to /openapi.yaml');
+    console.log('✅ /.well-known/ai-plugin.json OK');
   } catch (e) {
     errors.push(`/.well-known/ai-plugin.json failed: ${e.message}`);
   }
 
   if (errors.length) {
-    console.error("\n❌ Well-known tests failed:");
-    for (const err of errors) console.error("- " + err);
+    console.error('\n❌ Well-known tests failed:');
+    for (const err of errors) console.error('- ' + err);
     process.exit(1);
   }
 
-  console.log("\nAll well-known endpoint tests passed! 🎉");
+  console.log('\nAll well-known endpoint tests passed! 🎉');
   process.exit(0);
 }
 

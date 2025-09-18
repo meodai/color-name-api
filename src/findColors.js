@@ -4,12 +4,12 @@ import {
   wcagLuminance,
   differenceCiede2000,
   wcagContrast,
-} from "culori";
+} from 'culori';
 
-import { lib } from "./lib.js";
-import ClosestColor from "./closestColor.js";
-import { LRUCache } from "lru-cache";
-import { distance as levenshteinDistance } from "fastest-levenshtein";
+import { lib } from './lib.js';
+import ClosestColor from './closestColor.js';
+import { LRUCache } from 'lru-cache';
+import { distance as levenshteinDistance } from 'fastest-levenshtein';
 
 const distanceMetric = differenceCiede2000();
 
@@ -23,9 +23,9 @@ const distanceMetric = differenceCiede2000();
 const enrichColorObj = (colorObj, colorListParedRef) => {
   const localColorObj = { ...colorObj };
   const currentColor = parse(colorObj.hex);
-  const lab = converter("lab");
-  const rgb = converter("rgb");
-  const hsl = converter("hsl");
+  const lab = converter('lab');
+  const rgb = converter('rgb');
+  const hsl = converter('hsl');
 
   const ccLab = lab(currentColor);
 
@@ -58,13 +58,13 @@ const enrichColorObj = (colorObj, colorListParedRef) => {
   // calculate luminancy for each color
   localColorObj.luminance = parseFloat(lib.luminance(rgbInt).toFixed(5));
   localColorObj.luminanceWCAG = parseFloat(
-    wcagLuminance(currentColor).toFixed(5),
+    wcagLuminance(currentColor).toFixed(5)
   );
 
   localColorObj.bestContrast =
-    wcagContrast(currentColor, "#000") > wcagContrast(currentColor, "#fff")
-      ? "black"
-      : "white";
+    wcagContrast(currentColor, '#000') > wcagContrast(currentColor, '#fff')
+      ? 'black'
+      : 'white';
 
   localColorObj.swatchImg = {
     svgNamed: `/v1/swatch/?color=${localColorObj.hex.slice(1)}&name=${encodeURI(localColorObj.name)}`,
@@ -89,12 +89,12 @@ export class FindColors {
       this.colorLists = colorListsCache;
       this.colorListsParsed = colorListsParsedCache;
       this.closestInstances = closestInstancesCache;
-      console.log("[FindColors] Using cached VP-trees");
+      console.log('[FindColors] Using cached VP-trees');
       return;
     }
 
     console.log(
-      "[FindColors] Initializing color lists and VP-trees for the first time",
+      '[FindColors] Initializing color lists and VP-trees for the first time'
     );
     this.colorLists = colorsListsObj;
 
@@ -103,12 +103,12 @@ export class FindColors {
     this.closestInstances = {};
 
     // prepare color array and create VPTree instances
-    Object.keys(this.colorLists).forEach((listName) => {
+    Object.keys(this.colorLists).forEach(listName => {
       console.log(`[Color Finder] Initializing VPTree for list: ${listName}`);
 
       this.colorListsParsed[listName] = [];
-      this.colorLists[listName] = this.colorLists[listName].map((c) =>
-        enrichColorObj(c, this.colorListsParsed[listName]),
+      this.colorLists[listName] = this.colorLists[listName].map(c =>
+        enrichColorObj(c, this.colorListsParsed[listName])
       );
 
       Object.freeze(this.colorLists[listName]);
@@ -128,7 +128,7 @@ export class FindColors {
     // prepare color name response cache
     this.colorNameCache = {};
     // add a key for each color list
-    Object.keys(this.colorLists).forEach((listName) => {
+    Object.keys(this.colorLists).forEach(listName => {
       this.colorNameCache[listName] = new LRUCache({
         max: MAX_NAME_CACHE_SIZE,
       });
@@ -149,7 +149,7 @@ export class FindColors {
    * @param {string} listKey the color list to use
    * @param {number} maxResults maximum number of results to return (default: 50)
    */
-  searchNames(searchStr, listKey = "default", maxResults = 20) {
+  searchNames(searchStr, listKey = 'default', maxResults = 20) {
     this.validateListKey(listKey);
     const cache = this.colorNameCache[listKey];
 
@@ -170,7 +170,7 @@ export class FindColors {
         searchStr,
         color.name,
         searchLower,
-        nameLower,
+        nameLower
       );
 
       if (score > 0) {
@@ -192,7 +192,7 @@ export class FindColors {
     // Limit results but keep similarity score in output
     const results = scoredResults
       .slice(0, maxResults)
-      .map((color) => ({ ...color }));
+      .map(color => ({ ...color }));
 
     // Add to cache - LRUCache handles size limit and eviction automatically
     cache.set(cacheKey, results);
@@ -207,7 +207,7 @@ export class FindColors {
    * @param   {string} listKey the color list to use
    * @return  {object}         object containing all nearest colors
    */
-  getNamesForValues(colorArr, unique = false, listKey = "default") {
+  getNamesForValues(colorArr, unique = false, listKey = 'default') {
     this.validateListKey(listKey);
 
     // Use the appropriate pre-built instance based on unique flag
@@ -235,7 +235,7 @@ export class FindColors {
 
     // Process each color one by one
     return colorArr
-      .map((hex) => {
+      .map(hex => {
         // parse color
         const parsed = parse(hex);
 
@@ -271,7 +271,7 @@ function calculateSimilarityScore(
   searchStr,
   colorName,
   searchLower,
-  nameLower,
+  nameLower
 ) {
   // Pure Levenshtein similarity only
   const maxLen = Math.max(searchStr.length, colorName.length);

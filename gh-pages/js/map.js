@@ -1,13 +1,13 @@
 // Map and pixelation logic
-import { elements } from "./elements.js";
-import { addPixelsToPhysics } from "./physics.js";
+import { elements } from './elements.js';
+import { addPixelsToPhysics } from './physics.js';
 
 export const countriesMap = new Map();
 export const countryPathData = new Map();
 
 export function setupCountryMaps() {
-  elements.svgCountryPaths.forEach((path) => {
-    const countryCode = path.getAttribute("data-cc");
+  elements.svgCountryPaths.forEach(path => {
+    const countryCode = path.getAttribute('data-cc');
     countriesMap.set(countryCode, path);
     countryPathData.set(countryCode, {
       path: path,
@@ -20,12 +20,12 @@ export function createPixelatedMap(pixelSize = 10) {
   const originalMap = elements.mapContainer;
   if (!originalMap) return;
   const pixelatedMap = document.createElementNS(
-    "http://www.w3.org/2000/svg",
-    "svg",
+    'http://www.w3.org/2000/svg',
+    'svg'
   );
-  pixelatedMap.setAttribute("viewBox", originalMap.getAttribute("viewBox"));
-  pixelatedMap.classList.add("pixelated-map");
-  const viewBox = originalMap.getAttribute("viewBox").split(" ");
+  pixelatedMap.setAttribute('viewBox', originalMap.getAttribute('viewBox'));
+  pixelatedMap.classList.add('pixelated-map');
+  const viewBox = originalMap.getAttribute('viewBox').split(' ');
   const mapWidth = parseFloat(viewBox[2]);
   const mapHeight = parseFloat(viewBox[3]);
   const cols = Math.ceil(mapWidth / pixelSize);
@@ -35,7 +35,7 @@ export function createPixelatedMap(pixelSize = 10) {
     .map(() =>
       Array(cols)
         .fill()
-        .map(() => new Set()),
+        .map(() => new Set())
     );
   countryPathData.forEach((data, countryCode) => {
     const path = data.path;
@@ -44,12 +44,12 @@ export function createPixelatedMap(pixelSize = 10) {
     const startCol = Math.max(0, Math.floor(bbox.x / pixelSize));
     const endCol = Math.min(
       cols - 1,
-      Math.ceil((bbox.x + bbox.width) / pixelSize),
+      Math.ceil((bbox.x + bbox.width) / pixelSize)
     );
     const startRow = Math.max(0, Math.floor(bbox.y / pixelSize));
     const endRow = Math.min(
       rows - 1,
-      Math.ceil((bbox.y + bbox.height) / pixelSize),
+      Math.ceil((bbox.y + bbox.height) / pixelSize)
     );
     for (let row = startRow; row <= endRow; row++) {
       for (let col = startCol; col <= endCol; col++) {
@@ -67,26 +67,26 @@ export function createPixelatedMap(pixelSize = 10) {
       const countryCodes = Array.from(grid[row][col]);
       if (countryCodes.length > 0) {
         const rect = document.createElementNS(
-          "http://www.w3.org/2000/svg",
-          "rect",
+          'http://www.w3.org/2000/svg',
+          'rect'
         );
-        rect.setAttribute("x", col * pixelSize);
-        rect.setAttribute("y", row * pixelSize);
-        rect.setAttribute("width", pixelSize);
-        rect.setAttribute("height", pixelSize);
-        rect.setAttribute("data-countries", countryCodes.join(","));
-        rect.setAttribute("data-cc", countryCodes[0]);
-        rect.setAttribute("vector-effect", "non-scaling-stroke");
-        rect.setAttribute("stroke-width", "1.5");
-        rect.classList.add("pixel-country");
+        rect.setAttribute('x', col * pixelSize);
+        rect.setAttribute('y', row * pixelSize);
+        rect.setAttribute('width', pixelSize);
+        rect.setAttribute('height', pixelSize);
+        rect.setAttribute('data-countries', countryCodes.join(','));
+        rect.setAttribute('data-cc', countryCodes[0]);
+        rect.setAttribute('vector-effect', 'non-scaling-stroke');
+        rect.setAttribute('stroke-width', '1.5');
+        rect.classList.add('pixel-country');
         if (countryCodes.length > 1) {
-          rect.classList.add("pixel-border");
+          rect.classList.add('pixel-border');
         }
         const originalPath = countriesMap.get(countryCodes[0]);
         rect.style.fill =
           originalPath && originalPath.style.fill
             ? originalPath.style.fill
-            : "var(--c-fill)";
+            : 'var(--c-fill)';
         fragment.appendChild(rect);
       }
     }
@@ -98,22 +98,22 @@ export function createPixelatedMap(pixelSize = 10) {
 
 export function highlightMapCountry(countryCode, colors) {
   // Always target the pixel map, not the original SVG paths
-  const pixelMap = document.querySelector(".pixelated-map");
+  const pixelMap = document.querySelector('.pixelated-map');
   if (!pixelMap) return;
   const pixels = pixelMap.querySelectorAll(
-    `.pixel-country[data-cc="${countryCode}"]`,
+    `.pixel-country[data-cc="${countryCode}"]`
   );
   if (!pixels.length) return;
   // Pick a color for each pixel
   if (Array.isArray(colors) && colors.length > 1) {
-    pixels.forEach((pixel) => {
+    pixels.forEach(pixel => {
       const pixelRandomColor =
         colors[Math.floor(Math.random() * colors.length)];
       pixel.style.fill = pixelRandomColor.hex;
     });
   } else {
     const colorHex = colors[0].hex;
-    pixels.forEach((pixel) => {
+    pixels.forEach(pixel => {
       pixel.style.fill = colorHex;
     });
   }
@@ -123,27 +123,27 @@ export function initializePixelatedMap(config) {
   if (pixelatedMap) {
     const originalMap = elements.mapContainer;
     // Show pixel map by default, hide original
-    originalMap.style.display = "none";
-    pixelatedMap.style.display = "";
+    originalMap.style.display = 'none';
+    pixelatedMap.style.display = '';
     addPixelsToPhysics(pixelatedMap);
     // Add toggle button as in script.js
-    const toggleButton = document.createElement("button");
-    toggleButton.textContent = "Toggle Original Map";
-    toggleButton.classList.add("map-toggle-button");
-    toggleButton.addEventListener("click", () => {
-      if (originalMap.style.display === "none") {
-        originalMap.style.display = "";
-        pixelatedMap.style.display = "none";
-        toggleButton.textContent = "Toggle Pixel Map";
+    const toggleButton = document.createElement('button');
+    toggleButton.textContent = 'Toggle Original Map';
+    toggleButton.classList.add('map-toggle-button');
+    toggleButton.addEventListener('click', () => {
+      if (originalMap.style.display === 'none') {
+        originalMap.style.display = '';
+        pixelatedMap.style.display = 'none';
+        toggleButton.textContent = 'Toggle Pixel Map';
       } else {
-        originalMap.style.display = "none";
-        pixelatedMap.style.display = "";
-        toggleButton.textContent = "Toggle Original Map";
+        originalMap.style.display = 'none';
+        pixelatedMap.style.display = '';
+        toggleButton.textContent = 'Toggle Original Map';
       }
     });
     elements.mapContainer.parentNode.insertBefore(
       toggleButton,
-      elements.mapContainer,
+      elements.mapContainer
     );
   }
 }

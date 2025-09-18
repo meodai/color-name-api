@@ -1,7 +1,7 @@
-import { differenceCiede2000 } from "culori";
-import { hasOwnProperty } from "./lib.js";
-import { VPTree } from "./vptree.js";
-import { LRUCache } from "lru-cache";
+import { differenceCiede2000 } from 'culori';
+import { hasOwnProperty } from './lib.js';
+import { VPTree } from './vptree.js';
+import { LRUCache } from 'lru-cache';
 
 // Define cache size limit
 const MAX_CLOSEST_CACHE_SIZE = 5000; // Max entries in the instance cache
@@ -53,7 +53,7 @@ export default class Closest {
       this.previouslyReturnedIndexes.size >= this.list.length
     ) {
       return {
-        error: "All available colors have been exhausted",
+        error: 'All available colors have been exhausted',
         availableCount: 0,
         totalCount: this.list.length,
       };

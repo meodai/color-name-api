@@ -1,40 +1,40 @@
-import js from "@eslint/js";
-import globals from "globals";
-import prettier from "eslint-plugin-prettier";
-import prettierConfig from "eslint-config-prettier";
+import js from '@eslint/js';
+import globals from 'globals';
+import prettier from 'eslint-plugin-prettier';
+import prettierConfig from 'eslint-config-prettier';
 
 export default [
   js.configs.recommended,
   {
-    files: ["**/*.js", "**/*.mjs"],
+    files: ['**/*.js', '**/*.mjs'],
     plugins: {
       prettier,
     },
     languageOptions: {
-      ecmaVersion: "latest",
-      sourceType: "module",
+      ecmaVersion: 'latest',
+      sourceType: 'module',
       globals: {
         ...globals.node,
       },
     },
     rules: {
       ...prettierConfig.rules,
-      "prettier/prettier": "error",
-      "no-console": "off",
-      "no-unused-vars": [
-        "error",
+      'prettier/prettier': 'error',
+      'no-console': 'off',
+      'no-unused-vars': [
+        'error',
         {
-          argsIgnorePattern: "^_",
-          varsIgnorePattern: "^_",
-          caughtErrorsIgnorePattern: "^_",
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
         },
       ],
-      "prefer-const": "error",
-      "no-var": "error",
+      'prefer-const': 'error',
+      'no-var': 'error',
     },
   },
   {
-    files: ["gh-pages/**/*.js"],
+    files: ['gh-pages/**/*.js'],
     languageOptions: {
       globals: {
         ...globals.browser,
@@ -42,6 +42,6 @@ export default [
     },
   },
   {
-    ignores: ["node_modules/", "docs/", "generated/"],
+    ignores: ['node_modules/', 'docs/', 'generated/'],
   },
 ];

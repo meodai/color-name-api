@@ -1,7 +1,7 @@
 // API and list-fetching logic
-import { elements } from "./elements.js";
+import { elements } from './elements.js';
 
-export const API_BASE_URL = "https://api.color.pizza/v1/";
+export const API_BASE_URL = 'https://api.color.pizza/v1/';
 
 export async function fetchLists(populateListDropdown) {
   try {
@@ -13,13 +13,13 @@ export async function fetchLists(populateListDropdown) {
     populateListDropdown(data.availableColorNameLists || []);
     populateListOverview(data.listDescriptions || {});
   } catch (error) {
-    console.error("Error fetching color lists:", error);
+    console.error('Error fetching color lists:', error);
     elements.listSelect.innerHTML =
       '<option value="">Error loading lists</option>';
   }
 }
 
-const listEntryTpl = document.createElement("template");
+const listEntryTpl = document.createElement('template');
 listEntryTpl.innerHTML = `
   <li class="color-name-lists__item">
     <div class="color-name-lists__header">
@@ -52,23 +52,23 @@ export function populateListOverview(listsData) {
     "url": "/v1/?list=basic"
   }
   */
-  elements.listOverview.innerHTML = "";
+  elements.listOverview.innerHTML = '';
 
   Object.keys(listsData)
     .reverse()
-    .forEach((item) => {
+    .forEach(item => {
       const listItem = listsData[item];
       const listEntry = listEntryTpl.content.firstElementChild.cloneNode(true);
-      const title = listEntry.querySelector(".color-name-lists__title");
+      const title = listEntry.querySelector('.color-name-lists__title');
       const description = listEntry.querySelector(
-        ".color-name-lists__description",
+        '.color-name-lists__description'
       );
-      const count = listEntry.querySelector(".color-name-lists__count");
-      const key = listEntry.querySelector(".color-name-lists__key");
+      const count = listEntry.querySelector('.color-name-lists__count');
+      const key = listEntry.querySelector('.color-name-lists__key');
       const keyContainer = listEntry.querySelector(
-        ".color-name-lists__key-container",
+        '.color-name-lists__key-container'
       );
-      const license = listEntry.querySelector(".color-name-lists__license");
+      const license = listEntry.querySelector('.color-name-lists__license');
       //const source = listEntry.querySelector(".color-name-lists__source");
 
       title.textContent = listItem.title;
@@ -79,15 +79,15 @@ export function populateListOverview(listsData) {
       //source.href = listItem.source;
 
       // Add click event to key to update API example and scroll
-      keyContainer.style.cursor = "pointer";
-      keyContainer.title = "Click to use this list in the API example";
-      keyContainer.addEventListener("click", () => {
-        if (typeof window.updateApiExampleSetting === "function") {
-          window.updateApiExampleSetting("setList", { listKey: listItem.key });
+      keyContainer.style.cursor = 'pointer';
+      keyContainer.title = 'Click to use this list in the API example';
+      keyContainer.addEventListener('click', () => {
+        if (typeof window.updateApiExampleSetting === 'function') {
+          window.updateApiExampleSetting('setList', { listKey: listItem.key });
         }
       });
 
-      listEntry.dataset.collision = "0";
+      listEntry.dataset.collision = '0';
 
       elements.listOverview.appendChild(listEntry);
     });
@@ -100,16 +100,16 @@ export function populateListDropdown(
   updateApiUrlPreview,
   isInitialized,
   selectedColors,
-  fetchColorNames,
+  fetchColorNames
 ) {
-  elements.listSelect.innerHTML = "";
+  elements.listSelect.innerHTML = '';
   availableLists.length = 0;
-  lists.sort().forEach((listName) => availableLists.push(listName));
-  availableLists.forEach((listName) => {
-    const option = document.createElement("option");
+  lists.sort().forEach(listName => availableLists.push(listName));
+  availableLists.forEach(listName => {
+    const option = document.createElement('option');
     option.value = listName;
     option.textContent = listName;
-    if (listName === "default") {
+    if (listName === 'default') {
       option.selected = true;
     }
     elements.listSelect.appendChild(option);

@@ -30,9 +30,9 @@ export const svgTemplate = (colorValue, colorName) => {
         <text y="113" x="3">${colorValue}</text>
         <text y="122" x="3" class="val">${name}</text>
       `
-          : ""
+          : ''
       }
     </svg>`
-    .replace(/\s+/g, " ")
+    .replace(/\s+/g, ' ')
     .trim();
 };

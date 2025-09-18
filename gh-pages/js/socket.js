@@ -1,26 +1,26 @@
 // Socket.io logic for real-time color updates
-import { createColorObjectsFromData } from "./physics.js";
-import { elements } from "./elements.js";
-import { addColorsToVisualization } from "./visualization.js"; // We'll modularize this next
-import { generateFavicon } from "./favicon.js";
+import { createColorObjectsFromData } from './physics.js';
+import { elements } from './elements.js';
+import { addColorsToVisualization } from './visualization.js'; // We'll modularize this next
+import { generateFavicon } from './favicon.js';
 
 let socket = null;
 let isPageVisible = true;
 
 export function initializeSocket() {
   try {
-    socket = window.io("https://api.color.pizza", {
-      transports: ["websocket"],
+    socket = window.io('https://api.color.pizza', {
+      transports: ['websocket'],
       reconnectionAttempts: 5,
     });
-    socket.on("connect", () => console.log("Connected to Socket.io server"));
-    socket.on("disconnect", () =>
-      console.log("Disconnected from Socket.io server"),
+    socket.on('connect', () => console.log('Connected to Socket.io server'));
+    socket.on('disconnect', () =>
+      console.log('Disconnected from Socket.io server')
     );
-    socket.on("colors", (msg) => {
+    socket.on('colors', msg => {
       document.documentElement.style.setProperty(
-        "--last-color",
-        msg.colors[0].hex,
+        '--last-color',
+        msg.colors[0].hex
       );
       generateFavicon(msg.colors[0].hex);
       addColorsToVisualization(msg);
@@ -28,15 +28,15 @@ export function initializeSocket() {
         createColorObjectsFromData(msg);
       }
     });
-    socket.on("connect_error", (error) =>
-      console.error("Socket connection error:", error),
+    socket.on('connect_error', error =>
+      console.error('Socket connection error:', error)
     );
     if (!isPageVisible) {
       socket.wasConnected = true;
       socket.disconnect();
     }
   } catch (error) {
-    console.error("Error initializing socket:", error);
+    console.error('Error initializing socket:', error);
   }
 }
 
