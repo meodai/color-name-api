@@ -1,7 +1,7 @@
 import { differenceCiede2000 } from "culori";
 import { hasOwnProperty } from "./lib.js";
 import { VPTree } from "./vptree.js";
-import { LRUCache } from 'lru-cache';
+import { LRUCache } from "lru-cache";
 
 // Define cache size limit
 const MAX_CLOSEST_CACHE_SIZE = 5000; // Max entries in the instance cache
@@ -27,7 +27,7 @@ export default class Closest {
     }
     this.previouslyReturnedIndexes = new Set();
   }
-  
+
   /**
    * Returns the number of available colors remaining when in unique mode
    * @returns {number} Number of colors still available
@@ -44,27 +44,30 @@ export default class Closest {
     const colorUID = JSON.stringify(searchColor); // Use stringified color as cache key
 
     if (!this.unique && this.cache.has(colorUID)) {
-      return this.cache.get(colorUID); 
+      return this.cache.get(colorUID);
     }
 
     // Check if all colors have been used in unique mode
-    if (this.unique && this.previouslyReturnedIndexes.size >= this.list.length) {
+    if (
+      this.unique &&
+      this.previouslyReturnedIndexes.size >= this.list.length
+    ) {
       return {
         error: "All available colors have been exhausted",
         availableCount: 0,
-        totalCount: this.list.length
+        totalCount: this.list.length,
       };
     }
 
     // Determine how many results we need from the VP-tree search
     let maxResultsNeeded;
-    
+
     if (this.unique) {
       // Use a reasonable batch size instead of the entire list
       // Start with a smaller number of results for better performance
       // 500 is a good balance between performance and accuracy
       maxResultsNeeded = Math.min(500, this.list.length);
-      
+
       // If we've already used a large percentage of colors, increase the batch size
       // to improve chances of finding unused colors
       if (this.previouslyReturnedIndexes.size > this.list.length * 0.8) {

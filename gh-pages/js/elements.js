@@ -8,7 +8,7 @@ export const elements = {
   urlColors: document.getElementById("url-colors"),
   urlListContainer: document.getElementById("url-list-container"),
   urlNoDuplicatesContainer: document.getElementById(
-    "url-noduplicates-container"
+    "url-noduplicates-container",
   ),
   requestsContainer: document.getElementById("requests-container"),
   jsonViewer: document.getElementById("json-viewer"),

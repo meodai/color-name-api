@@ -3,7 +3,6 @@ import { getRandomHexColor } from "./colors.js";
 
 const intialColor = `#${getRandomHexColor()}`;
 
-
 const setColor = (color) => {
   elements.colorPicker.value = `${color}`;
   elements.colorValue.value = `${color}`;

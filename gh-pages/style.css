@@ -15,7 +15,7 @@
   --c-fill: var(--w);
 
   --color-entry-height: 3.5rem;
-  
+
   --inset: 3rem;
 
   background: var(--w);
@@ -26,7 +26,6 @@
   background: var(--b);
   color: var(--w);
 }
-
 
 body {
   margin: 2rem 6vw;
@@ -39,14 +38,14 @@ body {
   width: max-content;
   margin-left: auto;
   margin-top: -1em;
-  font-size: .8em;
+  font-size: 0.8em;
   background: transparent;
   gap: 0.5em;
   margin-right: 2.5rem;
 }
 
 .physics-toggle::after {
-  content: '';
+  content: "";
   display: inline-block;
   width: 2em;
   height: 1.1em;
@@ -59,23 +58,25 @@ body {
   border: 0.5px solid var(--b);
 }
 
-
 .physics-toggle.physics-disabled::after {
-  background-image: radial-gradient(circle at 70% 50%,
-        transparent 0% 35%,
-        var(--b) 35% 100%);
+  background-image: radial-gradient(
+    circle at 70% 50%,
+    transparent 0% 35%,
+    var(--b) 35% 100%
+  );
 }
 
 .physics-toggle.physics-disabled:hover {
-
 }
 
-h1, h2, h3 {
+h1,
+h2,
+h3 {
   font-weight: 800;
-  margin: 4em 0 .75em;
-  letter-spacing: -.015em;
+  margin: 4em 0 0.75em;
+  letter-spacing: -0.015em;
   font-size: 3em;
-  line-height: .9;
+  line-height: 0.9;
   width: max-content;
 }
 
@@ -102,18 +103,16 @@ article:has(.section--right) {
 
 .word-split__word {
   display: inline-flex;
-  line-height: .8;
+  line-height: 0.8;
   align-items: flex-end;
 }
-
 
 .letter-split__letter {
   margin-top: -0.12em;
 }
 
-
 a {
-  color: oklch(from var(--c-interactive) calc(l - .1) calc(c + .1) h);
+  color: oklch(from var(--c-interactive) calc(l - 0.1) calc(c + 0.1) h);
   text-decoration: none;
   text-underline-offset: 0.2em;
 }
@@ -126,7 +125,9 @@ a:hover {
   :root {
     --inset: 2rem;
   }
-  h1, h2, h3 {
+  h1,
+  h2,
+  h3 {
     font-size: 2.5em;
     width: min-content;
   }
@@ -134,7 +135,7 @@ a:hover {
 
 h1 {
   font-size: 5em;
-  margin-bottom: .5em;
+  margin-bottom: 0.5em;
   margin-top: 20vh;
 }
 
@@ -156,7 +157,8 @@ p {
   margin-top: 40vh;
 }
 
-.request-preview, .response {
+.request-preview,
+.response {
   padding: 1.5em;
 }
 
@@ -167,7 +169,8 @@ button {
   font-size: 1em;
 }
 
-code, pre {
+code,
+pre {
   font-family: monospace;
   word-wrap: break-word;
   white-space: pre-wrap;
@@ -205,7 +208,7 @@ pre {
   align-items: center;
   overflow-x: auto;
   line-height: 1.8;
-  
+
   background-color: var(--w);
   text-shadow: 0 0 1em var(--w);
 
@@ -256,7 +259,6 @@ pre {
   cursor: pointer;
 }
 
-
 .url-color-chip {
   display: inline-flex;
   align-items: center;
@@ -272,14 +274,14 @@ pre {
 }
 
 .url-color-label::before {
-  content: '';
+  content: "";
   display: inline-block;
-  width: .6em;
-  height: .6em;
+  width: 0.6em;
+  height: 0.6em;
   background-color: var(--color);
   border-radius: 50%;
   margin-right: 0.3em;
-  box-shadow: 0 0 0 .5px var(--b);
+  box-shadow: 0 0 0 0.5px var(--b);
 }
 
 .url-color-remove {
@@ -288,7 +290,7 @@ pre {
   padding: 0;
   border-radius: 50%;
   background: none;
-  margin-right: -.5em;
+  margin-right: -0.5em;
 }
 
 .url-add-color {
@@ -302,7 +304,9 @@ pre {
   box-shadow: inset 0 0 0 0.5px var(--b);
   border-radius: 50%;
   background: var(--w);
-  transition: background 0.1s ease, color 0.1s ease;
+  transition:
+    background 0.1s ease,
+    color 0.1s ease;
 }
 
 .url-add-color:hover {
@@ -356,8 +360,10 @@ pre {
 
 .pixelated-map rect {
   stroke: var(--b);
-  stroke-width: .5;
-  transition: fill 0.3s ease, stroke 0.3s ease;
+  stroke-width: 0.5;
+  transition:
+    fill 0.3s ease,
+    stroke 0.3s ease;
   transform-box: fill-box;
   transform: scale(0.87);
 }
@@ -405,29 +411,29 @@ pre {
     z-index: 1;
     padding: 0;
     margin: 0;
-    font-size: .9rem;
+    font-size: 0.9rem;
     font-weight: 100;
     display: flex;
-    transform: translateY(100%) translateY(.4rem);
+    transform: translateY(100%) translateY(0.4rem);
     white-space: nowrap;
     color: var(--b);
   }
 
   h2::after {
-    content: '';
+    content: "";
     display: inline-block;
-    width: .5em;
-    height: .5em;
+    width: 0.5em;
+    height: 0.5em;
     background: lime;
     border-radius: 50%;
-    margin-left: .5rem;
-    margin-top: .25em;
-    box-shadow: 0 0 0 .5px var(--b);
+    margin-left: 0.5rem;
+    margin-top: 0.25em;
+    box-shadow: 0 0 0 0.5px var(--b);
   }
 }
 
 .scrolling .live-requests {
-  transform: translateY(calc(var(--inset) * .15));
+  transform: translateY(calc(var(--inset) * 0.15));
 }
 
 .color-visualization {
@@ -446,9 +452,11 @@ pre {
   flex-direction: column-reverse;
   user-select: none;
 
-  background-image: radial-gradient(circle at 50% 50%,
-        transparent 0% 35%,
-        var(--w) 35% 100%);
+  background-image: radial-gradient(
+    circle at 50% 50%,
+    transparent 0% 35%,
+    var(--w) 35% 100%
+  );
   background-repeat: repeat;
   background-size: 5px 5px;
 }
@@ -481,7 +489,7 @@ pre {
   font-size: 0.8em;
   padding: 0.25em var(--inset) 0.25em calc(var(--inset) + 8rem);
   text-align: right;
-  
+
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -491,7 +499,6 @@ pre {
   font-size: 0.8em;
   font-weight: 100;
 }
-
 
 .color-name-lists {
   display: flex;
@@ -523,15 +530,18 @@ pre {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  box-shadow: 0 0 0 0.5px var(--b),
-              0 0 0 1.5px var(--w);
+  box-shadow:
+    0 0 0 0.5px var(--b),
+    0 0 0 1.5px var(--w);
   padding: var(--inset);
   box-sizing: border-box;
   color: var(--b);
 
-  background-image: radial-gradient(circle at 50% 50%,
-      transparent 0% 35%,
-      var(--w) 35% 100%);
+  background-image: radial-gradient(
+    circle at 50% 50%,
+    transparent 0% 35%,
+    var(--w) 35% 100%
+  );
   background-repeat: repeat;
   background-size: 5px 5px;
 }
@@ -554,7 +564,7 @@ pre {
   margin: var(--inset) calc(var(--inset) * -1) calc(var(--inset) * -1);
   padding: 0;
   & > * {
-    padding: .5em 0;
+    padding: 0.5em 0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -631,7 +641,7 @@ pre {
     margin-top: 4rem;
     margin-left: var(--inset);
   }
-} 
+}
 
 .sponsor-list {
   display: flex;
@@ -639,7 +649,6 @@ pre {
   gap: var(--inset);
   padding-left: var(--inset);
   margin-top: 4rem;
-
 
   a {
     display: block;
@@ -654,7 +663,7 @@ pre {
 }
 
 .ellogo path {
-  transition: fill .2s linear;
+  transition: fill 0.2s linear;
 }
 
 .ellogo:hover path {

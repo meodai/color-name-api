@@ -77,7 +77,7 @@ $ curl 'https://api.color.pizza/v1/names/?name=red'
 ➜       "similarity": 1.0
 ➜     },
 ➜     {
-➜       "name": "Dark Red", 
+➜       "name": "Dark Red",
 ➜       "hex": "#8b0000",
 ➜       "rgb": {"r": 139, "g": 0, "b": 0},
 ➜       "hsl": {"h": 0, "s": 100, "l": 27.25},
@@ -152,19 +152,20 @@ $ curl https://api.color.pizza/v1/?values=aaffcc
 ➜        "requestedHex":"#aaffcc",
 ➜        "distance":0
 ➜       }
-➜    ], 
+➜    ],
 ➜    "paletteTitle":"Neo Mint"
 ➜  }
 ```
 
-The response will be a JSON Object containing two keys: `colors` and `paletteTitle` 
-*colors* will contain an array of all the colors you have asked for, with some useful information like `name` or `hsl`.
+The response will be a JSON Object containing two keys: `colors` and `paletteTitle`
+_colors_ will contain an array of all the colors you have asked for, with some useful information like `name` or `hsl`.
 
 Now, let's `GET` the names for multiple colors:
+
 ```shell
 $ curl 'https://api.color.pizza/v1/?values=0d0d0f,f39d91,d4d4d7'
 
-➜ 
+➜
 {
   "paletteTitle":"Ruined Amber",
   "colors":[
@@ -242,7 +243,7 @@ $ curl 'https://api.color.pizza/v1/?values=0d0d0f,f39d91,d4d4d7'
 ```
 
 The response now contains 3 objects in the `colors` array. The API will return the closest color names if can find for each requested color.
-The come from a [large collection](https://github.com/meodai/color-names). If for some reason you don't like the names, there are several other lists to choose from. So lets get the same names from a differet `list`.  
+The come from a [large collection](https://github.com/meodai/color-names). If for some reason you don't like the names, there are several other lists to choose from. So lets get the same names from a differet `list`.
 
 ```shell
 $ curl 'https://api.color.pizza/v1/?values=0d0d0f,f39d91,d4d4d7&list=wikipedia'
@@ -298,7 +299,7 @@ Now when some of the requested colors are very similar you might get some duplic
 $ curl 'https://api.color.pizza/v1/?values=1b2b11,1c2f11,2e3f24&list=wikipedia'
 ```
 
-Notice how `Phthalo Green` was returned twice. 
+Notice how `Phthalo Green` was returned twice.
 What makes this API unique is that you can ask to return a color name only once. So if you ask for similar colors the api will make sure to return a unique color name per requested color.
 
 ```shell
@@ -328,6 +329,7 @@ The API uses an efficient Vantage Point Tree (VPTree) spatial data structure to 
 #### Best Practices
 
 For optimal results with `noduplicates=true`:
+
 - Use with larger color name lists: `default`, `bestOf`, `wikipedia`, `ntc`, `ral`, `ridgway` or `xkcd`
 - Order your most important colors first in the request, as they'll receive the closest name matches
 - Be aware that with very small color lists or many similar colors, later colors might receive less ideal name matches
@@ -337,6 +339,7 @@ In smaller color name lists, this can lead to unexpected results as the algorith
 #### Important Note About Color Limits
 
 When using `noduplicates=true`, if you request more colors than are available in the selected list, the API will:
+
 - Return as many uniquely named colors as possible (up to the size of the selected list)
 - Drop any additional colors that can't be assigned unique names
 - Return a response with fewer color objects than requested
@@ -378,25 +381,25 @@ To use WebSockets with the API:
 
 2. Connect to the WebSocket endpoint using a WebSocket client:
 
-    ```javascript
-    const socket = io('https://api.color.pizza', {
-      transports: ['websocket']
-    });
+   ```javascript
+   const socket = io("https://api.color.pizza", {
+     transports: ["websocket"],
+   });
 
-    // Listen for color updates
-    socket.on('colors', (data) => {
-      console.log('Received color data:', data);
-      // {
-      //   paletteTitle: "Neo Mint",
-      //   colors: [{
-      //     name: "Neo Mint",
-      //     hex: "#aaffcc",
-      //     // ... other color properties
-      //   }],
-      //   list: "default"
-      // }
-    });
-    ```
+   // Listen for color updates
+   socket.on("colors", (data) => {
+     console.log("Received color data:", data);
+     // {
+     //   paletteTitle: "Neo Mint",
+     //   colors: [{
+     //     name: "Neo Mint",
+     //     hex: "#aaffcc",
+     //     // ... other color properties
+     //   }],
+     //   list: "default"
+     // }
+   });
+   ```
 
 3. The WebSocket connection will automatically receive updates whenever new colors are requested through the API. The data format matches the REST API response structure, containing the `paletteTitle`, `colors` array, and the `list` used.
 
@@ -428,11 +431,11 @@ $ curl -H "X-Referrer: my-awesome-app" 'https://api.color.pizza/v1/?values=aaffc
 or
 
 ```javascript
-fetch('https://api.color.pizza/v1/?values=aaffcc', {
+fetch("https://api.color.pizza/v1/?values=aaffcc", {
   headers: {
     "X-Referrer": "your-app-name",
   },
-}).then((response) => response.json())
+}).then((response) => response.json());
 ```
 
 When the API is configured with WebSockets enabled, this referrer information is included in the broadcasted socket events, allowing for tracking and analytics of color requests across different applications or domains.

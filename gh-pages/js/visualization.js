@@ -1,11 +1,11 @@
 // Visualization logic for color requests
-import { elements } from './elements.js';
-import { highlightMapCountry } from './map.js';
-import { getColorValue, colorArrToSteppedGradient } from './colors.js';
+import { elements } from "./elements.js";
+import { highlightMapCountry } from "./map.js";
+import { getColorValue, colorArrToSteppedGradient } from "./colors.js";
 
 const MAX_COLORS_DISPLAY = 50;
 const MAX_COLOR_ITEMS = 1;
-const API_BASE_URL = 'https://api.color.pizza/v1/';
+const API_BASE_URL = "https://api.color.pizza/v1/";
 
 const entryTpl = document.createElement("template");
 entryTpl.innerHTML = `
@@ -21,18 +21,18 @@ entryTpl.innerHTML = `
 export function addColorsToVisualization(data) {
   const { paletteTitle, colors } = data;
   let url = data.request.url;
-  if (url && !url.startsWith('http')) {
-    if (!url.includes('/v1/') && !url.startsWith('/v1/')) {
-      url = url.startsWith('/') ? url.substring(1) : url;
+  if (url && !url.startsWith("http")) {
+    if (!url.includes("/v1/") && !url.startsWith("/v1/")) {
+      url = url.startsWith("/") ? url.substring(1) : url;
       url = API_BASE_URL + url;
     } else {
-      url = url.startsWith('/') ? url : '/' + url;
-      url = API_BASE_URL.split('/v1/')[0] + url;
+      url = url.startsWith("/") ? url : "/" + url;
+      url = API_BASE_URL.split("/v1/")[0] + url;
     }
   }
   url = url.replace(/%2C/g, ",");
   let countryCode = null;
-  
+
   if (
     data.request.hasOwnProperty("clientLocation") &&
     data.request.clientLocation.hasOwnProperty("country")
@@ -45,7 +45,7 @@ export function addColorsToVisualization(data) {
     visualizationContainer.classList.add("color-visualization");
     elements.requestsContainer.parentNode.insertBefore(
       visualizationContainer,
-      elements.requestsContainer
+      elements.requestsContainer,
     );
   }
   const visualizationContainer = document.getElementById("color-visualization");
@@ -81,7 +81,7 @@ export function addColorsToVisualization(data) {
   }
   visualizationContainer.insertBefore(
     colorItem,
-    visualizationContainer.firstChild
+    visualizationContainer.firstChild,
   );
   while (visualizationContainer.children.length > MAX_COLOR_ITEMS) {
     visualizationContainer.removeChild(visualizationContainer.lastChild);

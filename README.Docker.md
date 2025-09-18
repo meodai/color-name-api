@@ -22,7 +22,7 @@ docs for more detail on building and pushing.
 
 ## References
 
-* [Docker's Node.js guide](https://docs.docker.com/language/nodejs/)
+- [Docker's Node.js guide](https://docs.docker.com/language/nodejs/)
 
 ## Quick Start
 
@@ -72,9 +72,9 @@ docker run -p 8080:8080 color-name-api
 
 For production deployment, consider:
 
-* Setting appropriate environment variables
-* Configuring proper logging
-* Setting up monitoring
-* Configuring SSL/TLS if exposed directly
-* Setting up proper volume mounts if needed
-* Adjusting network settings based on your infrastructure
+- Setting appropriate environment variables
+- Configuring proper logging
+- Setting up monitoring
+- Configuring SSL/TLS if exposed directly
+- Setting up proper volume mounts if needed
+- Adjusting network settings based on your infrastructure

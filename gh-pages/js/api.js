@@ -1,7 +1,7 @@
 // API and list-fetching logic
-import { elements } from './elements.js';
+import { elements } from "./elements.js";
 
-export const API_BASE_URL = 'https://api.color.pizza/v1/';
+export const API_BASE_URL = "https://api.color.pizza/v1/";
 
 export async function fetchLists(populateListDropdown) {
   try {
@@ -13,8 +13,9 @@ export async function fetchLists(populateListDropdown) {
     populateListDropdown(data.availableColorNameLists || []);
     populateListOverview(data.listDescriptions || {});
   } catch (error) {
-    console.error('Error fetching color lists:', error);
-    elements.listSelect.innerHTML = '<option value="">Error loading lists</option>';
+    console.error("Error fetching color lists:", error);
+    elements.listSelect.innerHTML =
+      '<option value="">Error loading lists</option>';
   }
 }
 
@@ -53,53 +54,70 @@ export function populateListOverview(listsData) {
   */
   elements.listOverview.innerHTML = "";
 
-  Object.keys(listsData).reverse().forEach(item => {
-    const listItem = listsData[item];
-    const listEntry = listEntryTpl.content.firstElementChild.cloneNode(true);
-    const title = listEntry.querySelector(".color-name-lists__title");
-    const description = listEntry.querySelector(".color-name-lists__description");
-    const count = listEntry.querySelector(".color-name-lists__count");
-    const key = listEntry.querySelector(".color-name-lists__key");
-    const keyContainer = listEntry.querySelector(".color-name-lists__key-container");
-    const license = listEntry.querySelector(".color-name-lists__license");
-    //const source = listEntry.querySelector(".color-name-lists__source");
+  Object.keys(listsData)
+    .reverse()
+    .forEach((item) => {
+      const listItem = listsData[item];
+      const listEntry = listEntryTpl.content.firstElementChild.cloneNode(true);
+      const title = listEntry.querySelector(".color-name-lists__title");
+      const description = listEntry.querySelector(
+        ".color-name-lists__description",
+      );
+      const count = listEntry.querySelector(".color-name-lists__count");
+      const key = listEntry.querySelector(".color-name-lists__key");
+      const keyContainer = listEntry.querySelector(
+        ".color-name-lists__key-container",
+      );
+      const license = listEntry.querySelector(".color-name-lists__license");
+      //const source = listEntry.querySelector(".color-name-lists__source");
 
-    title.textContent = listItem.title;
-    description.textContent = listItem.description;
-    count.textContent = listItem.colorCount;
-    key.textContent = listItem.key;
-    license.textContent = listItem.license;
-    //source.href = listItem.source;
+      title.textContent = listItem.title;
+      description.textContent = listItem.description;
+      count.textContent = listItem.colorCount;
+      key.textContent = listItem.key;
+      license.textContent = listItem.license;
+      //source.href = listItem.source;
 
-    // Add click event to key to update API example and scroll
-    keyContainer.style.cursor = "pointer";
-    keyContainer.title = "Click to use this list in the API example";
-    keyContainer.addEventListener("click", () => {
-      if (typeof window.updateApiExampleSetting === "function") {
-        window.updateApiExampleSetting("setList", { listKey: listItem.key });
-      }
+      // Add click event to key to update API example and scroll
+      keyContainer.style.cursor = "pointer";
+      keyContainer.title = "Click to use this list in the API example";
+      keyContainer.addEventListener("click", () => {
+        if (typeof window.updateApiExampleSetting === "function") {
+          window.updateApiExampleSetting("setList", { listKey: listItem.key });
+        }
+      });
+
+      listEntry.dataset.collision = "0";
+
+      elements.listOverview.appendChild(listEntry);
     });
-
-    listEntry.dataset.collision = '0';
-
-    elements.listOverview.appendChild(listEntry);
-  });
 }
 
-export function populateListDropdown(lists, availableLists, initializeUrlInteractiveElements, updateApiUrlPreview, isInitialized, selectedColors, fetchColorNames) {
-  elements.listSelect.innerHTML = '';
+export function populateListDropdown(
+  lists,
+  availableLists,
+  initializeUrlInteractiveElements,
+  updateApiUrlPreview,
+  isInitialized,
+  selectedColors,
+  fetchColorNames,
+) {
+  elements.listSelect.innerHTML = "";
   availableLists.length = 0;
-  lists.sort().forEach(listName => availableLists.push(listName));
-  availableLists.forEach(listName => {
-    const option = document.createElement('option');
+  lists.sort().forEach((listName) => availableLists.push(listName));
+  availableLists.forEach((listName) => {
+    const option = document.createElement("option");
     option.value = listName;
     option.textContent = listName;
-    if (listName === 'default') {
+    if (listName === "default") {
       option.selected = true;
     }
     elements.listSelect.appendChild(option);
   });
-  if (!elements.listSelect.querySelector('[value="default"]') && elements.listSelect.options.length > 0) {
+  if (
+    !elements.listSelect.querySelector('[value="default"]') &&
+    elements.listSelect.options.length > 0
+  ) {
     elements.listSelect.options[0].selected = true;
   }
   initializeUrlInteractiveElements();

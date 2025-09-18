@@ -4,12 +4,12 @@ import {
   wcagLuminance,
   differenceCiede2000,
   wcagContrast,
-} from 'culori';
+} from "culori";
 
-import { lib } from './lib.js';
-import ClosestColor from './closestColor.js';
-import { LRUCache } from 'lru-cache';
-import { distance as levenshteinDistance } from 'fastest-levenshtein';
+import { lib } from "./lib.js";
+import ClosestColor from "./closestColor.js";
+import { LRUCache } from "lru-cache";
+import { distance as levenshteinDistance } from "fastest-levenshtein";
 
 const distanceMetric = differenceCiede2000();
 
@@ -23,9 +23,9 @@ const distanceMetric = differenceCiede2000();
 const enrichColorObj = (colorObj, colorListParedRef) => {
   const localColorObj = { ...colorObj };
   const currentColor = parse(colorObj.hex);
-  const lab = converter('lab');
-  const rgb = converter('rgb');
-  const hsl = converter('hsl');
+  const lab = converter("lab");
+  const rgb = converter("rgb");
+  const hsl = converter("hsl");
 
   const ccLab = lab(currentColor);
 
@@ -57,9 +57,14 @@ const enrichColorObj = (colorObj, colorListParedRef) => {
 
   // calculate luminancy for each color
   localColorObj.luminance = parseFloat(lib.luminance(rgbInt).toFixed(5));
-  localColorObj.luminanceWCAG = parseFloat(wcagLuminance(currentColor).toFixed(5));
+  localColorObj.luminanceWCAG = parseFloat(
+    wcagLuminance(currentColor).toFixed(5),
+  );
 
-  localColorObj.bestContrast = wcagContrast(currentColor, '#000') > wcagContrast(currentColor, '#fff') ? 'black' : 'white';
+  localColorObj.bestContrast =
+    wcagContrast(currentColor, "#000") > wcagContrast(currentColor, "#fff")
+      ? "black"
+      : "white";
 
   localColorObj.swatchImg = {
     svgNamed: `/v1/swatch/?color=${localColorObj.hex.slice(1)}&name=${encodeURI(localColorObj.name)}`,
@@ -84,11 +89,13 @@ export class FindColors {
       this.colorLists = colorListsCache;
       this.colorListsParsed = colorListsParsedCache;
       this.closestInstances = closestInstancesCache;
-      console.log('[FindColors] Using cached VP-trees');
+      console.log("[FindColors] Using cached VP-trees");
       return;
     }
 
-    console.log('[FindColors] Initializing color lists and VP-trees for the first time');
+    console.log(
+      "[FindColors] Initializing color lists and VP-trees for the first time",
+    );
     this.colorLists = colorsListsObj;
 
     // object containing the parsed colors for VPTree
@@ -101,16 +108,15 @@ export class FindColors {
 
       this.colorListsParsed[listName] = [];
       this.colorLists[listName] = this.colorLists[listName].map((c) =>
-        enrichColorObj(c, this.colorListsParsed[listName])
+        enrichColorObj(c, this.colorListsParsed[listName]),
       );
 
-
       Object.freeze(this.colorLists[listName]);
-      
+
       // Create regular and unique ClosestColor instances using VPTree for this list
       this.closestInstances[listName] = {
         regular: new ClosestColor(this.colorListsParsed[listName], false),
-        unique: new ClosestColor(this.colorListsParsed[listName], true)
+        unique: new ClosestColor(this.colorListsParsed[listName], true),
       };
     });
 
@@ -123,7 +129,9 @@ export class FindColors {
     this.colorNameCache = {};
     // add a key for each color list
     Object.keys(this.colorLists).forEach((listName) => {
-      this.colorNameCache[listName] = new LRUCache({ max: MAX_NAME_CACHE_SIZE });
+      this.colorNameCache[listName] = new LRUCache({
+        max: MAX_NAME_CACHE_SIZE,
+      });
     });
   }
 
@@ -141,13 +149,13 @@ export class FindColors {
    * @param {string} listKey the color list to use
    * @param {number} maxResults maximum number of results to return (default: 50)
    */
-  searchNames(searchStr, listKey = 'default', maxResults = 20) {
+  searchNames(searchStr, listKey = "default", maxResults = 20) {
     this.validateListKey(listKey);
     const cache = this.colorNameCache[listKey];
 
     // Create cache key that includes maxResults to avoid conflicts
     const cacheKey = `${searchStr}:${maxResults}`;
-    
+
     if (cache.has(cacheKey)) {
       return cache.get(cacheKey);
     }
@@ -158,12 +166,17 @@ export class FindColors {
     // Score all colors for similarity
     for (const color of this.colorLists[listKey]) {
       const nameLower = color.name.toLowerCase();
-      const score = calculateSimilarityScore(searchStr, color.name, searchLower, nameLower);
-      
+      const score = calculateSimilarityScore(
+        searchStr,
+        color.name,
+        searchLower,
+        nameLower,
+      );
+
       if (score > 0) {
         scoredResults.push({
           ...color,
-          similarity: score
+          similarity: score,
         });
       }
     }
@@ -194,12 +207,12 @@ export class FindColors {
    * @param   {string} listKey the color list to use
    * @return  {object}         object containing all nearest colors
    */
-  getNamesForValues(colorArr, unique = false, listKey = 'default') {
+  getNamesForValues(colorArr, unique = false, listKey = "default") {
     this.validateListKey(listKey);
 
     // Use the appropriate pre-built instance based on unique flag
-    const localClosest = unique 
-      ? this.closestInstances[listKey].unique 
+    const localClosest = unique
+      ? this.closestInstances[listKey].unique
       : this.closestInstances[listKey].regular;
 
     // If using unique mode, clear any previous cache to start fresh
@@ -210,53 +223,60 @@ export class FindColors {
     // In unique mode, check if we have enough colors before proceeding
     if (unique && colorArr.length > this.colorLists[listKey].length) {
       // Construct an error object that matches our pattern
-      return [{
-        error: `Too many colors requested in unique mode. Requested ${colorArr.length} colors but only ${this.colorLists[listKey].length} are available.`,
-        availableCount: this.colorLists[listKey].length,
-        totalCount: this.colorLists[listKey].length,
-        requestedCount: colorArr.length
-      }];
+      return [
+        {
+          error: `Too many colors requested in unique mode. Requested ${colorArr.length} colors but only ${this.colorLists[listKey].length} are available.`,
+          availableCount: this.colorLists[listKey].length,
+          totalCount: this.colorLists[listKey].length,
+          requestedCount: colorArr.length,
+        },
+      ];
     }
 
     // Process each color one by one
-    return colorArr.map((hex) => {
-      // parse color
-      const parsed = parse(hex);
+    return colorArr
+      .map((hex) => {
+        // parse color
+        const parsed = parse(hex);
 
-      // get the closest named colors using VPTree
-      const closestColor = localClosest.get(parsed);
-      
-      // If no color was found (all unique colors used up) or we got an error response
-      if (!closestColor) {
-        return null;
-      } else if (closestColor.error) {
-        // If we got an error object instead of a color (happens when all colors are exhausted)
-        return closestColor;
-      }
-      
-      const color = this.colorLists[listKey][closestColor.index];
+        // get the closest named colors using VPTree
+        const closestColor = localClosest.get(parsed);
 
-      return {
-        ...color,
-        requestedHex: `#${hex}`,
-        swatchImg: {
-          svgNamed: `/v1/swatch/?color=${hex}&name=${encodeURI(color.name)}`,
-          svg: `/v1/swatch/?color=${hex}`,
-        },
-        distance: parseFloat(
-          distanceMetric(parsed, color.hex).toFixed(5),
-        ),
-      };
-    }).filter(Boolean); // Remove any null values
+        // If no color was found (all unique colors used up) or we got an error response
+        if (!closestColor) {
+          return null;
+        } else if (closestColor.error) {
+          // If we got an error object instead of a color (happens when all colors are exhausted)
+          return closestColor;
+        }
+
+        const color = this.colorLists[listKey][closestColor.index];
+
+        return {
+          ...color,
+          requestedHex: `#${hex}`,
+          swatchImg: {
+            svgNamed: `/v1/swatch/?color=${hex}&name=${encodeURI(color.name)}`,
+            svg: `/v1/swatch/?color=${hex}`,
+          },
+          distance: parseFloat(distanceMetric(parsed, color.hex).toFixed(5)),
+        };
+      })
+      .filter(Boolean); // Remove any null values
   }
 }
 
 // Calculate similarity score (0-1, where 1 is perfect match)
-function calculateSimilarityScore(searchStr, colorName, searchLower, nameLower) {
+function calculateSimilarityScore(
+  searchStr,
+  colorName,
+  searchLower,
+  nameLower,
+) {
   // Pure Levenshtein similarity only
   const maxLen = Math.max(searchStr.length, colorName.length);
   const distance = levenshteinDistance(searchLower, nameLower);
-  const similarity = 1 - (distance / maxLen);
+  const similarity = 1 - distance / maxLen;
   // Only return matches above threshold to avoid too many irrelevant results
   return similarity > 0.5 ? similarity : 0;
 }

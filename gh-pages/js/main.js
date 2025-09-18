@@ -1,38 +1,48 @@
 // Main entry point for the app
-import { elements } from './elements.js';
-import { getRandomHexColor, renderColors } from './colors.js';
-import { fetchLists, populateListDropdown } from './api.js';
-import { initializeUrlInteractiveElements, updateApiUrlPreview, fetchColorNames } from './url.js';
-import { setupCountryMaps, initializePixelatedMap } from './map.js';
-import { initializePhysics, physics, setupMotionPreferenceListener, togglePhysics, updateToggleButton } from './physics.js';
-import { initializeSocket, setPageVisibility } from './socket.js';
-import { initColorPicker } from './picker.js';
-import { generateFavicon } from './favicon.js';
+import { elements } from "./elements.js";
+import { getRandomHexColor, renderColors } from "./colors.js";
+import { fetchLists, populateListDropdown } from "./api.js";
+import {
+  initializeUrlInteractiveElements,
+  updateApiUrlPreview,
+  fetchColorNames,
+} from "./url.js";
+import { setupCountryMaps, initializePixelatedMap } from "./map.js";
+import {
+  initializePhysics,
+  physics,
+  setupMotionPreferenceListener,
+  togglePhysics,
+  updateToggleButton,
+} from "./physics.js";
+import { initializeSocket, setPageVisibility } from "./socket.js";
+import { initColorPicker } from "./picker.js";
+import { generateFavicon } from "./favicon.js";
 
-elements.splitText.forEach(element => {
+elements.splitText.forEach((element) => {
   const text = element.textContent;
-  element.setAttribute('aria-label', text);
-  const words = text.split(' ');
-  const $warp = document.createElement('span');
-  $warp.classList.add('word-split');
+  element.setAttribute("aria-label", text);
+  const words = text.split(" ");
+  const $warp = document.createElement("span");
+  $warp.classList.add("word-split");
 
-  words.forEach(word => {
-    const $word = document.createElement('span');
-    $word.classList.add('word-split__word');
-    const letters = word.split('');
-    letters.forEach(letter => {
-      const $letter = document.createElement('span');
-      $letter.classList.add('letter-split__letter');
+  words.forEach((word) => {
+    const $word = document.createElement("span");
+    $word.classList.add("word-split__word");
+    const letters = word.split("");
+    letters.forEach((letter) => {
+      const $letter = document.createElement("span");
+      $letter.classList.add("letter-split__letter");
 
-      $letter.dataset.collision = '.27 -.1';
+      $letter.dataset.collision = ".27 -.1";
       // check if letter is uppercase
       if (
-        letter === letter.toUpperCase() && letter !== letter.toLowerCase() ||
-        letter === 'l' ||
-        letter === 'i' ||
-        letter === 't'
+        (letter === letter.toUpperCase() && letter !== letter.toLowerCase()) ||
+        letter === "l" ||
+        letter === "i" ||
+        letter === "t"
       ) {
-        $letter.classList.add('letter-split__letter--uppercase');
+        $letter.classList.add("letter-split__letter--uppercase");
         $letter.dataset.collision = ".15 -.1";
       }
       $letter.textContent = letter;
@@ -40,7 +50,7 @@ elements.splitText.forEach(element => {
     });
     $warp.appendChild($word);
   });
-  element.textContent = '';
+  element.textContent = "";
   element.appendChild($warp);
 });
 
@@ -50,8 +60,12 @@ let availableLists = [];
 let isInitialized = { value: false };
 
 function removeColor(hexColorToRemove) {
-  selectedColors = selectedColors.filter(color => color !== hexColorToRemove);
-  renderColors(selectedColors, () => updateApiUrlPreview(selectedColors, availableLists, isInitialized), removeColor);
+  selectedColors = selectedColors.filter((color) => color !== hexColorToRemove);
+  renderColors(
+    selectedColors,
+    () => updateApiUrlPreview(selectedColors, availableLists, isInitialized),
+    removeColor,
+  );
   updateApiUrlPreview(selectedColors, availableLists, isInitialized);
 }
 
@@ -62,38 +76,38 @@ function removeColor(hexColorToRemove) {
  */
 function updateApiExampleSetting(action, payload = {}) {
   switch (action) {
-    case 'addColor': {
+    case "addColor": {
       const { hexColor } = payload;
       if (hexColor && !selectedColors.includes(hexColor)) {
         selectedColors.push(hexColor);
       }
       break;
     }
-    case 'changeColor': {
+    case "changeColor": {
       const { index, hexColor } = payload;
-      if (typeof index === 'number' && hexColor && selectedColors[index]) {
+      if (typeof index === "number" && hexColor && selectedColors[index]) {
         selectedColors[index] = hexColor;
       }
       break;
     }
-    case 'removeAllColors': {
+    case "removeAllColors": {
       selectedColors = [];
       break;
     }
-    case 'removeColor': {
+    case "removeColor": {
       const { index } = payload;
-      if (typeof index === 'number' && selectedColors[index]) {
+      if (typeof index === "number" && selectedColors[index]) {
         selectedColors.splice(index, 1);
       }
       break;
     }
-    case 'setList': {
+    case "setList": {
       const { listKey } = payload;
       if (listKey && availableLists.includes(listKey)) {
         elements.listSelect.value = listKey;
         // Update the visible select in the pseudo-terminal
-        const urlListSelect = document.getElementById('url-list-select');
-        const urlListLabel = document.querySelector('.url-list-label');
+        const urlListSelect = document.getElementById("url-list-select");
+        const urlListLabel = document.querySelector(".url-list-label");
         if (urlListSelect) {
           urlListSelect.value = listKey;
           // Also update the label if present
@@ -102,7 +116,7 @@ function updateApiExampleSetting(action, payload = {}) {
       }
       break;
     }
-    case 'setNoduplicates': {
+    case "setNoduplicates": {
       const { value } = payload;
       elements.noduplicatesCheckbox.checked = !!value;
       break;
@@ -110,17 +124,17 @@ function updateApiExampleSetting(action, payload = {}) {
     default:
       break;
   }
-  const pseudoTerminal = document.querySelector('.pseudo-terminal');
-  if (pseudoTerminal && typeof pseudoTerminal.scrollIntoView === 'function') {
-    pseudoTerminal.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  const pseudoTerminal = document.querySelector(".pseudo-terminal");
+  if (pseudoTerminal && typeof pseudoTerminal.scrollIntoView === "function") {
+    pseudoTerminal.scrollIntoView({ behavior: "smooth", block: "center" });
     setTimeout(() => {
       switch (action) {
-        case 'setList': {
+        case "setList": {
           const { listKey } = payload;
           if (listKey && availableLists.includes(listKey)) {
             elements.listSelect.value = listKey;
-            const urlListSelect = document.getElementById('url-list-select');
-            const urlListLabel = document.querySelector('.url-list-label');
+            const urlListSelect = document.getElementById("url-list-select");
+            const urlListLabel = document.querySelector(".url-list-label");
             if (urlListSelect) {
               urlListSelect.value = listKey;
               if (urlListLabel) urlListLabel.textContent = listKey;
@@ -128,24 +142,39 @@ function updateApiExampleSetting(action, payload = {}) {
           }
           break;
         }
-        case 'setNoduplicates': {
+        case "setNoduplicates": {
           const { value } = payload;
           elements.noduplicatesCheckbox.checked = !!value;
           break;
         }
       }
-      renderColors(selectedColors, () => updateApiUrlPreview(selectedColors, availableLists, isInitialized), removeColor);
+      renderColors(
+        selectedColors,
+        () =>
+          updateApiUrlPreview(selectedColors, availableLists, isInitialized),
+        removeColor,
+      );
       updateApiUrlPreview(selectedColors, availableLists, isInitialized);
     }, 1000);
     return;
   }
   // fallback: update immediately if no scroll
-  renderColors(selectedColors, () => updateApiUrlPreview(selectedColors, availableLists, isInitialized), removeColor);
+  renderColors(
+    selectedColors,
+    () => updateApiUrlPreview(selectedColors, availableLists, isInitialized),
+    removeColor,
+  );
   updateApiUrlPreview(selectedColors, availableLists, isInitialized);
   // Scroll pseudo-terminal (API example) into view
-  const pseudoTerminalFallback = document.querySelector('.pseudo-terminal');
-  if (pseudoTerminalFallback && typeof pseudoTerminalFallback.scrollIntoView === 'function') {
-    pseudoTerminalFallback.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  const pseudoTerminalFallback = document.querySelector(".pseudo-terminal");
+  if (
+    pseudoTerminalFallback &&
+    typeof pseudoTerminalFallback.scrollIntoView === "function"
+  ) {
+    pseudoTerminalFallback.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
   }
 }
 
@@ -163,9 +192,9 @@ setTimeout(() => {
 }, 100);
 
 // Setup physics toggle button
-const physicsToggle = document.getElementById('physics-toggle');
+const physicsToggle = document.getElementById("physics-toggle");
 if (physicsToggle) {
-  physicsToggle.addEventListener('click', togglePhysics);
+  physicsToggle.addEventListener("click", togglePhysics);
   // Initialize button state after a brief delay to ensure physics state is set
   setTimeout(() => {
     updateToggleButton();
@@ -180,30 +209,37 @@ initializeSocket();
 
 // Color logic
 selectedColors.push(getRandomHexColor());
-renderColors(selectedColors, () => updateApiUrlPreview(selectedColors, availableLists, isInitialized), removeColor);
+renderColors(
+  selectedColors,
+  () => updateApiUrlPreview(selectedColors, availableLists, isInitialized),
+  removeColor,
+);
 
 fetchLists((lists) => {
   populateListDropdown(
     lists,
     availableLists,
-    () => initializeUrlInteractiveElements(availableLists, () => updateApiUrlPreview(selectedColors, availableLists, isInitialized)),
+    () =>
+      initializeUrlInteractiveElements(availableLists, () =>
+        updateApiUrlPreview(selectedColors, availableLists, isInitialized),
+      ),
     () => updateApiUrlPreview(selectedColors, availableLists, isInitialized),
     isInitialized,
     selectedColors,
-    () => fetchColorNames(elements.apiUrlPreview.textContent)
+    () => fetchColorNames(elements.apiUrlPreview.textContent),
   );
 });
 
 // Event listeners for hidden controls
-elements.listSelect.addEventListener('change', (event) => {
+elements.listSelect.addEventListener("change", (event) => {
   updateApiUrlPreview(selectedColors, availableLists, isInitialized);
 });
-elements.noduplicatesCheckbox.addEventListener('change', (event) => {
+elements.noduplicatesCheckbox.addEventListener("change", (event) => {
   updateApiUrlPreview(selectedColors, availableLists, isInitialized);
 });
 
-document.addEventListener('visibilitychange', () => {
-  const isVisible = document.visibilityState === 'visible';
+document.addEventListener("visibilitychange", () => {
+  const isVisible = document.visibilityState === "visible";
   setPageVisibility(isVisible);
   if (isVisible) {
     if (!physics.initialized && physics.wasInitialized) {
@@ -231,7 +267,7 @@ elements.liveView.addEventListener(
   },
   {
     capture: true,
-  }
+  },
 );
 elements.doc.addEventListener(
   "click",
@@ -245,15 +281,17 @@ elements.doc.addEventListener(
   },
   {
     capture: true,
-  }
+  },
 );
-
 
 let isPageOnTop = true;
 const topThreshold = 10;
 
 function handleScroll() {
-  const scrollTop = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop;
+  const scrollTop =
+    window.scrollY ||
+    document.documentElement.scrollTop ||
+    document.body.scrollTop;
   if (scrollTop > topThreshold && isPageOnTop) {
     isPageOnTop = false;
     elements.doc.classList.add("scrolling");
