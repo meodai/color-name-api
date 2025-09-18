@@ -34,8 +34,8 @@ export function addColorsToVisualization(data) {
   let countryCode = null;
 
   if (
-    data.request.hasOwnProperty('clientLocation') &&
-    data.request.clientLocation.hasOwnProperty('country')
+    Object.prototype.hasOwnProperty.call(data.request, 'clientLocation') &&
+    Object.prototype.hasOwnProperty.call(data.request.clientLocation, 'country')
   ) {
     countryCode = data.request.clientLocation.country.toUpperCase();
   }

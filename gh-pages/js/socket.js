@@ -1,6 +1,5 @@
 // Socket.io logic for real-time color updates
 import { createColorObjectsFromData } from './physics.js';
-import { elements } from './elements.js';
 import { addColorsToVisualization } from './visualization.js'; // We'll modularize this next
 import { generateFavicon } from './favicon.js';
 

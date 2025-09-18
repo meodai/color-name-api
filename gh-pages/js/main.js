@@ -16,7 +16,6 @@ import {
   updateToggleButton,
 } from './physics.js';
 import { initializeSocket, setPageVisibility } from './socket.js';
-import { initColorPicker } from './picker.js';
 import { generateFavicon } from './favicon.js';
 
 elements.splitText.forEach(element => {
@@ -231,10 +230,10 @@ fetchLists(lists => {
 });
 
 // Event listeners for hidden controls
-elements.listSelect.addEventListener('change', event => {
+elements.listSelect.addEventListener('change', () => {
   updateApiUrlPreview(selectedColors, availableLists, isInitialized);
 });
-elements.noduplicatesCheckbox.addEventListener('change', event => {
+elements.noduplicatesCheckbox.addEventListener('change', () => {
   updateApiUrlPreview(selectedColors, availableLists, isInitialized);
 });
 
@@ -262,7 +261,7 @@ document.addEventListener('visibilitychange', () => {
 
 elements.liveView.addEventListener(
   'click',
-  event => {
+  () => {
     elements.doc.classList.toggle('color-visualization-open');
   },
   {

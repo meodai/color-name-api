@@ -4,6 +4,8 @@
  * in unique mode with the basic list (which has 21 colors)
  */
 
+import { hasOwnProperty } from '../src/lib.js';
+
 const localhost = '127.0.0.1';
 const port = process.env.PORT || 8080;
 const currentVersion = 'v1';
@@ -71,15 +73,15 @@ async function runTest() {
       throw new Error('Error response missing message');
     }
 
-    if (!response.error.hasOwnProperty('availableCount')) {
+    if (!hasOwnProperty(response.error, 'availableCount')) {
       throw new Error('Error response missing availableCount property');
     }
 
-    if (!response.error.hasOwnProperty('totalCount')) {
+    if (!hasOwnProperty(response.error, 'totalCount')) {
       throw new Error('Error response missing totalCount property');
     }
 
-    if (!response.error.hasOwnProperty('requestedCount')) {
+    if (!hasOwnProperty(response.error, 'requestedCount')) {
       throw new Error('Error response missing requestedCount property');
     }
 

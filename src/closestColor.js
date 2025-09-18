@@ -1,5 +1,4 @@
 import { differenceCiede2000 } from 'culori';
-import { hasOwnProperty } from './lib.js';
 import { VPTree } from './vptree.js';
 import { LRUCache } from 'lru-cache';
 

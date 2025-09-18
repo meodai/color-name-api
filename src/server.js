@@ -11,7 +11,6 @@ import requestIp from 'request-ip';
 import { lookup } from 'ip-location-api';
 import * as dotenv from 'dotenv';
 import { LRUCache } from 'lru-cache'; // Import LRUCache
-import { parse as parseYAML } from 'yaml';
 
 import { FindColors } from './findColors.js';
 import { getPaletteTitle } from './generatePaletteName.js';
@@ -442,7 +441,7 @@ const respondValueSearch = async (
   }
 
   if (socket) {
-    const { clientIp, clientLocation } = getClientInfo(request);
+    const { clientLocation } = getClientInfo(request);
     const xReferrer = request.headers['x-referrer'];
 
     let relativePath = requestUrl.pathname + requestUrl.search;
