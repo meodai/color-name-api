@@ -5,9 +5,10 @@
   "main": "src/index.js",
   "type": "module",
   "scripts": {
-    "test": "npm run test:local && npm run test:vptree && npm run test:exhausted && npm run test:compare-api && npm run test:well-known",
+    "test": "npm run test:local && npm run test:vptree && npm run test:exhausted && npm run test:compare-api && npm run test:well-known && npm run test:palette-name",
     "test:local": "node test/test.js",
     "test:vptree": "node test/vptree.test.js",
+    "test:palette-name": "node test/generatePaletteName.test.js",
     "test:compare-api": "node test/compare-api.js",
     "test:benchmark": "node test/benchmark.js",
     "test:exhausted": "node test/test-exhausted-colors.js",
