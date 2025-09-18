@@ -447,7 +447,7 @@ const respondValueSearch = async (
     let relativePath = requestUrl.pathname + requestUrl.search;
 
     // Remove the API version from the path (e.g., /v1/)
-    relativePath = relativePath.replace(new RegExp(`^\/${baseUrl}`), '/');
+    relativePath = relativePath.replace(new RegExp(`^/${baseUrl}`), '/');
 
     const emittedRequestInfo = {
       url: relativePath,

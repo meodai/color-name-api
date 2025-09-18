@@ -252,7 +252,7 @@ async function runTests() {
   try {
     await fetch(`http://${localhost}:${port}/${baseUrl}/`);
     console.log('Server is running. Starting tests...');
-  } catch (err) {
+  } catch {
     console.error('ERROR: Server is not running!');
     console.error(`Make sure the server is running on port ${port}`);
     process.exit(1);

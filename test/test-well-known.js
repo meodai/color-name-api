@@ -5,7 +5,7 @@ async function run() {
   // verify server is up
   try {
     await fetch(`http://${localhost}:${port}/v1/`);
-  } catch (err) {
+  } catch {
     console.error('ERROR: Server is not running!');
     process.exit(1);
   }
