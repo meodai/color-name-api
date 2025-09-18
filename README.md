@@ -387,7 +387,7 @@ To use WebSockets with the API:
    });
 
    // Listen for color updates
-   socket.on("colors", (data) => {
+   socket.on("colors", data => {
      console.log("Received color data:", data);
      // {
      //   paletteTitle: "Neo Mint",
@@ -435,7 +435,7 @@ fetch("https://api.color.pizza/v1/?values=aaffcc", {
   headers: {
     "X-Referrer": "your-app-name",
   },
-}).then((response) => response.json());
+}).then(response => response.json());
 ```
 
 When the API is configured with WebSockets enabled, this referrer information is included in the broadcasted socket events, allowing for tracking and analytics of color requests across different applications or domains.

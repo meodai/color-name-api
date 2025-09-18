@@ -1,24 +1,47 @@
+import js from "@eslint/js";
 import globals from "globals";
-import { FlatCompat } from "@eslint/eslintrc";
-
-const compat = new FlatCompat({
-  baseDirectory: import.meta.url,
-});
+import prettier from "eslint-plugin-prettier";
+import prettierConfig from "eslint-config-prettier";
 
 export default [
+  js.configs.recommended,
   {
+    files: ["**/*.js", "**/*.mjs"],
+    plugins: {
+      prettier,
+    },
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",
       globals: {
-        ...globals.browser,
         ...globals.node,
       },
     },
     rules: {
-      "import/prefer-default-export": "off",
-      "import/extensions": "off",
+      ...prettierConfig.rules,
+      "prettier/prettier": "error",
       "no-console": "off",
+      "no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
+      "prefer-const": "error",
+      "no-var": "error",
     },
+  },
+  {
+    files: ["gh-pages/**/*.js"],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+      },
+    },
+  },
+  {
+    ignores: ["node_modules/", "docs/", "generated/"],
   },
 ];

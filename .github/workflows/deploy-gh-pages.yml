@@ -27,7 +27,7 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           # Upload content from the gh-pages directory
-          path: './gh-pages'
+          path: "./gh-pages"
 
       - name: Deploy to GitHub Pages
         id: deployment
