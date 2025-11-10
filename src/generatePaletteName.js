@@ -34,8 +34,7 @@ function deduplicateParts(parts, separatorRegex) {
   // Final pass: remove any consecutive duplicate words (across head/tail seams)
   const final = [];
   let prevWord = null;
-  for (let i = 0; i < result.length; i++) {
-    const token = result[i];
+  for (const token of result) {
     if (isSepToken(token)) {
       final.push(token);
     } else {
@@ -81,12 +80,12 @@ export function getPaletteTitle(
 
   // Regex for preferred separators (dash, dot, slash - but not space)
   const preferredSepRegex = /[-\u2010-\u2015\u00B7/.]/;
+  const allSepRegex = /[-\u2010-\u2015\u00B7/. ]/;
 
   // Helper to extract preferred separator
   function extractPreferredSeparator(sep) {
     if (!sep) return '';
-    // Only allow dash, dot, slash, or space
-    const match = sep.match(/[-\u2010-\u2015\u00B7/. ]/);
+    const match = sep.match(allSepRegex);
     return match ? match[0] : '';
   }
 
@@ -104,11 +103,13 @@ export function getPaletteTitle(
     return sepFromTail || sepFromHead || ' ';
   }
 
-  // Style A: (all but the last part of first) + (the last part(s) of last)
-  if (rng() < 0.5) {
-    const headParts =
-      partsFirst.length > 1 ? partsFirst.slice(0, -1) : partsFirst;
-    let tailParts, tailSepRaw;
+  // Style A or B: combine head and tail parts
+  const isStyleA = rng() < 0.5;
+  let headParts, tailParts, headSepRaw, tailSepRaw;
+
+  if (isStyleA) {
+    // Style A: (all but the last part of first) + (the last part(s) of last)
+    headParts = partsFirst.length > 1 ? partsFirst.slice(0, -1) : partsFirst;
     if (partsLast.length > 3) {
       tailParts = partsLast.slice(-3);
       tailSepRaw = partsLast[partsLast.length - 4] || null;
@@ -117,23 +118,18 @@ export function getPaletteTitle(
       tailSepRaw =
         partsLast.length > 1 ? partsLast[partsLast.length - 2] : null;
     }
-    const headSepRaw =
+    headSepRaw =
       partsFirst.length > 1 ? partsFirst[partsFirst.length - 2] : null;
-    const separator = pickSeamSeparator(headSepRaw, tailSepRaw);
-    // Combine parts with separator, then deduplicate
-    const combined = [...headParts, separator, ...tailParts];
-    const deduplicated = deduplicateParts(combined, separatorRegex);
-    return deduplicated.join('').trim();
   } else {
     // Style B: (the first part of first) + (all but the first part of last)
-    const headParts = [partsFirst[0]];
-    const tailParts = partsLast.length > 1 ? partsLast.slice(1) : partsLast;
-    const headSepRaw = partsFirst.length > 1 ? partsFirst[1] : null;
-    const tailSepRaw = partsLast.length > 1 ? partsLast[1] : null;
-    const separator = pickSeamSeparator(headSepRaw, tailSepRaw);
-    // Combine parts with separator, then deduplicate
-    const combined = [...headParts, separator, ...tailParts];
-    const deduplicated = deduplicateParts(combined, separatorRegex);
-    return deduplicated.join('').trim();
+    headParts = [partsFirst[0]];
+    tailParts = partsLast.length > 1 ? partsLast.slice(1) : partsLast;
+    headSepRaw = partsFirst.length > 1 ? partsFirst[1] : null;
+    tailSepRaw = partsLast.length > 1 ? partsLast[1] : null;
   }
+
+  const separator = pickSeamSeparator(headSepRaw, tailSepRaw);
+  const combined = [...headParts, separator, ...tailParts];
+  const deduplicated = deduplicateParts(combined, separatorRegex);
+  return deduplicated.join('').trim();
 }
