@@ -6,24 +6,40 @@ import seedrandom from 'seedrandom';
  * @param {string[]} parts - The array of name parts, including separators.
  * @returns {string[]} A new array with adjacent duplicates removed.
  */
-function deduplicateParts(parts) {
+function deduplicateParts(parts, separatorRegex) {
   if (parts.length < 3) return parts; // Not enough parts for an adjacent duplicate
 
-  const result = [parts[0]]; // Always keep the first element (expected to be a word)
-  // Iterate over subsequent words (even indices in the original split contract)
-  for (let i = 2; i < parts.length; i += 2) {
-    const currentWord = parts[i];
-    const previousWordInResult = result[result.length - 1];
+  // Treat tokens that match the provided separatorRegex fully as separators
+  const isSepToken = token =>
+    !!token &&
+    new RegExp(`^${separatorRegex.source}$`, separatorRegex.flags).test(token);
 
-    // Only add the new word if it's different from the last one we added
-    if (
-      currentWord.trim().toLowerCase() !==
-      previousWordInResult.trim().toLowerCase()
-    ) {
-      result.push(parts[i - 1]); // Add the separator
-      result.push(currentWord); // Add the word
+  const result = [];
+  let lastWordLower = null;
+  let pendingSep = '';
+
+  for (const token of parts) {
+    if (isSepToken(token)) {
+      // Hold onto the latest separator; if multiple separators stack, prefer the most recent
+      pendingSep = token;
+      continue;
+    }
+
+    // It's a word token
+    const wordLower = token.trim().toLowerCase();
+    if (wordLower !== lastWordLower) {
+      if (pendingSep) {
+        result.push(pendingSep);
+        pendingSep = '';
+      }
+      result.push(token);
+      lastWordLower = wordLower;
+    } else {
+      // Duplicate adjacent word; drop it and the pending separator
+      pendingSep = '';
     }
   }
+
   return result;
 }
 
@@ -151,27 +167,30 @@ export function getPaletteTitle(
 
   // 7. Combine parts, now with internal de-duplication.
   if (rng() < 0.5) {
-    // Style A: (all but the last part of first) + (the last part of last)
+    // Style A: (all but the last part of first) + (the last part(s) of last)
     const headParts =
       partsFirst.length > 1 ? partsFirst.slice(0, -1) : partsFirst;
     const head =
       partsFirst.length > 1
-        ? deduplicateParts(headParts).join('')
+        ? deduplicateParts(headParts, separatorRegex).join('')
         : partsFirst[0];
 
-    // Get the tail - if partsLast has multiple parts, include the separator with it
+    // Get the tail - take more words if available to make longer titles
     let tail;
-
-    if (partsLast.length > 2) {
-      // Take last 2 elements (separator + word) to preserve the original separator
-      tail = partsLast.slice(-2).join('');
+    let tailSepRaw;
+    if (partsLast.length > 3) {
+      // Take last 3 parts (sep + word + sep + word) to include more words
+      const tailParts = partsLast.slice(-3);
+      tail = deduplicateParts(tailParts, separatorRegex).join('');
+      tailSepRaw = partsLast[partsLast.length - 4] || null; // Sep before the first word of tail
     } else {
       tail = partsLast[partsLast.length - 1];
+      tailSepRaw =
+        partsLast.length > 1 ? partsLast[partsLast.length - 2] : null;
     }
+
     const headSepRaw =
       partsFirst.length > 1 ? partsFirst[partsFirst.length - 2] : null;
-    const tailSepRaw =
-      partsLast.length > 2 ? partsLast[partsLast.length - 2] : null;
     const candidates = [
       partsLast[partsLast.length - 1],
       partsLast[0],
@@ -188,13 +207,14 @@ export function getPaletteTitle(
     if (partsLast.length > 2) {
       // Take everything after the first word, including its separator
       const tailParts = partsLast.slice(1);
-      tail = deduplicateParts(tailParts).join('');
+      tail = deduplicateParts(tailParts, separatorRegex).join('');
     } else if (partsLast.length === 1) {
       tail = partsLast[0];
     } else {
       // partsLast has 2 or 3 elements
       tail = partsLast.slice(1).join('');
     }
+
     const headSepRaw = partsFirst.length > 1 ? partsFirst[1] : null;
     const tailSepRaw = partsLast.length > 1 ? partsLast[1] : null;
     const candidates = [
