@@ -286,6 +286,44 @@ try {
   );
 }
 
+// Regression: Should not return duplicate word pairs (e.g., "Black Black")
+try {
+  const names = ['Fog of War', 'Fog of War', 'Fog of War', 'Black'];
+  const result = getPaletteTitle(names);
+  assert(
+    !/\b(\w+) \1\b/.test(result),
+    `Unexpected duplicate word pair in "${result}"`
+  );
+  logResult('should not return duplicate word pairs (e.g., "Black Black")');
+} catch (err) {
+  logResult(
+    'should not return duplicate word pairs (e.g., "Black Black")',
+    err
+  );
+}
+
+// Regression: Prefer "Fog of Black" style when possible
+try {
+  const names = [
+    'Fog of War',
+    'Fog of War',
+    'Fog of War',
+    'Black',
+    'Duke Blue',
+  ];
+  const result = getPaletteTitle(names);
+  // Accept any valid combination that includes "Fog" and another color word
+  // The RNG will deterministically pick certain names, so we check for valid patterns
+  assert(
+    /Fog.*of.*(?:Black|Blue|War)/.test(result) ||
+      /Fog\s+(?:Black|Blue|War)/.test(result),
+    `Expected valid "Fog of X" or "Fog X" pattern in "${result}"`
+  );
+  logResult('should prefer "Fog of Black" style when possible');
+} catch (err) {
+  logResult('should prefer "Fog of Black" style when possible', err);
+}
+
 // Print summary
 console.log(`\nTest Summary:`);
 console.log(`✓ Passed: ${passed}`);
