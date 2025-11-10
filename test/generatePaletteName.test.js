@@ -324,6 +324,27 @@ try {
   logResult('should prefer "Fog of Black" style when possible', err);
 }
 
+// Regression: Should not collapse "of the" into "ofthe"
+try {
+  const names = [
+    'Dust of the Moon',
+    'Pearly Pink',
+    'Super Pink',
+    'Tempest',
+    'Great Void',
+    'Dark Moon',
+  ];
+  const result = getPaletteTitle(names);
+  // Should not contain collapsed multi-word phrases like "oftheMoon" or "ofthe"
+  assert(
+    !/of(?:the|The)[A-Z]/.test(result) && !/\bofthe\b/i.test(result),
+    `Result "${result}" contains collapsed phrase (missing space after "of the")`
+  );
+  logResult('should not collapse "of the" into "ofthe"');
+} catch (err) {
+  logResult('should not collapse "of the" into "ofthe"', err);
+}
+
 // Print summary
 console.log(`\nTest Summary:`);
 console.log(`✓ Passed: ${passed}`);

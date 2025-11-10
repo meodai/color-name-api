@@ -33,15 +33,15 @@ export function getPaletteTitle(
   const useStyleA = rng() < 0.5;
   let headParts, tailParts, separator;
 
-  // Helper to get only word tokens (not separators)
-  const isWord = (token, idx) => idx % 2 === 0; // Words are at even indices
-
   if (useStyleA) {
-    // Style A: head words from first name + tail words from second name
-    const words1 = parts1.filter(isWord);
-    const words2 = parts2.filter(isWord);
+    // Style A: head from first name (all but last word) + tail from second name (last word)
+    // Extract only words for head
+    const words1 = parts1.filter((_, idx) => idx % 2 === 0);
     headParts = words1.length > 1 ? words1.slice(0, -1) : [words1[0]];
-    tailParts = words2.length > 1 ? [words2[words2.length - 1]] : words2;
+
+    // For tail, take just the last word
+    tailParts = [parts2[parts2.length - 1]];
+
     // Extract separator from the original parts
     const headSep = parts1.length > 1 ? parts1[parts1.length - 2] : null;
     const tailSep =
@@ -52,11 +52,10 @@ export function getPaletteTitle(
           : null;
     separator = extractSeparator(headSep, tailSep);
   } else {
-    // Style B: first word from first name + remaining words from second name
-    const words1 = parts1.filter(isWord);
-    const words2 = parts2.filter(isWord);
-    headParts = [words1[0]];
-    tailParts = words2.length > 1 ? words2.slice(1) : words2;
+    // Style B: first word from first name + rest of second name (with internal separators)
+    headParts = [parts1[0]];
+    // Take everything after the first word from parts2, including separators
+    tailParts = parts2.length > 1 ? parts2.slice(2) : parts2;
     separator = extractSeparator(parts1[1], parts2[1]);
   }
 
