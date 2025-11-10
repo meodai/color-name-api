@@ -79,6 +79,9 @@ export function getPaletteTitle(
     }
   }
 
+  // Regex for preferred separators (dash, dot, slash - but not space)
+  const preferredSepRegex = /[-\u2010-\u2015\u00B7/.]/;
+
   // Helper to extract preferred separator
   function extractPreferredSeparator(sep) {
     if (!sep) return '';
@@ -92,10 +95,10 @@ export function getPaletteTitle(
     const sepFromTail = extractPreferredSeparator(tailSepRaw);
     const sepFromHead = extractPreferredSeparator(headSepRaw);
     // Prefer dash/dot/slash if present
-    if (sepFromTail && /[-\u2010-\u2015\u00B7/.]/.test(sepFromTail)) {
+    if (sepFromTail && preferredSepRegex.test(sepFromTail)) {
       return sepFromTail;
     }
-    if (sepFromHead && /[-\u2010-\u2015\u00B7/.]/.test(sepFromHead)) {
+    if (sepFromHead && preferredSepRegex.test(sepFromHead)) {
       return sepFromHead;
     }
     return sepFromTail || sepFromHead || ' ';
