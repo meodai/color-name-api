@@ -1,135 +1,127 @@
 import seedrandom from 'seedrandom';
 
-/** Remove adjacent duplicate words (case-insensitive) from a token array */
-function deduplicateParts(parts, separatorRegex) {
-  if (parts.length < 3) return parts;
-
-  // Helper to check if a token is a separator
-  const isSepToken = token =>
-    !!token &&
-    new RegExp(`^${separatorRegex.source}$`, separatorRegex.flags).test(token);
-
-  const result = [];
-  let lastWordLower = null;
-  let pendingSep = '';
-
-  for (const token of parts) {
-    if (isSepToken(token)) {
-      pendingSep = token;
-      continue;
-    }
-    const wordLower = token.trim().toLowerCase();
-    if (wordLower !== lastWordLower) {
-      if (pendingSep) {
-        result.push(pendingSep);
-        pendingSep = '';
-      }
-      result.push(token);
-      lastWordLower = wordLower;
-    } else {
-      pendingSep = '';
-    }
-  }
-
-  // Final pass: remove any consecutive duplicate words (across head/tail seams)
-  const final = [];
-  let prevWord = null;
-  for (const token of result) {
-    if (isSepToken(token)) {
-      final.push(token);
-    } else {
-      const wordLower = token.trim().toLowerCase();
-      if (wordLower !== prevWord) {
-        final.push(token);
-        prevWord = wordLower;
-      }
-    }
-  }
-  return final;
-}
-
+/**
+ * Generate a unique palette title by combining parts from multiple color names.
+ * Deterministic based on input order.
+ */
 export function getPaletteTitle(
   namesArr,
   separatorRegex = /(\s|[-\u2010\u2011\u2012\u2013\u2014\u2015\u00B7/])+/
 ) {
+  // Handle edge cases
+  if (!namesArr || namesArr.length === 0) return '';
   const uniqueNames = [...new Set(namesArr)];
-  if (uniqueNames.length === 0) return '';
   if (uniqueNames.length === 1) return uniqueNames[0];
 
+  // Deterministic random selection
   const rng = seedrandom(uniqueNames.join('-'));
-  const n = uniqueNames.length;
-  const indexFirst = Math.floor(rng() * n);
-  let indexLast = Math.floor(rng() * (n - 1));
-  if (indexLast >= indexFirst) indexLast += 1;
-  const firstName = uniqueNames[indexFirst];
-  const lastName = uniqueNames[indexLast];
+  const pickIndex = max => Math.floor(rng() * max);
 
-  let partsFirst = firstName.split(separatorRegex);
-  let partsLast = lastName.split(separatorRegex);
+  // Pick two distinct names
+  const idx1 = pickIndex(uniqueNames.length);
+  let idx2 = pickIndex(uniqueNames.length - 1);
+  if (idx2 >= idx1) idx2++;
 
-  // Swap if seam would be a duplicate
-  const firstOfFirst = partsFirst[0].trim().toLowerCase();
-  const lastOfLast = partsLast[partsLast.length - 1].trim().toLowerCase();
-  if (firstOfFirst === lastOfLast) {
-    const firstOfLast = partsLast[0].trim().toLowerCase();
-    const lastOfFirst = partsFirst[partsFirst.length - 1].trim().toLowerCase();
-    if (firstOfLast !== lastOfFirst) {
-      [partsFirst, partsLast] = [partsLast, partsFirst];
-    }
+  const name1 = uniqueNames[idx1];
+  const name2 = uniqueNames[idx2];
+
+  // Split names into parts (words and separators)
+  const parts1 = name1.split(separatorRegex);
+  const parts2 = name2.split(separatorRegex);
+
+  // Determine combination style
+  const useStyleA = rng() < 0.5;
+  let headParts, tailParts, separator;
+
+  // Helper to get only word tokens (not separators)
+  const isWord = (token, idx) => idx % 2 === 0; // Words are at even indices
+
+  if (useStyleA) {
+    // Style A: head words from first name + tail words from second name
+    const words1 = parts1.filter(isWord);
+    const words2 = parts2.filter(isWord);
+    headParts = words1.length > 1 ? words1.slice(0, -1) : [words1[0]];
+    tailParts = words2.length > 1 ? [words2[words2.length - 1]] : words2;
+    // Extract separator from the original parts
+    const headSep = parts1.length > 1 ? parts1[parts1.length - 2] : null;
+    const tailSep =
+      parts2.length > 3
+        ? parts2[parts2.length - 4]
+        : parts2.length > 1
+          ? parts2[parts2.length - 2]
+          : null;
+    separator = extractSeparator(headSep, tailSep);
+  } else {
+    // Style B: first word from first name + remaining words from second name
+    const words1 = parts1.filter(isWord);
+    const words2 = parts2.filter(isWord);
+    headParts = [words1[0]];
+    tailParts = words2.length > 1 ? words2.slice(1) : words2;
+    separator = extractSeparator(parts1[1], parts2[1]);
   }
 
-  // Regex for preferred separators (dash, dot, slash - but not space)
-  const preferredSepRegex = /[-\u2010-\u2015\u00B7/.]/;
+  // Combine: headParts + separator + tailParts, then deduplicate
+  const combined = [...headParts, separator, ...tailParts];
+  const result = deduplicateWords(combined, separatorRegex);
+
+  return result.join('').trim();
+}
+
+/**
+ * Extract preferred separator (prefer dash/dot/slash over space)
+ */
+function extractSeparator(sep1, sep2) {
+  const preferredRegex = /[-\u2010-\u2015\u00B7/.]/;
   const allSepRegex = /[-\u2010-\u2015\u00B7/. ]/;
 
-  // Helper to extract preferred separator
-  function extractPreferredSeparator(sep) {
-    if (!sep) return '';
+  for (const sep of [sep2, sep1]) {
+    if (!sep) continue;
     const match = sep.match(allSepRegex);
-    return match ? match[0] : '';
+    if (match && preferredRegex.test(match[0])) return match[0];
   }
 
-  // Helper to pick a seam separator
-  function pickSeamSeparator(headSepRaw, tailSepRaw) {
-    const sepFromTail = extractPreferredSeparator(tailSepRaw);
-    const sepFromHead = extractPreferredSeparator(headSepRaw);
-    // Prefer dash/dot/slash if present
-    if (sepFromTail && preferredSepRegex.test(sepFromTail)) {
-      return sepFromTail;
-    }
-    if (sepFromHead && preferredSepRegex.test(sepFromHead)) {
-      return sepFromHead;
-    }
-    return sepFromTail || sepFromHead || ' ';
+  // Fallback to any separator or space
+  for (const sep of [sep2, sep1]) {
+    if (!sep) continue;
+    const match = sep.match(allSepRegex);
+    if (match) return match[0];
   }
 
-  // Style A or B: combine head and tail parts
-  const isStyleA = rng() < 0.5;
-  let headParts, tailParts, headSepRaw, tailSepRaw;
+  return ' ';
+}
 
-  if (isStyleA) {
-    // Style A: (all but the last part of first) + (the last part(s) of last)
-    headParts = partsFirst.length > 1 ? partsFirst.slice(0, -1) : partsFirst;
-    if (partsLast.length > 3) {
-      tailParts = partsLast.slice(-3);
-      tailSepRaw = partsLast[partsLast.length - 4] || null;
+/**
+ * Remove consecutive duplicate words while preserving separators
+ */
+function deduplicateWords(parts, separatorRegex) {
+  if (parts.length < 3) return parts;
+
+  const isSep = token =>
+    !!token &&
+    new RegExp(`^${separatorRegex.source}$`, separatorRegex.flags).test(token);
+
+  const result = [];
+  let prevWord = '';
+
+  for (const token of parts) {
+    if (isSep(token)) {
+      // Keep separators, but don't add duplicate separators
+      if (result.length > 0 && !isSep(result[result.length - 1])) {
+        result.push(token);
+      }
     } else {
-      tailParts = [partsLast[partsLast.length - 1]];
-      tailSepRaw =
-        partsLast.length > 1 ? partsLast[partsLast.length - 2] : null;
+      const word = token.trim().toLowerCase();
+      if (word !== prevWord) {
+        result.push(token);
+        prevWord = word;
+      } else {
+        // Remove the separator before this duplicate word
+        if (result.length > 0 && isSep(result[result.length - 1])) {
+          result.pop();
+        }
+      }
     }
-    headSepRaw =
-      partsFirst.length > 1 ? partsFirst[partsFirst.length - 2] : null;
-  } else {
-    // Style B: (the first part of first) + (all but the first part of last)
-    headParts = [partsFirst[0]];
-    tailParts = partsLast.length > 1 ? partsLast.slice(1) : partsLast;
-    headSepRaw = partsFirst.length > 1 ? partsFirst[1] : null;
-    tailSepRaw = partsLast.length > 1 ? partsLast[1] : null;
   }
 
-  const separator = pickSeamSeparator(headSepRaw, tailSepRaw);
-  const combined = [...headParts, separator, ...tailParts];
-  const deduplicated = deduplicateParts(combined, separatorRegex);
-  return deduplicated.join('').trim();
+  return result;
 }
