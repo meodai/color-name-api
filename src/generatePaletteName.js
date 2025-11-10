@@ -1,227 +1,91 @@
 import seedrandom from 'seedrandom';
 
-/**
- * Removes adjacent duplicate words from a parts array.
- * e.g., ['Deep', ' ', 'Deep', ' ', 'Blue'] becomes ['Deep', ' ', 'Blue']
- * @param {string[]} parts - The array of name parts, including separators.
- * @returns {string[]} A new array with adjacent duplicates removed.
- */
-function deduplicateParts(parts, separatorRegex) {
-  if (parts.length < 3) return parts; // Not enough parts for an adjacent duplicate
+/** Remove adjacent duplicate words (case-insensitive) from a token array */
+function deduplicateParts(parts: string[], sepRe: RegExp) {
+  if (parts.length < 3) return parts;
+  const isSep = (t: string) => new RegExp(`^${sepRe.source}$`, sepRe.flags).test(t);
 
-  // Treat tokens that match the provided separatorRegex fully as separators
-  const isSepToken = token =>
-    !!token &&
-    new RegExp(`^${separatorRegex.source}$`, separatorRegex.flags).test(token);
+  const result: string[] = [];
+  let lastWord = '';
+  let sep = '';
 
-  const result = [];
-  let lastWordLower = null;
-  let pendingSep = '';
-
-  for (const token of parts) {
-    if (isSepToken(token)) {
-      // Hold onto the latest separator; if multiple separators stack, prefer the most recent
-      pendingSep = token;
+  for (const t of parts) {
+    if (isSep(t)) {
+      sep = t;
       continue;
     }
-
-    // It's a word token
-    const wordLower = token.trim().toLowerCase();
-    if (wordLower !== lastWordLower) {
-      if (pendingSep) {
-        result.push(pendingSep);
-        pendingSep = '';
-      }
-      result.push(token);
-      lastWordLower = wordLower;
-    } else {
-      // Duplicate adjacent word; drop it and the pending separator
-      pendingSep = '';
-    }
+    const w = t.trim().toLowerCase();
+    if (w !== lastWord) {
+      if (sep) result.push(sep), (sep = '');
+      result.push(t);
+      lastWord = w;
+    } else sep = '';
   }
-
   return result;
 }
 
-/**
- * Extract a preferred single-character separator from a captured separator chunk.
- * - If the chunk contains any non-space character (e.g., '-', '–', '—', '‑', '·', '/'), use the first one.
- * - Otherwise, return a single space.
- * @param {string} sepChunk
- * @returns {string|null}
- */
-function extractPreferredSeparator(sepChunk) {
-  if (!sepChunk) return null;
-  const match = sepChunk.match(/[^\s]/u);
-  if (match) return match[0];
-  // All spaces
-  return ' ';
+function pickSeparator(chunk?: string | null) {
+  if (!chunk) return null;
+  const c = chunk.match(/[^\s]/u);
+  return c ? c[0] : ' ';
 }
 
-/**
- * Generates a unique and deterministic palette name from an array of color names.
- */
-// Default separator regex captures whitespace and a broad set of dash-like separators
-// Hyphen-minus -, Non‑breaking hyphen ‑, Figure dash ‒, En dash –, Em dash —, Horizontal bar ―, Middle dot ·, Slash /
 export function getPaletteTitle(
-  namesArr,
-  separatorRegex = /(\s|[-\u2010\u2011\u2012\u2013\u2014\u2015\u00B7/])+/
+  names: string[],
+  sepRe = /(\s|[-\u2010-\u2015\u00B7/])+/
 ) {
-  // ... (Steps 1-5: setup, RNG, name selection, and splitting are identical to before)
+  const unique = [...new Set(names)];
+  if (!unique.length) return '';
+  if (unique.length === 1) return unique[0];
 
-  // Helper to count word tokens using the same separatorRegex used for splitting
-  function countWords(str) {
-    const parts = str.split(separatorRegex);
-    let count = 0;
-    for (let i = 0; i < parts.length; i += 2) {
-      if (parts[i] && parts[i].trim()) count += 1;
-    }
-    return count;
+  const rng = seedrandom(unique.join('-'));
+  const n = unique.length;
+  const i1 = Math.floor(rng() * n);
+  const i2 = (Math.floor(rng() * (n - 1)) + (i1 < n - 1 ? 0 : 1)) % n;
+
+  let p1 = unique[i1].split(sepRe);
+  let p2 = unique[i2].split(sepRe);
+
+  // swap if they start/end with same word
+  const first1 = p1[0].trim().toLowerCase();
+  const last2 = p2[p2.length - 1].trim().toLowerCase();
+  if (first1 === last2) {
+    const last1 = p1[p1.length - 1].trim().toLowerCase();
+    const first2 = p2[0].trim().toLowerCase();
+    if (first2 !== last1) [p1, p2] = [p2, p1];
   }
 
-  // Derive leading/trailing trim regexes from the provided separatorRegex to avoid repeating character classes
-  const leadingSepRegex = new RegExp(
-    `^${separatorRegex.source}`,
-    separatorRegex.flags
-  );
-  const trailingSepRegex = new RegExp(
-    `${separatorRegex.source}$`,
-    separatorRegex.flags
-  );
+  const combine = (
+    head: string,
+    tail: string,
+    headSep?: string | null,
+    tailSep?: string | null
+  ) => {
+    const headTrim = head.replace(new RegExp(`^${sepRe.source}|${sepRe.source}$`, sepRe.flags), '');
+    const tailTrim = tail.replace(new RegExp(`^${sepRe.source}|${sepRe.source}$`, sepRe.flags), '');
+    const sep = pickSeparator(tailSep) || pickSeparator(headSep) || ' ';
+    let combined = `${headTrim}${sep}${tailTrim}`.trim();
 
-  // Helper to assemble the final string with consistent trimming, separator selection, and fallback
-  function assembleCombinedName(
-    head,
-    tail,
-    headSepRaw,
-    tailSepRaw,
-    candidates
-  ) {
-    // Normalize edges
-    const headTrimmed = head.replace(trailingSepRegex, '');
-    const tailTrimmed = tail.replace(leadingSepRegex, '');
-
-    // Determine separator at seam using exact captured separators
-    const sepFromTail = extractPreferredSeparator(tailSepRaw);
-    const sepFromHead = extractPreferredSeparator(headSepRaw);
-    const separator = sepFromTail || sepFromHead || ' ';
-
-    const combined = `${headTrimmed}${separator}${tailTrimmed}`.trim();
-
-    // Fallback: ensure at least two tokens if we had >=2 unique names
-    if (uniqueNames.length >= 2) {
-      const wordCount = countWords(combined);
-      if (wordCount < 2) {
-        const headLower = headTrimmed.trim().toLowerCase();
-        const fallbackTailRaw = candidates.find(
-          w => w && w.trim() && w.trim().toLowerCase() !== headLower
-        );
-        const fallbackTail = fallbackTailRaw
-          ? fallbackTailRaw.trim()
-          : headTrimmed;
-        const safeSep = separator || ' ';
-        return `${headTrimmed}${safeSep}${fallbackTail}`.trim();
-      }
+    // fallback to 2 words if only 1
+    if (unique.length >= 2 && combined.split(sepRe).filter(w => w.trim()).length < 2) {
+      const alt = unique.find(w => w.trim().toLowerCase() !== headTrim.toLowerCase()) || headTrim;
+      combined = `${headTrim}${sep}${alt}`.trim();
     }
     return combined;
-  }
+  };
 
-  // 1. Create a new array with unique names.
-  const uniqueNames = [...new Set(namesArr)];
-
-  // 2. Handle edge cases.
-  if (uniqueNames.length === 0) {
-    return '';
-  }
-  if (uniqueNames.length === 1) {
-    return uniqueNames[0];
-  }
-
-  // 3. Initialize a deterministic random number generator.
-  const rng = seedrandom(namesArr.join('-'));
-
-  // 4. Select two distinct random names efficiently.
-  const n = uniqueNames.length;
-  const indexFirst = Math.floor(rng() * n);
-  let indexLast = Math.floor(rng() * (n - 1));
-  if (indexLast >= indexFirst) {
-    indexLast += 1;
-  }
-  const firstName = uniqueNames[indexFirst];
-  const lastName = uniqueNames[indexLast];
-
-  // 5. Split the chosen names into parts.
-  let partsFirst = firstName.split(separatorRegex);
-  let partsLast = lastName.split(separatorRegex);
-
-  // 6. Check and prevent duplicate words at the combination seam.
-  const firstOfFirst = partsFirst[0].trim().toLowerCase();
-  const lastOfLast = partsLast[partsLast.length - 1].trim().toLowerCase();
-  if (firstOfFirst === lastOfLast) {
-    const firstOfLast = partsLast[0].trim().toLowerCase();
-    const lastOfFirst = partsFirst[partsFirst.length - 1].trim().toLowerCase();
-    if (firstOfLast !== lastOfFirst) {
-      [partsFirst, partsLast] = [partsLast, partsFirst];
-    }
-  }
-
-  // 7. Combine parts, now with internal de-duplication.
-  if (rng() < 0.5) {
-    // Style A: (all but the last part of first) + (the last part(s) of last)
-    const headParts =
-      partsFirst.length > 1 ? partsFirst.slice(0, -1) : partsFirst;
-    const head =
-      partsFirst.length > 1
-        ? deduplicateParts(headParts, separatorRegex).join('')
-        : partsFirst[0];
-
-    // Get the tail - take more words if available to make longer titles
-    let tail;
-    let tailSepRaw;
-    if (partsLast.length > 3) {
-      // Take last 3 parts (sep + word + sep + word) to include more words
-      const tailParts = partsLast.slice(-3);
-      tail = deduplicateParts(tailParts, separatorRegex).join('');
-      tailSepRaw = partsLast[partsLast.length - 4] || null; // Sep before the first word of tail
-    } else {
-      tail = partsLast[partsLast.length - 1];
-      tailSepRaw =
-        partsLast.length > 1 ? partsLast[partsLast.length - 2] : null;
-    }
-
-    const headSepRaw =
-      partsFirst.length > 1 ? partsFirst[partsFirst.length - 2] : null;
-    const candidates = [
-      partsLast[partsLast.length - 1],
-      partsLast[0],
-      partsFirst[partsFirst.length - 1],
-    ];
-    return assembleCombinedName(head, tail, headSepRaw, tailSepRaw, candidates);
+  const styleA = rng() < 0.5;
+  if (styleA) {
+    const head = deduplicateParts(p1.slice(0, -1), sepRe).join('') || p1[0];
+    const tailParts = p2.length > 3 ? p2.slice(-3) : [p2[p2.length - 1]];
+    const tail = deduplicateParts(tailParts, sepRe).join('');
+    const headSep = p1[p1.length - 2];
+    const tailSep = p2[p2.length - 2];
+    return combine(head, tail, headSep, tailSep);
   } else {
-    // Style B: (the first part of first) + (all but the first part of last)
-    const head = partsFirst[0];
-
-    // Get the tail with its separator
-    let tail;
-
-    if (partsLast.length > 2) {
-      // Take everything after the first word, including its separator
-      const tailParts = partsLast.slice(1);
-      tail = deduplicateParts(tailParts, separatorRegex).join('');
-    } else if (partsLast.length === 1) {
-      tail = partsLast[0];
-    } else {
-      // partsLast has 2 or 3 elements
-      tail = partsLast.slice(1).join('');
-    }
-
-    const headSepRaw = partsFirst.length > 1 ? partsFirst[1] : null;
-    const tailSepRaw = partsLast.length > 1 ? partsLast[1] : null;
-    const candidates = [
-      partsLast[partsLast.length - 1],
-      partsLast[0],
-      partsFirst[partsFirst.length - 1],
-    ];
-    return assembleCombinedName(head, tail, headSepRaw, tailSepRaw, candidates);
+    const head = p1[0];
+    const tailParts = p2.length > 1 ? p2.slice(1) : p2;
+    const tail = deduplicateParts(tailParts, sepRe).join('');
+    return combine(head, tail, p1[1], p2[1]);
   }
 }
