@@ -94,9 +94,12 @@ function extractSeparator(sep1, sep2) {
 function deduplicateWords(parts, separatorRegex) {
   if (parts.length < 3) return parts;
 
-  const isSep = token =>
-    !!token &&
-    new RegExp(`^${separatorRegex.source}$`, separatorRegex.flags).test(token);
+  // Create regex once, not in every iteration
+  const sepTest = new RegExp(
+    `^${separatorRegex.source}$`,
+    separatorRegex.flags
+  );
+  const isSep = token => !!token && sepTest.test(token);
 
   const result = [];
   let prevWord = '';
