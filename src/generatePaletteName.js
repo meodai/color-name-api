@@ -1,11 +1,11 @@
 import seedrandom from 'seedrandom';
 
 /** Remove adjacent duplicate words (case-insensitive) from a token array */
-function deduplicateParts(parts: string[], sepRe: RegExp) {
+function deduplicateParts(parts, sepRe) {
   if (parts.length < 3) return parts;
-  const isSep = (t: string) => new RegExp(`^${sepRe.source}$`, sepRe.flags).test(t);
+  const isSep = t => new RegExp(`^${sepRe.source}$`, sepRe.flags).test(t);
 
-  const result: string[] = [];
+  const result = [];
   let lastWord = '';
   let sep = '';
 
@@ -16,7 +16,7 @@ function deduplicateParts(parts: string[], sepRe: RegExp) {
     }
     const w = t.trim().toLowerCase();
     if (w !== lastWord) {
-      if (sep) result.push(sep), (sep = '');
+      if (sep) (result.push(sep), (sep = ''));
       result.push(t);
       lastWord = w;
     } else sep = '';
@@ -24,14 +24,14 @@ function deduplicateParts(parts: string[], sepRe: RegExp) {
   return result;
 }
 
-function pickSeparator(chunk?: string | null) {
+function pickSeparator(chunk) {
   if (!chunk) return null;
   const c = chunk.match(/[^\s]/u);
   return c ? c[0] : ' ';
 }
 
 export function getPaletteTitle(
-  names: string[],
+  names,
   sepRe = /(\s|[-\u2010-\u2015\u00B7/])+/
 ) {
   const unique = [...new Set(names)];
@@ -55,20 +55,26 @@ export function getPaletteTitle(
     if (first2 !== last1) [p1, p2] = [p2, p1];
   }
 
-  const combine = (
-    head: string,
-    tail: string,
-    headSep?: string | null,
-    tailSep?: string | null
-  ) => {
-    const headTrim = head.replace(new RegExp(`^${sepRe.source}|${sepRe.source}$`, sepRe.flags), '');
-    const tailTrim = tail.replace(new RegExp(`^${sepRe.source}|${sepRe.source}$`, sepRe.flags), '');
+  const combine = (head, tail, headSep = null, tailSep = null) => {
+    const headTrim = head.replace(
+      new RegExp(`^${sepRe.source}|${sepRe.source}$`, sepRe.flags),
+      ''
+    );
+    const tailTrim = tail.replace(
+      new RegExp(`^${sepRe.source}|${sepRe.source}$`, sepRe.flags),
+      ''
+    );
     const sep = pickSeparator(tailSep) || pickSeparator(headSep) || ' ';
     let combined = `${headTrim}${sep}${tailTrim}`.trim();
 
     // fallback to 2 words if only 1
-    if (unique.length >= 2 && combined.split(sepRe).filter(w => w.trim()).length < 2) {
-      const alt = unique.find(w => w.trim().toLowerCase() !== headTrim.toLowerCase()) || headTrim;
+    if (
+      unique.length >= 2 &&
+      combined.split(sepRe).filter(w => w.trim()).length < 2
+    ) {
+      const alt =
+        unique.find(w => w.trim().toLowerCase() !== headTrim.toLowerCase()) ||
+        headTrim;
       combined = `${headTrim}${sep}${alt}`.trim();
     }
     return combined;
