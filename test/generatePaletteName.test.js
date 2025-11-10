@@ -345,6 +345,27 @@ try {
   logResult('should not collapse "of the" into "ofthe"', err);
 }
 
+// Regression: Should preserve spaces in multi-word head parts
+try {
+  const names = [
+    'Day On Mercury',
+    'Exotic Escape',
+    'Verdigris',
+    'Dill',
+    'Olive Leaf',
+    'Mole',
+  ];
+  const result = getPaletteTitle(names);
+  // Should not contain collapsed multi-word phrases like "DayOn"
+  assert(
+    !/[a-z][A-Z]/.test(result),
+    `Result "${result}" contains collapsed words (missing space between lowercase and uppercase)`
+  );
+  logResult('should preserve spaces in multi-word head parts');
+} catch (err) {
+  logResult('should preserve spaces in multi-word head parts', err);
+}
+
 // Print summary
 console.log(`\nTest Summary:`);
 console.log(`✓ Passed: ${passed}`);

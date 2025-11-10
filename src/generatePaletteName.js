@@ -35,9 +35,8 @@ export function getPaletteTitle(
 
   if (useStyleA) {
     // Style A: head from first name (all but last word) + tail from second name (last word)
-    // Extract only words for head
-    const words1 = parts1.filter((_, idx) => idx % 2 === 0);
-    headParts = words1.length > 1 ? words1.slice(0, -1) : [words1[0]];
+    // Take all parts except the last word and its separator
+    headParts = parts1.length > 2 ? parts1.slice(0, -2) : [parts1[0]];
 
     // For tail, take just the last word
     tailParts = [parts2[parts2.length - 1]];
