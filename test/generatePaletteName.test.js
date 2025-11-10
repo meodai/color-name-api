@@ -115,6 +115,71 @@ try {
   logResult('should handle mixed name formats', err);
 }
 
+// Test: Preserve hyphen-like dashes (en dash, em dash, non-breaking hyphen) at seam
+try {
+  const names = ['Deep Blue', 'Forest–Green', 'Silver—Gold', 'Jean‑Pierre']; // – (U+2013), — (U+2014), ‑ (U+2011)
+  const result = getPaletteTitle(names);
+  assert.strictEqual(typeof result, 'string');
+  assert(
+    /[-\u2010\u2011\u2012\u2013\u2014\u2015]/.test(result),
+    `Expected a dash-like separator in "${result}"`
+  );
+  logResult('should preserve dash-like separators at seam');
+} catch (err) {
+  logResult('should preserve dash-like separators at seam', err);
+}
+
+// Test: Preserve middle dot and slash as separators when present
+try {
+  const names = ['Soft·Glow', 'Night Sky', 'Silver/Gold'];
+  const result = getPaletteTitle(names);
+  assert.strictEqual(typeof result, 'string');
+  assert(
+    /[\u00B7/]/.test(result),
+    `Expected middle dot or slash in "${result}"`
+  );
+  logResult('should preserve middle dot or slash separators');
+} catch (err) {
+  logResult('should preserve middle dot or slash separators', err);
+}
+
+// Test: Ensure at least two words when multiple single-word inputs provided
+try {
+  const names = ['Red', 'Blue', 'Green', 'Gray'];
+  const result = getPaletteTitle(names);
+  const tokens = result
+    .split(/[\s\-\u2010\u2011\u2012\u2013\u2014\u2015\u00B7/]+/)
+    .filter(Boolean);
+  assert(tokens.length >= 2, `Expected at least two tokens, got "${result}"`);
+  logResult('should not collapse to single word with multi single-word inputs');
+} catch (err) {
+  logResult(
+    'should not collapse to single word with multi single-word inputs',
+    err
+  );
+}
+
+// Test: Original reported case — hyphen should be kept (no space)
+try {
+  const names = [
+    'Silent Snowfall',
+    'Garden Goddess',
+    'Buckingham Gardens',
+    'Roland-Garros',
+    'Prune',
+    'Black',
+  ];
+  const result = getPaletteTitle(names);
+  // Must not contain 'Prune Garros' with a space; allow 'Prune-Garros' or dash-like
+  assert(
+    !/Prune Garros/.test(result),
+    `Unexpected space at hyphen seam in "${result}"`
+  );
+  logResult('should keep hyphen at seam for reported case');
+} catch (err) {
+  logResult('should keep hyphen at seam for reported case', err);
+}
+
 // Test: Specific known behavior - test a few known combinations
 try {
   // Test with known inputs to verify specific behavior
