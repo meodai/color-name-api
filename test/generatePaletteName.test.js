@@ -267,6 +267,25 @@ try {
   logResult('should return empty string for empty array', err);
 }
 
+// Regression: Ensure internal spaces in tail aren't removed (e.g., "Fog of War")
+try {
+  const names = ['Lead', 'Lead', 'Fog of War'];
+  const result = getPaletteTitle(names);
+  // Should not contain the collapsed token 'ofWar'
+  assert(
+    !/ofWar/.test(result),
+    `Unexpected missing space within tail in "${result}"`
+  );
+  logResult(
+    'should preserve internal spaces within tail parts (e.g., "Fog of War")'
+  );
+} catch (err) {
+  logResult(
+    'should preserve internal spaces within tail parts (e.g., "Fog of War")',
+    err
+  );
+}
+
 // Print summary
 console.log(`\nTest Summary:`);
 console.log(`✓ Passed: ${passed}`);

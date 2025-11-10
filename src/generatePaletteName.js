@@ -9,15 +9,22 @@ import seedrandom from 'seedrandom';
 function deduplicateParts(parts) {
   if (parts.length < 3) return parts; // Not enough parts for an adjacent duplicate
 
-  // The first part is always included.
-  // Subsequent parts are added only if they are not the same as the previous part.
-  return parts.filter((part, i) => {
-    // Keep all separators (odd indices) and the first word (index 0)
-    if (i % 2 !== 0 || i === 0) return true;
-    // For words (even indices > 0), check against the previous word
-    const previousWord = parts[i - 2];
-    return part.trim().toLowerCase() !== previousWord.trim().toLowerCase();
-  });
+  const result = [parts[0]]; // Always keep the first element (expected to be a word)
+  // Iterate over subsequent words (even indices in the original split contract)
+  for (let i = 2; i < parts.length; i += 2) {
+    const currentWord = parts[i];
+    const previousWordInResult = result[result.length - 1];
+
+    // Only add the new word if it's different from the last one we added
+    if (
+      currentWord.trim().toLowerCase() !==
+      previousWordInResult.trim().toLowerCase()
+    ) {
+      result.push(parts[i - 1]); // Add the separator
+      result.push(currentWord); // Add the word
+    }
+  }
+  return result;
 }
 
 /**
