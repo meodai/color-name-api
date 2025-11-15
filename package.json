@@ -53,7 +53,7 @@
     "culori": "^4.0.1",
     "dotenv": "^16.4.7",
     "fastest-levenshtein": "^1.0.16",
-    "ip-location-api": "^2.4.3",
+    "ip-location-api": "^4.0.3",
     "lru-cache": "^11.1.0",
     "request-ip": "^3.3.0",
     "seedrandom": "^3.0.5",
