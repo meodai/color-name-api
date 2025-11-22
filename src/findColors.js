@@ -14,13 +14,12 @@ import { distance as levenshteinDistance } from 'fastest-levenshtein';
 const distanceMetric = differenceCiede2000();
 
 /**
- * enriches color object and fills RGB color arrays
- * Warning: Not a pure function at all :D
- * @param   {object} colorObj hex representation of color
- * @param   {array} rgbColorArrRef reference to RGB color array
- * @return  {object} enriched color object
+ * Hydrates a color object with calculated properties (RGB, HSL, Lab, etc.)
+ * This is done on-demand only for colors that are being returned to the client.
+ * @param   {object} colorObj Source color object with hex and name
+ * @return  {object} Enriched color object
  */
-const enrichColorObj = (colorObj, colorListParedRef) => {
+const hydrateColor = colorObj => {
   const localColorObj = { ...colorObj };
   const currentColor = parse(colorObj.hex);
   const lab = converter('lab');
@@ -42,8 +41,6 @@ const enrichColorObj = (colorObj, colorListParedRef) => {
     l: parseFloat((100 * hslFloat.l).toFixed(5)),
   };
 
-  // populates array needed for VPTree search
-  colorListParedRef.push(currentColor);
   // transform hex to RGB
   localColorObj.rgb = rgbInt;
   // get hsl color value
@@ -72,6 +69,19 @@ const enrichColorObj = (colorObj, colorListParedRef) => {
   };
 
   return localColorObj;
+};
+
+/**
+ * Prepares color for search index (VPTree)
+ * @param   {object} colorObj hex representation of color
+ * @param   {array} colorListParedRef reference to RGB color array
+ * @return  {object} original color object (unchanged)
+ */
+const prepareColorForSearch = (colorObj, colorListParedRef) => {
+  const currentColor = parse(colorObj.hex);
+  // populates array needed for VPTree search
+  colorListParedRef.push(currentColor);
+  return colorObj;
 };
 
 // Initialize color lists and VPTrees just once at module level
@@ -107,8 +117,9 @@ export class FindColors {
       console.log(`[Color Finder] Initializing VPTree for list: ${listName}`);
 
       this.colorListsParsed[listName] = [];
+      // Only prepare for search, don't hydrate yet
       this.colorLists[listName] = this.colorLists[listName].map(c =>
-        enrichColorObj(c, this.colorListsParsed[listName])
+        prepareColorForSearch(c, this.colorListsParsed[listName])
       );
 
       Object.freeze(this.colorLists[listName]);
@@ -192,7 +203,7 @@ export class FindColors {
     // Limit results but keep similarity score in output
     const results = scoredResults
       .slice(0, maxResults)
-      .map(color => ({ ...color }));
+      .map(color => hydrateColor(color));
 
     // Add to cache - LRUCache handles size limit and eviction automatically
     cache.set(cacheKey, results);
@@ -252,9 +263,10 @@ export class FindColors {
         }
 
         const color = this.colorLists[listKey][closestColor.index];
+        const hydrated = hydrateColor(color);
 
         return {
-          ...color,
+          ...hydrated,
           requestedHex: `#${hex}`,
           swatchImg: {
             svgNamed: `/v1/swatch/?color=${hex}&name=${encodeURI(color.name)}`,
