@@ -240,7 +240,8 @@ export class FindColors {
         const parsed = parse(hex);
 
         // get the closest named colors using VPTree
-        const closestColor = localClosest.get(parsed);
+        // Pass hex as cache key to avoid expensive JSON.stringify in Closest.get
+        const closestColor = localClosest.get(parsed, hex);
 
         // If no color was found (all unique colors used up) or we got an error response
         if (!closestColor) {
@@ -273,8 +274,28 @@ function calculateSimilarityScore(
   searchLower,
   nameLower
 ) {
-  // Pure Levenshtein similarity only
+  // Optimization: Skip Levenshtein if length difference is too large
+  // We need similarity > 0.5.
+  // Similarity = 1 - distance / maxLen.
+  // So we need 1 - distance / maxLen > 0.5 => distance < 0.5 * maxLen.
+  // Since distance >= abs(lenA - lenB), if abs(lenA - lenB) >= 0.5 * maxLen,
+  // then distance >= 0.5 * maxLen, so similarity <= 0.5.
   const maxLen = Math.max(searchStr.length, colorName.length);
+  const minLen = Math.min(searchStr.length, colorName.length);
+
+  // Optimization: Check for substring match
+  if (nameLower.includes(searchLower)) {
+    // Boost score for substring matches to ensure they pass the threshold
+    // and are ranked by length ratio (shorter matches are better)
+    return 0.5 + 0.5 * (minLen / maxLen);
+  }
+
+  // Optimization: Skip Levenshtein if length difference is too large
+  if (maxLen - minLen >= 0.5 * maxLen) {
+    return 0;
+  }
+
+  // Pure Levenshtein similarity only
   const distance = levenshteinDistance(searchLower, nameLower);
   const similarity = 1 - distance / maxLen;
   // Only return matches above threshold to avoid too many irrelevant results

@@ -38,9 +38,9 @@ export default class Closest {
     return this.list.length - this.previouslyReturnedIndexes.size;
   }
 
-  get(searchColor) {
+  get(searchColor, cacheKey = null) {
     const searchObj = { color: searchColor, index: -1 };
-    const colorUID = JSON.stringify(searchColor); // Use stringified color as cache key
+    const colorUID = cacheKey || JSON.stringify(searchColor); // Use provided key or stringified color
 
     if (!this.unique && this.cache.has(colorUID)) {
       return this.cache.get(colorUID);
