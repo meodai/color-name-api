@@ -12,7 +12,7 @@ import { lookup } from 'ip-location-api';
 import * as dotenv from 'dotenv';
 import { LRUCache } from 'lru-cache'; // Import LRUCache
 
-import { FindColors } from './findColors.js';
+import { FindColors, hydrateColor } from './findColors.js';
 import { getPaletteTitle } from './generatePaletteName.js';
 import { svgTemplate } from './colorSwatchSVG.js';
 import { createColorRecord } from './lib.js';
@@ -45,6 +45,7 @@ let docsHTML;
 let gzippedDocsHTML; // Cache for gzipped docs
 const gzipCache = new LRUCache({ max: gzipCacheSize });
 const ipCache = new LRUCache({ max: ipCacheSize }); // Cache for IP lookups
+const fullListCache = new Map(); // Cache for full list responses (json & gzip)
 
 // OpenAPI spec content via wellKnown module
 let getOpenApiYAMLString;
@@ -416,7 +417,83 @@ const respondValueSearch = async (
   let paletteTitle;
   let colorsResponse;
 
-  if (urlColorList[0]) {
+  // Optimization: Handle full list request with caching and hydration
+  if (!urlColorList[0]) {
+    // Check cache first
+    const cached = fullListCache.get(listKey);
+    if (cached) {
+      if (socket) {
+        // Emit socket event (lightweight version)
+        const { clientLocation } = getClientInfo(request);
+        const xReferrer = request.headers['x-referrer'];
+        let relativePath = requestUrl.pathname + requestUrl.search;
+        relativePath = relativePath.replace(new RegExp(`^/${baseUrl}`), '/');
+
+        const emittedRequestInfo = {
+          url: relativePath,
+          method: request.method,
+          clientLocation,
+          xReferrer: xReferrer || null,
+        };
+
+        // We need a few colors for the broadcast, but we don't want to parse the huge JSON
+        // So we just grab the first 50 raw colors and hydrate them for the socket
+        const rawColors = colorsLists[listKey];
+        const broadcastColors = rawColors
+          .slice(0, 50)
+          .map(c => hydrateColor(c));
+
+        io.emit('colors', {
+          paletteTitle: `All the ${listKey} names`,
+          colors: broadcastColors,
+          list: listKey,
+          request: emittedRequestInfo,
+        });
+      }
+
+      // Serve cached response
+      response.writeHead(200, {
+        ...responseHeader,
+        'Content-Type': 'application/json; charset=utf-8',
+        'Content-Encoding':
+          responseHeader['Content-Encoding'] === 'gzip' ? 'gzip' : undefined,
+      });
+
+      if (responseHeader['Content-Encoding'] === 'gzip') {
+        response.end(cached.gzipped);
+      } else {
+        response.end(cached.json);
+      }
+      return;
+    }
+
+    // Cache miss: Generate full response
+    const rawColors = colorsLists[listKey];
+    // Hydrate all colors (expensive, but done once per listKey)
+    colorsResponse = rawColors.map(c => hydrateColor(c));
+    paletteTitle = `All the ${listKey} names`;
+
+    const responseObj = {
+      paletteTitle,
+      colors: colorsResponse,
+    };
+
+    const jsonString = JSON.stringify(responseObj);
+    let gzippedBuffer;
+    try {
+      gzippedBuffer = await gzip(jsonString);
+    } catch (err) {
+      console.error('Gzip failed for full list:', err);
+    }
+
+    // Store in cache
+    if (jsonString && gzippedBuffer) {
+      fullListCache.set(listKey, {
+        json: jsonString,
+        gzipped: gzippedBuffer,
+      });
+    }
+  } else if (urlColorList[0]) {
     colorsResponse = findColors.getNamesForValues(
       urlColorList,
       uniqueMode,
@@ -438,8 +515,6 @@ const respondValueSearch = async (
         }
       );
     }
-  } else {
-    colorsResponse = colorsLists[listKey];
   }
 
   if (urlColorList.length === 1) {
@@ -448,10 +523,8 @@ const respondValueSearch = async (
   } else if (urlColorList.length > 1) {
     // get a palette title for the returned colors
     paletteTitle = getPaletteTitle(colorsResponse.map(color => color.name));
-  } else {
-    // return all colors if no colors were given
-    paletteTitle = `All the ${listKey} names`;
   }
+  // Note: paletteTitle for full list is already set above
 
   if (socket) {
     const { clientLocation } = getClientInfo(request);
@@ -471,9 +544,7 @@ const respondValueSearch = async (
 
     // Don't broadcast the entire list if it's too large to prevent flooding clients
     const broadcastColors =
-      colorsResponse.length > 200
-        ? colorsResponse.slice(0, 200)
-        : colorsResponse;
+      colorsResponse.length > 50 ? colorsResponse.slice(0, 50) : colorsResponse;
 
     io.emit('colors', {
       paletteTitle,

@@ -19,7 +19,7 @@ const distanceMetric = differenceCiede2000();
  * @param   {object} colorObj Source color object with hex and name
  * @return  {object} Enriched color object
  */
-const hydrateColor = colorObj => {
+export const hydrateColor = colorObj => {
   const localColorObj = { ...colorObj };
   const currentColor = parse(colorObj.hex);
   const lab = converter('lab');
