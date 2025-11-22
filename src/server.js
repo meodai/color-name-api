@@ -237,10 +237,23 @@ const httpRespond = async (
   }
 
   if (type === 'svg') {
-    // SVG is small, gzip on the fly if needed, no caching needed here
-    const svgString = responseObj; // Assuming responseObj is the SVG string for type 'svg'
+    const svgString = responseObj;
     if (responseHeader['Content-Encoding'] === 'gzip') {
-      const gzippedSvg = await gzip(svgString);
+      let gzippedSvg = gzipCache.get(svgString);
+      if (!gzippedSvg) {
+        try {
+          gzippedSvg = await gzip(svgString);
+          gzipCache.set(svgString, gzippedSvg);
+        } catch (err) {
+          console.error('Gzip compression failed:', err);
+          response.writeHead(statusCode, {
+            ...responseHeader,
+            'Content-Encoding': undefined,
+          });
+          response.end(svgString);
+          return;
+        }
+      }
       response.end(gzippedSvg);
     } else {
       response.end(svgString);
@@ -456,9 +469,15 @@ const respondValueSearch = async (
       xReferrer: xReferrer || null,
     };
 
+    // Don't broadcast the entire list if it's too large to prevent flooding clients
+    const broadcastColors =
+      colorsResponse.length > 200
+        ? colorsResponse.slice(0, 200)
+        : colorsResponse;
+
     io.emit('colors', {
       paletteTitle,
-      colors: colorsResponse,
+      colors: broadcastColors,
       list: listKey,
       request: emittedRequestInfo,
     });
