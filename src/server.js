@@ -39,13 +39,14 @@ const baseUrlNames = `${baseUrl}${urlNameSubpath}/`;
 const urlColorSeparator = ',';
 const gzipCacheSize = 500; // Max size of the gzip cache
 const ipCacheSize = 1000; // Cache size for IP lookup results
+const fullListCacheSize = 20; // Max number of full list responses to cache
 
 // Declare variables for async loading
 let docsHTML;
 let gzippedDocsHTML; // Cache for gzipped docs
 const gzipCache = new LRUCache({ max: gzipCacheSize });
 const ipCache = new LRUCache({ max: ipCacheSize }); // Cache for IP lookups
-const fullListCache = new Map(); // Cache for full list responses (json & gzip)
+const fullListCache = new LRUCache({ max: fullListCacheSize }); // Cache for full list responses (json & gzip)
 
 // OpenAPI spec content via wellKnown module
 let getOpenApiYAMLString;
