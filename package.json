@@ -5,11 +5,12 @@
   "main": "src/index.js",
   "type": "module",
   "scripts": {
-    "test": "npm run test:local && npm run test:vptree && npm run test:exhausted && npm run test:compare-api && npm run test:well-known && npm run test:palette-name",
+    "test": "npm run test:local && npm run test:vptree && npm run test:exhausted && npm run test:compare-api && npm run test:well-known && npm run test:palette-name && npm run test:gzip-headers",
     "test:local": "node test/test.js",
     "test:vptree": "node test/vptree.test.js",
     "test:palette-name": "node test/generatePaletteName.test.js",
     "test:compare-api": "node test/compare-api.js",
+    "test:gzip-headers": "node test/gzip-headers.test.js",
     "test:benchmark": "node test/benchmark.js",
     "test:exhausted": "node test/test-exhausted-colors.js",
     "test:well-known": "node test/test-well-known.js",
