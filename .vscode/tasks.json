@@ -35,6 +35,11 @@
 				"$eslint-stylish"
 			],
 			"group": "test"
+		},
+		{
+			"label": "npm run test:caching",
+			"type": "shell",
+			"command": "npm run test:caching"
 		}
 	]
 }

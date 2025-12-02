@@ -17,7 +17,7 @@ export default class Closest {
     this.unique = unique;
     this.metric = (a, b) => metric(a.color, b.color);
     this.vpTree = new VPTree(this.list, this.metric);
-    this.clearCache(false);
+    this.clearCache();
   }
 
   clearCache(indexOnly = this.unique) {

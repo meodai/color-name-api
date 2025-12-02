@@ -11,6 +11,7 @@
     "test:palette-name": "node test/generatePaletteName.test.js",
     "test:compare-api": "node test/compare-api.js",
     "test:gzip-headers": "node test/gzip-headers.test.js",
+    "test:caching": "node test/caching.test.js",
     "test:benchmark": "node test/benchmark.js",
     "test:exhausted": "node test/test-exhausted-colors.js",
     "test:well-known": "node test/test-well-known.js",
