@@ -248,10 +248,9 @@ const httpRespond = async (
           gzipCache.set(svgString, gzippedSvg);
         } catch (err) {
           console.error('Gzip compression failed:', err);
-          response.writeHead(statusCode, {
-            ...responseHeader,
-            'Content-Encoding': undefined,
-          });
+          const fallbackHeaders = { ...responseHeader };
+          delete fallbackHeaders['Content-Encoding'];
+          response.writeHead(statusCode, fallbackHeaders);
           response.end(svgString);
           return;
         }
@@ -274,10 +273,9 @@ const httpRespond = async (
           gzipCache.set(textResponse, gzippedText);
         } catch (err) {
           console.error('Gzip compression failed:', err);
-          response.writeHead(statusCode, {
-            ...responseHeader,
-            'Content-Encoding': undefined,
-          });
+          const fallbackHeaders = { ...responseHeader };
+          delete fallbackHeaders['Content-Encoding'];
+          response.writeHead(statusCode, fallbackHeaders);
           response.end(textResponse);
           return;
         }
@@ -302,10 +300,9 @@ const httpRespond = async (
       } catch (err) {
         console.error('Gzip compression failed:', err);
         // Send uncompressed if gzip fails
-        response.writeHead(statusCode, {
-          ...responseHeader,
-          'Content-Encoding': undefined,
-        });
+        const fallbackHeaders = { ...responseHeader };
+        delete fallbackHeaders['Content-Encoding'];
+        response.writeHead(statusCode, fallbackHeaders);
         response.end(stringifiedResponse);
         return;
       }
@@ -453,12 +450,18 @@ const respondValueSearch = async (
       }
 
       // Serve cached response
-      response.writeHead(200, {
+      const cachedHeaders = {
         ...responseHeader,
         'Content-Type': 'application/json; charset=utf-8',
-        'Content-Encoding':
-          responseHeader['Content-Encoding'] === 'gzip' ? 'gzip' : undefined,
-      });
+      };
+
+      if (responseHeader['Content-Encoding'] === 'gzip') {
+        cachedHeaders['Content-Encoding'] = 'gzip';
+      } else {
+        delete cachedHeaders['Content-Encoding'];
+      }
+
+      response.writeHead(200, cachedHeaders);
 
       if (responseHeader['Content-Encoding'] === 'gzip') {
         response.end(cached.gzipped);
