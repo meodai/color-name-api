@@ -1,0 +1,3 @@
+✓ Closest.get() should cache results in non-unique mode
+✓ Closest.get() should return cached result
+✓ Closest should use previouslyReturnedIndexes in unique mode

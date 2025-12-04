@@ -2,9 +2,9 @@
  * Handlers for /.well-known endpoints to keep server.js tidy.
  * Also provides initialization that loads and parses the OpenAPI spec.
  */
-import fs from 'fs/promises';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { parse as parseYAML } from 'yaml';
 
 const DEFAULT_CONTACT_EMAIL = 'color-name-api@elastiq.click';

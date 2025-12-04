@@ -1,75 +1,107 @@
 {
-  "name": "color-name-api",
-  "version": "0.113.0",
-  "description": "Rest API that returns a bunch of color names for a given color-value",
-  "main": "src/index.js",
-  "type": "module",
-  "scripts": {
-    "test": "npm run test:local && npm run test:vptree && npm run test:exhausted && npm run test:compare-api && npm run test:well-known && npm run test:palette-name && npm run test:gzip-headers",
-    "test:local": "node test/test.js",
-    "test:vptree": "node test/vptree.test.js",
-    "test:palette-name": "node test/generatePaletteName.test.js",
-    "test:compare-api": "node test/compare-api.js",
-    "test:gzip-headers": "node test/gzip-headers.test.js",
-    "test:caching": "node test/caching.test.js",
-    "test:benchmark": "node test/benchmark.js",
-    "test:exhausted": "node test/test-exhausted-colors.js",
-    "test:well-known": "node test/test-well-known.js",
-    "start": "node src/server.js",
-    "apidocs": "openapi-generator-cli generate -i color-names-v1-OpenAPI.yml -g html2 -o ./docs/",
-    "openapitypes": "npx openapi-typescript color-names-v1-OpenAPI.yml -o generated/types.ts",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "format": "prettier --write .",
-    "format:check": "prettier --check ."
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/meodai/color-name-api.git"
-  },
-  "keywords": [
-    "color",
-    "palette",
-    "naming",
-    "colors",
-    "colour",
-    "colours",
-    "rest",
-    "api",
-    "node"
-  ],
-  "author": "meodai@gmail.com",
-  "license": "MIT",
-  "engines": {
-    "node": ">=20.11.0",
-    "npm": ">=10.2.0"
-  },
-  "bugs": {
-    "url": "https://github.com/meodai/color-name-api/issues"
-  },
-  "homepage": "https://github.com/meodai/color-name-api#readme",
-  "dependencies": {
-    "@supabase/supabase-js": "^2.47.10",
-    "color-name-list": "^13.36.0",
-    "color-name-lists": "^3.32.0",
-    "culori": "^4.0.1",
-    "dotenv": "^16.4.7",
-    "fastest-levenshtein": "^1.0.16",
-    "ip-location-api": "^4.0.3",
-    "lru-cache": "^11.1.0",
-    "request-ip": "^3.3.0",
-    "seedrandom": "^3.0.5",
-    "socket.io": "^4.8.1",
-    "yaml": "^2.8.1"
-  },
-  "devDependencies": {
-    "@eslint/js": "^9.35.0",
-    "@openapitools/openapi-generator-cli": "^2.18.4",
-    "eslint": "^9.17.0",
-    "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-prettier": "^5.5.4",
-    "globals": "^16.4.0",
-    "openapi-typescript": "^7.6.1",
-    "prettier": "^3.6.2"
-  }
+	"name": "color-name-api",
+	"version": "0.113.0",
+	"description": "Rest API that returns a bunch of color names for a given color-value",
+	"main": "src/index.js",
+	"type": "module",
+	"scripts": {
+		"test": "npm run test:local && npm run test:vptree && npm run test:exhausted && npm run test:compare-api && npm run test:well-known && npm run test:palette-name && npm run test:gzip-headers",
+		"test:bun": "bun run test:local:bun && bun run test:vptree:bun && bun run test:exhausted:bun && bun run test:compare-api:bun && bun run test:well-known:bun && bun run test:palette-name:bun && bun run test:gzip-headers:bun",
+		"test:local": "tsx test/test.ts",
+		"test:local:bun": "bun test/test.ts",
+		"test:vptree": "tsx test/vptree.test.ts",
+		"test:vptree:bun": "bun test/vptree.test.ts",
+		"test:palette-name": "tsx test/generatePaletteName.test.ts",
+		"test:palette-name:bun": "bun test/generatePaletteName.test.ts",
+		"test:compare-api": "tsx test/compare-api.ts",
+		"test:compare-api:bun": "bun test/compare-api.ts",
+		"test:gzip-headers": "tsx test/gzip-headers.test.ts",
+		"test:gzip-headers:bun": "bun test/gzip-headers.test.ts",
+		"test:caching": "tsx test/caching.test.ts",
+		"test:caching:bun": "bun test/caching.test.ts",
+		"test:search-names": "tsx test/searchNames.test.ts",
+		"test:search-names:bun": "bun test/searchNames.test.ts",
+		"test:benchmark": "tsx test/benchmark.ts",
+		"test:benchmark:bun": "bun test/benchmark.ts",
+		"test:exhausted": "tsx test/test-exhausted-colors.ts",
+		"test:exhausted:bun": "bun test/test-exhausted-colors.ts",
+		"test:well-known": "tsx test/test-well-known.ts",
+		"test:well-known:bun": "bun test/test-well-known.ts",
+		"test:concurrent": "tsx test/concurrent-users.test.ts",
+		"test:concurrent:bun": "bun test/concurrent-users.test.ts",
+		"test:live": "tsx test/live-concurrent-users.test.ts",
+		"test:live:bun": "bun test/live-concurrent-users.test.ts",
+		"start": "node src/server.js",
+		"start:ts": "tsx src/index.ts",
+		"start:bun": "bun run src/index.ts",
+		"dev": "tsx watch src/index.ts",
+		"dev:bun": "bun --watch run src/index.ts",
+		"typecheck": "tsc --noEmit",
+		"apidocs": "npx @redocly/cli build-docs color-names-v1-OpenAPI.yml -o docs/index.html",
+		"openapitypes": "npx openapi-typescript color-names-v1-OpenAPI.yml -o generated/types.ts",
+		"lint": "eslint .",
+		"lint:fix": "eslint . --fix",
+		"format": "prettier --write .",
+		"format:check": "prettier --check ."
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/meodai/color-name-api.git"
+	},
+	"keywords": [
+		"color",
+		"palette",
+		"naming",
+		"colors",
+		"colour",
+		"colours",
+		"rest",
+		"api",
+		"node"
+	],
+	"author": "meodai@gmail.com",
+	"contributors": [
+		{
+			"name": "Shahin Farzane",
+			"email": "hey@nerd.ceo",
+			"url": "https://github.com/shahfarzane"
+		}
+	],
+	"license": "MIT",
+	"engines": {
+		"node": ">=20.11.0",
+		"npm": ">=10.2.0"
+	},
+	"bugs": {
+		"url": "https://github.com/meodai/color-name-api/issues"
+	},
+	"homepage": "https://github.com/meodai/color-name-api#readme",
+	"dependencies": {
+		"@supabase/supabase-js": "^2.47.10",
+		"color-name-list": "^13.36.0",
+		"color-name-lists": "^3.32.0",
+		"culori": "^4.0.1",
+		"dotenv": "^16.4.7",
+		"fastest-levenshtein": "^1.0.16",
+		"hono": "^4.10.7",
+		"ip-location-api": "^4.0.3",
+		"lru-cache": "^11.1.0",
+		"request-ip": "^3.3.0",
+		"seedrandom": "^3.0.5",
+		"socket.io": "^4.8.1",
+		"yaml": "^2.8.1"
+	},
+	"devDependencies": {
+		"@eslint/js": "^9.35.0",
+		"@redocly/cli": "^1.25.0",
+		"@types/bun": "^1.3.3",
+		"eslint": "^9.17.0",
+		"eslint-config-prettier": "^10.1.8",
+		"eslint-plugin-prettier": "^5.5.4",
+		"globals": "^16.4.0",
+		"openapi-typescript": "^7.6.1",
+		"prettier": "^3.6.2",
+		"tsx": "^4.21.0",
+		"typescript": "^5.9.3"
+	}
 }

@@ -1,15 +1,14 @@
 import {
-  parse,
   converter,
-  wcagLuminance,
   differenceCiede2000,
+  parse,
   wcagContrast,
+  wcagLuminance,
 } from 'culori';
-
-import { lib } from './lib.js';
-import ClosestColor from './closestColor.js';
-import { LRUCache } from 'lru-cache';
 import { distance as levenshteinDistance } from 'fastest-levenshtein';
+import { LRUCache } from 'lru-cache';
+import ClosestColor from './closestColor.js';
+import { lib } from './lib.js';
 
 const distanceMetric = differenceCiede2000();
 
