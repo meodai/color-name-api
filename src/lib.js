@@ -12,8 +12,7 @@ export const lib = {
  * @param {String} prop
  * @return {Boolean}
  */
-export const hasOwnProperty = (obj, prop) =>
-  Object.prototype.hasOwnProperty.call(obj, prop);
+export const hasOwn = (obj, prop) => Object.hasOwn(obj, prop);
 
 export function createColorRecord({ paletteTitle, colors, list }) {
   const parsedColors = [];

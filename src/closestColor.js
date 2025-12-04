@@ -1,6 +1,6 @@
 import { differenceCiede2000 } from 'culori';
-import { VPTree } from './vptree.js';
 import { LRUCache } from 'lru-cache';
+import { VPTree } from './vptree.js';
 
 // Define cache size limit
 const MAX_CLOSEST_CACHE_SIZE = 5000; // Max entries in the instance cache

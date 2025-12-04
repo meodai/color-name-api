@@ -1,7 +1,7 @@
-import colorNameLists from 'color-name-lists';
 import { colornames as colors } from 'color-name-list';
 import { colornames as colorsBestOf } from 'color-name-list/bestof';
 import { colornames as colorsShort } from 'color-name-list/short';
+import colorNameLists from 'color-name-lists';
 import { FindColors } from '../src/findColors.js';
 
 // --- Configuration ---

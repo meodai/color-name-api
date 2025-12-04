@@ -1,22 +1,21 @@
-import http from 'http';
-import zlib from 'zlib';
-import { promisify } from 'util';
-import fs from 'fs/promises';
-import colorNameLists from 'color-name-lists';
+import fs from 'node:fs/promises';
+import http from 'node:http';
+import { promisify } from 'node:util';
+import zlib from 'node:zlib';
 import { colornames as colors } from 'color-name-list';
 import { colornames as colorsBestOf } from 'color-name-list/bestof';
 import { colornames as colorsShort } from 'color-name-list/short';
-import { Server } from 'socket.io';
-import requestIp from 'request-ip';
-import { lookup } from 'ip-location-api';
+import colorNameLists from 'color-name-lists';
 import * as dotenv from 'dotenv';
+import { lookup } from 'ip-location-api';
 import { LRUCache } from 'lru-cache'; // Import LRUCache
-
+import requestIp from 'request-ip';
+import { Server } from 'socket.io';
+import { svgTemplate } from './colorSwatchSVG.js';
+import { addResponseToTable, initDatabase } from './database.js';
 import { FindColors, hydrateColor } from './findColors.js';
 import { getPaletteTitle } from './generatePaletteName.js';
-import { svgTemplate } from './colorSwatchSVG.js';
 import { createColorRecord } from './lib.js';
-import { initDatabase, addResponseToTable } from './database.js';
 import { initWellKnown } from './wellKnown.js';
 
 dotenv.config();
@@ -28,9 +27,7 @@ const socket = process.env.SOCKET || false;
 const maxColorsPerRequest =
   parseInt(process.env.MAX_COLORS_PER_REQUEST, 10) || 170;
 const allowedSocketOrigins =
-  (process.env.ALLOWED_SOCKET_ORIGINS &&
-    process.env.ALLOWED_SOCKET_ORIGINS.split(',')) ||
-  `http://localhost:${port}`;
+  process.env.ALLOWED_SOCKET_ORIGINS?.split(',') || `http://localhost:${port}`;
 const currentVersion = 'v1';
 const urlNameSubpath = 'names';
 const APIurl = ''; // subfolder for the API
@@ -41,12 +38,22 @@ const gzipCacheSize = 500; // Max size of the gzip cache
 const ipCacheSize = 1000; // Cache size for IP lookup results
 const fullListCacheSize = 20; // Max number of full list responses to cache
 
+// Rate limiting configuration
+const rateLimitWindowMs =
+  parseInt(process.env.RATE_LIMIT_WINDOW_MS, 10) || 60000; // 1 minute window
+const rateLimitMaxRequests =
+  parseInt(process.env.RATE_LIMIT_MAX_REQUESTS, 10) || 100; // 100 requests per window
+const rateLimitEnabled = process.env.RATE_LIMIT_ENABLED !== 'false'; // enabled by default
+
 // Declare variables for async loading
 let docsHTML;
 let gzippedDocsHTML; // Cache for gzipped docs
 const gzipCache = new LRUCache({ max: gzipCacheSize });
 const ipCache = new LRUCache({ max: ipCacheSize }); // Cache for IP lookups
 const fullListCache = new LRUCache({ max: fullListCacheSize }); // Cache for full list responses (json & gzip)
+
+// Rate limiter storage: IP -> { count, resetTime }
+const rateLimitCache = new LRUCache({ max: 10000 }); // Track up to 10k unique IPs
 
 // OpenAPI spec content via wellKnown module
 let getOpenApiYAMLString;
@@ -184,6 +191,54 @@ const getClientInfo = request => {
   ipCache.set(clientIp, result);
 
   return result;
+};
+
+/**
+ * Checks if a request should be rate limited
+ * @param {string} clientIp - The client's IP address
+ * @returns {object} { limited: boolean, remaining: number, resetTime: number }
+ */
+const checkRateLimit = clientIp => {
+  if (!rateLimitEnabled || !clientIp) {
+    return { limited: false, remaining: rateLimitMaxRequests, resetTime: 0 };
+  }
+
+  const now = Date.now();
+  let record = rateLimitCache.get(clientIp);
+
+  // If no record or window expired, create new record
+  if (!record || now > record.resetTime) {
+    record = {
+      count: 1,
+      resetTime: now + rateLimitWindowMs,
+    };
+    rateLimitCache.set(clientIp, record);
+    return {
+      limited: false,
+      remaining: rateLimitMaxRequests - 1,
+      resetTime: record.resetTime,
+    };
+  }
+
+  // Increment count
+  record.count++;
+  rateLimitCache.set(clientIp, record);
+
+  const remaining = Math.max(0, rateLimitMaxRequests - record.count);
+
+  if (record.count > rateLimitMaxRequests) {
+    return {
+      limited: true,
+      remaining: 0,
+      resetTime: record.resetTime,
+    };
+  }
+
+  return {
+    limited: false,
+    remaining,
+    resetTime: record.resetTime,
+  };
 };
 
 /**
@@ -582,8 +637,8 @@ const respondValueSearch = async (
 
 const respondLists = async (
   searchParams,
-  requestUrl,
-  request,
+  _requestUrl,
+  _request,
   response,
   responseHeader
 ) => {
@@ -616,9 +671,9 @@ const routes = [
   {
     path: '/docs/',
     handler: async (
-      searchParams,
-      requestUrl,
-      request,
+      _searchParams,
+      _requestUrl,
+      _request,
       response,
       responseHeader
     ) =>
@@ -633,13 +688,13 @@ const routes = [
   {
     path: '/openapi.yaml',
     handler: async (
-      searchParams,
-      requestUrl,
-      request,
+      _searchParams,
+      _requestUrl,
+      _request,
       response,
       responseHeader
     ) => {
-      const yml = getOpenApiYAMLString && getOpenApiYAMLString();
+      const yml = getOpenApiYAMLString?.();
       if (!yml) {
         return await sendError(
           response,
@@ -663,13 +718,13 @@ const routes = [
   {
     path: '/openapi.json',
     handler: async (
-      searchParams,
-      requestUrl,
-      request,
+      _searchParams,
+      _requestUrl,
+      _request,
       response,
       responseHeader
     ) => {
-      const json = getOpenApiJSONObject && getOpenApiJSONObject();
+      const json = getOpenApiJSONObject?.();
       if (!json) {
         return await sendError(
           response,
@@ -693,8 +748,8 @@ const routes = [
     path: '/swatch/',
     handler: async (
       searchParams,
-      requestUrl,
-      request,
+      _requestUrl,
+      _request,
       response,
       responseHeader
     ) => {
@@ -769,9 +824,39 @@ const requestHandler = async (request, response) => {
   // Handle .well-known endpoints centrally
   const handled = await handleWellKnown(request, response);
   if (handled) return;
+
+  // Rate limiting check (early, before any processing)
+  const clientIp = requestIp.getClientIp(request);
+  const rateLimit = checkRateLimit(clientIp);
+
+  // Add rate limit headers to all responses
+  const rateLimitHeaders = {
+    'X-RateLimit-Limit': String(rateLimitMaxRequests),
+    'X-RateLimit-Remaining': String(rateLimit.remaining),
+    'X-RateLimit-Reset': String(Math.ceil(rateLimit.resetTime / 1000)),
+  };
+
+  if (rateLimit.limited) {
+    const retryAfter = Math.ceil((rateLimit.resetTime - Date.now()) / 1000);
+    response.writeHead(429, {
+      ...responseHeaderObj,
+      ...rateLimitHeaders,
+      'Retry-After': String(retryAfter),
+    });
+    response.end(
+      JSON.stringify({
+        error: {
+          status: 429,
+          message: `Rate limit exceeded. Try again in ${retryAfter} seconds.`,
+        },
+      })
+    );
+    return;
+  }
+
   const isAPI = requestUrl.pathname.startsWith(`/${baseUrl}`);
   const path = requestUrl.pathname.replace(`/${baseUrl}`, '/');
-  const responseHeader = { ...responseHeaderObj };
+  const responseHeader = { ...responseHeaderObj, ...rateLimitHeaders };
   const responseHandler = getHandlerForPath(path);
   const isSocket = request.headers.upgrade === 'websocket';
 
@@ -840,8 +925,8 @@ const requestHandler = async (request, response) => {
     console.info('request from', from);
   }
 
-  // Get client info once, log it here but could be reused elsewhere
-  const { clientIp, clientLocation } = getClientInfo(request);
+  // Get client location for logging (clientIp already retrieved for rate limiting)
+  const { clientLocation } = getClientInfo(request);
   if (clientIp) {
     console.info('client ip', clientIp);
     console.log('client location', clientLocation);
@@ -894,11 +979,11 @@ async function initializeServer() {
     // Initialize database if configured
     if (
       !process.env.NODB &&
-      process.env.SUPRABASEURL &&
-      process.env.SUPRABASEKEY
+      process.env.SUPABASE_URL &&
+      process.env.SUPABASE_KEY
     ) {
       console.log('Initializing database...');
-      await initDatabase(process.env.SUPRABASEURL, process.env.SUPRABASEKEY); // Assuming initDatabase might be async
+      await initDatabase(process.env.SUPABASE_URL, process.env.SUPABASE_KEY); // Assuming initDatabase might be async
       hasDb = true;
       console.log('Database initialized.');
     } else {

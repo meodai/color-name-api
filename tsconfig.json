@@ -1,0 +1,29 @@
+{
+	"compilerOptions": {
+		"target": "ESNext",
+		"module": "ESNext",
+		"moduleResolution": "bundler",
+		"strict": true,
+		"skipLibCheck": true,
+		"esModuleInterop": true,
+		"allowSyntheticDefaultImports": true,
+		"resolveJsonModule": true,
+		"isolatedModules": true,
+		"noEmit": true,
+		"lib": ["ESNext"],
+		"types": ["bun-types"],
+		"baseUrl": ".",
+		"paths": {
+			"@/*": ["src/*"],
+			"@lib/*": ["src/lib/*"],
+			"@routes/*": ["src/routes/*"],
+			"@middleware/*": ["src/middleware/*"],
+			"@services/*": ["src/services/*"]
+		},
+		"declaration": true,
+		"declarationMap": true,
+		"sourceMap": true
+	},
+	"include": ["src/**/*.ts", "test/**/*.ts"],
+	"exclude": ["node_modules", "dist"]
+}

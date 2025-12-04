@@ -5,10 +5,7 @@
 			"label": "start server",
 			"type": "shell",
 			"command": "npm",
-			"args": [
-				"run",
-				"start"
-			],
+			"args": ["run", "start"],
 			"isBackground": true,
 			"group": "build"
 		},
@@ -16,10 +13,7 @@
 			"label": "restart server",
 			"type": "shell",
 			"command": "npm",
-			"args": [
-				"run",
-				"start"
-			],
+			"args": ["run", "start"],
 			"isBackground": true,
 			"group": "build"
 		},
@@ -27,13 +21,9 @@
 			"label": "Run tests",
 			"type": "shell",
 			"command": "npm",
-			"args": [
-				"test"
-			],
+			"args": ["test"],
 			"isBackground": false,
-			"problemMatcher": [
-				"$eslint-stylish"
-			],
+			"problemMatcher": ["$eslint-stylish"],
 			"group": "test"
 		},
 		{

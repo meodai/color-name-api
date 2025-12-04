@@ -1,0 +1,50 @@
+# Fly.io Configuration for Color Name API
+# Deploy with: fly deploy --dockerfile Dockerfile.bun
+
+app = 'color-name-api'
+primary_region = 'sjc'
+
+[build]
+  dockerfile = "Dockerfile.bun"
+
+[env]
+  NODE_ENV = "production"
+  PORT = "8080"
+  SOCKET = "true"
+  # Allow Socket.IO connections from these origins (comma-separated)
+  # Update this to include your Vercel frontend URL
+  ALLOWED_SOCKET_ORIGINS = "https://color.pizza,https://gh-pages-puce.vercel.app,https://*.vercel.app,https://shahfarzane.github.io"
+  RATE_LIMIT_ENABLED = "true"
+  RATE_LIMIT_MAX_REQUESTS = "100"
+  RATE_LIMIT_WINDOW_MS = "60000"
+  MAX_COLORS_PER_REQUEST = "170"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = false  # Keep warm for VP-trees in memory
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ['app']
+
+  [http_service.concurrency]
+    type = "requests"
+    hard_limit = 250
+    soft_limit = 200
+
+[[vm]]
+  memory = '512mb'
+  cpu_kind = 'shared'
+  cpus = 1
+
+# Health check configuration
+# Note: ip-location-api downloads its GeoIP database on first startup, which can take time
+[checks]
+  [checks.health]
+    port = 8080
+    type = "http"
+    interval = "30s"
+    timeout = "10s"
+    grace_period = "120s"
+    method = "GET"
+    path = "/health"
