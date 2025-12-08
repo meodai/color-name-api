@@ -131,6 +131,58 @@ This reverse functionality is particularly useful for:
 
 ## Getting started with the REST API
 
+### API Discovery
+
+The API provides a root endpoint that returns metadata and information about all available endpoints:
+
+```shell
+$ curl https://api.color.pizza/
+
+➜ {
+➜   "name": "Color Name API",
+➜   "version": "v1",
+➜   "description": "API for getting human-friendly names for hex colors",
+➜   "endpoints": {
+➜     "colors": "/v1/?values=ff0000,00ff00",
+➜     "colorsByPath": "/v1/ff0000,00ff00",
+➜     "names": "/v1/names/:query",
+➜     "lists": "/v1/lists/",
+➜     "swatch": "/v1/swatch/?color=ff0000&name=Red",
+➜     "docs": "/v1/docs/",
+➜     "health": "/health"
+➜   },
+➜   "documentation": "/openapi.yaml",
+➜   "source": "https://github.com/meodai/color-name-api"
+➜ }
+```
+
+This endpoint is perfect for:
+
+- API discovery and exploration
+- Building dynamic API clients that need to know available endpoints
+- Documentation tools that auto-generate endpoint lists
+- Health dashboards that display API capabilities
+
+### Health Check
+
+For monitoring and uptime checks, use the `/health` endpoint:
+
+```shell
+$ curl https://api.color.pizza/health
+
+➜ {
+➜   "status": "ok",
+➜   "timestamp": "2025-12-08T10:30:00.000Z"
+➜ }
+```
+
+This endpoint:
+
+- Always returns `200 OK` when the API is operational
+- Provides an ISO 8601 timestamp of the current server time
+- Is ideal for load balancer health checks and monitoring systems
+- Does not require authentication or API versioning
+
 ### Hello World
 
 Let's start by testing the API. Open up a command prompt and enter the following command:
@@ -382,13 +434,13 @@ To use WebSockets with the API:
 2. Connect to the WebSocket endpoint using a WebSocket client:
 
    ```javascript
-   const socket = io("https://api.color.pizza", {
-     transports: ["websocket"],
+   const socket = io('https://api.color.pizza', {
+     transports: ['websocket'],
    });
 
    // Listen for color updates
-   socket.on("colors", data => {
-     console.log("Received color data:", data);
+   socket.on('colors', data => {
+     console.log('Received color data:', data);
      // {
      //   paletteTitle: "Neo Mint",
      //   colors: [{
@@ -431,9 +483,9 @@ $ curl -H "X-Referrer: my-awesome-app" 'https://api.color.pizza/v1/?values=aaffc
 or
 
 ```javascript
-fetch("https://api.color.pizza/v1/?values=aaffcc", {
+fetch('https://api.color.pizza/v1/?values=aaffcc', {
   headers: {
-    "X-Referrer": "your-app-name",
+    'X-Referrer': 'your-app-name',
   },
 }).then(response => response.json());
 ```

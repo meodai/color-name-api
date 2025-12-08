@@ -614,7 +614,59 @@ const normalizePath = p => (p === '/' ? '/' : p.replace(/\/+$/, ''));
 
 const routes = [
   {
-    path: '/docs/',
+    path: '/',
+    handler: async (
+      searchParams,
+      requestUrl,
+      request,
+      response,
+      responseHeader
+    ) => {
+      return await httpRespond(
+        response,
+        {
+          name: 'Color Name API',
+          version: currentVersion,
+          description: 'API for getting human-friendly names for hex colors',
+          endpoints: {
+            colors: `/${baseUrl}?values=ff0000,00ff00`,
+            colorsByPath: `/${baseUrl}ff0000,00ff00`,
+            names: `/${baseUrl}names/:query`,
+            lists: `/${baseUrl}lists/`,
+            swatch: `/${baseUrl}swatch/?color=ff0000&name=Red`,
+            docs: `/${baseUrl}docs/`,
+            health: '/health',
+          },
+          documentation: '/openapi.yaml',
+          source: 'https://github.com/meodai/color-name-api',
+        },
+        200,
+        responseHeader
+      );
+    },
+  },
+  {
+    path: '/health',
+    handler: async (
+      searchParams,
+      requestUrl,
+      request,
+      response,
+      responseHeader
+    ) => {
+      return await httpRespond(
+        response,
+        {
+          status: 'ok',
+          timestamp: new Date().toISOString(),
+        },
+        200,
+        responseHeader
+      );
+    },
+  },
+  {
+    path: `/${baseUrl}docs/`,
     handler: async (
       searchParams,
       requestUrl,
@@ -682,15 +734,15 @@ const routes = [
     },
   },
   {
-    path: '/names/',
+    path: `/${baseUrl}names/`,
     handler: respondNameSearch,
   },
   {
-    path: '/lists/',
+    path: `/${baseUrl}lists/`,
     handler: respondLists,
   },
   {
-    path: '/swatch/',
+    path: `/${baseUrl}swatch/`,
     handler: async (
       searchParams,
       requestUrl,
@@ -724,7 +776,7 @@ const routes = [
     },
   },
   {
-    path: '/',
+    path: `/${baseUrl}`,
     handler: respondValueSearch,
   },
 ];
@@ -742,8 +794,11 @@ const getHandlerForPath = path => {
     return matchingRoute.handler;
   }
 
-  // If no route matches, check if it is a color (for backwards compatibility)
-  if (validateColors(path.slice(1))) {
+  // If no route matches, check if it is a color path under /v1/ (for backwards compatibility)
+  if (
+    path.startsWith(`/${baseUrl}`) &&
+    validateColors(path.slice(baseUrl.length + 1))
+  ) {
     return respondValueSearch;
   }
 
@@ -753,14 +808,18 @@ const getHandlerForPath = path => {
 /**
  * Paths:
  *
- * /                      => Error
+ * /                      => API metadata and discovery
+ * /health                => Health check endpoint
  * /v1/                   => all colors
  * /v1/212121             => array with one color
- * /v1/212121,222,f02f123 => array with 3 color
+ * /v1/212121,222,f02f123 => array with 3 colors
  * /v1/names/             => all colors
  * /v1/names/red          => all colors containing the word red
  * /v1/lists/             => all available lists
  * /v1/swatch/?color=212121&name=red => svg with color and name
+ * /v1/docs/              => HTML documentation
+ * /openapi.yaml          => OpenAPI spec in YAML format
+ * /openapi.json          => OpenAPI spec in JSON format
  */
 
 const requestHandler = async (request, response) => {
@@ -769,8 +828,8 @@ const requestHandler = async (request, response) => {
   // Handle .well-known endpoints centrally
   const handled = await handleWellKnown(request, response);
   if (handled) return;
-  const isAPI = requestUrl.pathname.startsWith(`/${baseUrl}`);
-  const path = requestUrl.pathname.replace(`/${baseUrl}`, '/');
+
+  const path = requestUrl.pathname;
   const responseHeader = { ...responseHeaderObj };
   const responseHandler = getHandlerForPath(path);
   const isSocket = request.headers.upgrade === 'websocket';
@@ -789,16 +848,7 @@ const requestHandler = async (request, response) => {
 
   // const accpets = request.headers['accept-encoding'];
 
-  // makes sure the API is beeing requested
-  if (!isAPI) {
-    return await sendError(
-      response,
-      404,
-      'invalid URL: make sure to provide the API version',
-      responseHeader
-    );
-  }
-
+  // Check if we have a handler for this path
   if (responseHandler === null) {
     return await sendError(
       response,
@@ -811,22 +861,21 @@ const requestHandler = async (request, response) => {
   // const search = requestUrl.search || '';
   const searchParams = new URLSearchParams(requestUrl.search);
 
-  // Validate list key before proceeding
-  const listKeyValidation = getListKey(searchParams); // Check if list key is valid or default is applicable
-  const requiresListKey = ![
-    '/docs/',
-    '/swatch/',
-    '/openapi.yaml',
-    '/openapi.json',
-  ].includes(path); // Some paths don't need a list key
+  // Only validate list key for /v1/ endpoints that require it
+  const isAPIEndpoint = path.startsWith(`/${baseUrl}`);
+  const excludedPaths = [`/${baseUrl}docs/`, `/${baseUrl}swatch/`];
+  const requiresListKey = isAPIEndpoint && !excludedPaths.includes(path);
 
-  if (requiresListKey && !listKeyValidation) {
-    return await sendError(
-      response,
-      400,
-      `Invalid or missing list key: '${searchParams.get('list') || ''}'. Available keys are: ${availableColorNameLists.join(', ')}. Check /lists/ for more info.`,
-      responseHeader
-    );
+  if (requiresListKey) {
+    const listKeyValidation = getListKey(searchParams);
+    if (!listKeyValidation) {
+      return await sendError(
+        response,
+        400,
+        `Invalid or missing list key: '${searchParams.get('list') || ''}'. Available keys are: ${availableColorNameLists.join(', ')}. Check /${baseUrl}lists/ for more info.`,
+        responseHeader
+      );
+    }
   }
 
   const xReferrer = request.headers['x-referrer']; // Read the custom X-Referrer header
