@@ -93,6 +93,66 @@ function testBlackColor(response) {
 }
 
 const routesToTest = {
+  // Test root metadata endpoint (not under /v1/)
+  __root: {
+    path: '/',
+    test: response => {
+      if (typeof response !== 'object') {
+        throw new Error('response is not an object');
+      }
+      if (!hasOwnProperty(response, 'name')) {
+        throw new Error('response does not have property name');
+      }
+      if (!hasOwnProperty(response, 'version')) {
+        throw new Error('response does not have property version');
+      }
+      if (!hasOwnProperty(response, 'description')) {
+        throw new Error('response does not have property description');
+      }
+      if (!hasOwnProperty(response, 'endpoints')) {
+        throw new Error('response does not have property endpoints');
+      }
+      if (!hasOwnProperty(response, 'documentation')) {
+        throw new Error('response does not have property documentation');
+      }
+      if (!hasOwnProperty(response, 'source')) {
+        throw new Error('response does not have property source');
+      }
+      if (typeof response.endpoints !== 'object') {
+        throw new Error('endpoints is not an object');
+      }
+      // Verify key endpoints are listed
+      const requiredEndpoints = ['colors', 'names', 'lists', 'health'];
+      for (const endpoint of requiredEndpoints) {
+        if (!hasOwnProperty(response.endpoints, endpoint)) {
+          throw new Error(`endpoints missing required key: ${endpoint}`);
+        }
+      }
+    },
+  },
+  // Test health endpoint (not under /v1/)
+  __health: {
+    path: '/health',
+    test: response => {
+      if (typeof response !== 'object') {
+        throw new Error('response is not an object');
+      }
+      if (!hasOwnProperty(response, 'status')) {
+        throw new Error('response does not have property status');
+      }
+      if (response.status !== 'ok') {
+        throw new Error('health status is not "ok"');
+      }
+      if (!hasOwnProperty(response, 'timestamp')) {
+        throw new Error('response does not have property timestamp');
+      }
+      // Verify timestamp is a valid ISO 8601 date
+      const date = new Date(response.timestamp);
+      if (isNaN(date.getTime())) {
+        throw new Error('timestamp is not a valid ISO 8601 date');
+      }
+    },
+  },
   '/': response => {
     colorResponseBasicTest(response);
   },
@@ -267,13 +327,22 @@ async function runTests() {
 
   // Run each test in sequence
   for (const route of routes) {
-    const testFn = routesToTest[route];
-    console.log(
-      `Testing route: http://${localhost}:${port}/${baseUrl}${route}`
-    );
+    const testConfig = routesToTest[route];
+
+    // Handle special routes that are not under baseUrl (e.g., /, /health)
+    let testPath, testFn;
+    if (typeof testConfig === 'object' && testConfig.path) {
+      testPath = testConfig.path;
+      testFn = testConfig.test;
+    } else {
+      testPath = `/${baseUrl}${route}`;
+      testFn = testConfig;
+    }
+
+    console.log(`Testing route: http://${localhost}:${port}${testPath}`);
 
     try {
-      const res = await fetch(`http://${localhost}:${port}/${baseUrl}${route}`);
+      const res = await fetch(`http://${localhost}:${port}${testPath}`);
       const response = await res.json();
 
       // Execute the test function
