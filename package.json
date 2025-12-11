@@ -50,7 +50,7 @@
   "homepage": "https://github.com/meodai/color-name-api#readme",
   "dependencies": {
     "@supabase/supabase-js": "^2.47.10",
-    "color-name-list": "^14.10.0",
+    "color-name-list": "^14.10.1",
     "color-name-lists": "^3.33.2",
     "culori": "^4.0.1",
     "dotenv": "^16.4.7",
