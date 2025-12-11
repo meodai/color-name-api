@@ -37,9 +37,9 @@ const APIurl = ''; // subfolder for the API
 const baseUrl = `${APIurl}${currentVersion}/`;
 const baseUrlNames = `${baseUrl}${urlNameSubpath}/`;
 const urlColorSeparator = ',';
-const gzipCacheMaxBytes = 50 * 1024 * 1024; // Cap gzip cache by size to avoid OOM
+const gzipCacheMaxBytes = 10 * 1024 * 1024; // Cap gzip cache for small responses only
 const ipCacheSize = 1000; // Cache size for IP lookup results
-const fullListCacheMaxBytes = 30 * 1024 * 1024; // Cap full list cache by size
+const fullListCacheMaxBytes = 15 * 1024 * 1024; // Cap full list cache (JSON only, no gzip)
 
 // Declare variables for async loading
 let docsHTML;
@@ -58,11 +58,9 @@ const ipCache = new LRUCache({ max: ipCacheSize }); // Cache for IP lookups
 const fullListCache = new LRUCache({
   maxSize: fullListCacheMaxBytes,
   sizeCalculation: value => {
-    const jsonSize = value?.json ? Buffer.byteLength(value.json) : 0;
-    const gzSize = value?.gzipped?.length || 0;
-    return jsonSize + gzSize;
+    return typeof value === 'string' ? Buffer.byteLength(value) : 0;
   },
-}); // Cache for full list responses (json & gzip)
+}); // Cache for full list responses (JSON only, gzip on-demand)
 
 // OpenAPI spec content via wellKnown module
 let getOpenApiYAMLString;
@@ -465,24 +463,30 @@ const respondValueSearch = async (
         });
       }
 
-      // Serve cached response
-      const cachedHeaders = {
-        ...responseHeader,
-        'Content-Type': 'application/json; charset=utf-8',
-      };
-
+      // Serve cached response - gzip on-demand to save memory
       if (responseHeader['Content-Encoding'] === 'gzip') {
-        cachedHeaders['Content-Encoding'] = 'gzip';
+        try {
+          const gzippedResponse = await gzip(cached);
+          response.writeHead(200, {
+            ...responseHeader,
+            'Content-Type': 'application/json; charset=utf-8',
+            'Content-Encoding': 'gzip',
+          });
+          response.end(gzippedResponse);
+        } catch (err) {
+          console.error('Gzip failed for cached full list:', err);
+          response.writeHead(200, {
+            ...responseHeader,
+            'Content-Type': 'application/json; charset=utf-8',
+          });
+          response.end(cached);
+        }
       } else {
-        delete cachedHeaders['Content-Encoding'];
-      }
-
-      response.writeHead(200, cachedHeaders);
-
-      if (responseHeader['Content-Encoding'] === 'gzip') {
-        response.end(cached.gzipped);
-      } else {
-        response.end(cached.json);
+        response.writeHead(200, {
+          ...responseHeader,
+          'Content-Type': 'application/json; charset=utf-8',
+        });
+        response.end(cached);
       }
       return;
     }
@@ -499,20 +503,9 @@ const respondValueSearch = async (
     };
 
     const jsonString = JSON.stringify(responseObj);
-    let gzippedBuffer;
-    try {
-      gzippedBuffer = await gzip(jsonString);
-    } catch (err) {
-      console.error('Gzip failed for full list:', err);
-    }
 
-    // Store in cache
-    if (jsonString && gzippedBuffer) {
-      fullListCache.set(listKey, {
-        json: jsonString,
-        gzipped: gzippedBuffer,
-      });
-    }
+    // Store only JSON in cache - gzip on-demand to save memory
+    fullListCache.set(listKey, jsonString);
   } else if (urlColorList[0]) {
     colorsResponse = findColors.getNamesForValues(
       urlColorList,
