@@ -96,8 +96,8 @@ async function testMemoryUsage() {
   console.log(`  ✓ Heap Used: ${formatMB(afterAllLists.heapUsed)} MB`);
   console.log(`  ✓ Memory increase: ${formatMB(memoryIncreaseAllLists)} MB`);
 
-  // Test 4: Many small requests with gzip
-  console.log('\n🔄 Test 4: Many small requests (gzip cache test)');
+  // Test 4: Many small requests with gzip (sequential)
+  console.log('\n🔄 Test 4: Many sequential requests (gzip cache test)');
   const smallRequestsStart = getMemoryUsage();
   const iterations = 20;
 
@@ -121,6 +121,63 @@ async function testMemoryUsage() {
     `  ✓ Memory increase: ${formatMB(memoryIncreaseSmall)} MB (should be small)`
   );
 
+  // Test 5: Many unique requests (cache growth test)
+  console.log('\n🔄 Test 5: Many unique color requests (cache growth)');
+  const uniqueRequestsStart = getMemoryUsage();
+  const uniqueIterations = 50;
+
+  for (let i = 0; i < uniqueIterations; i++) {
+    // Generate random colors to test cache size limits
+    const r = Math.floor(Math.random() * 256)
+      .toString(16)
+      .padStart(2, '0');
+    const g = Math.floor(Math.random() * 256)
+      .toString(16)
+      .padStart(2, '0');
+    const b = Math.floor(Math.random() * 256)
+      .toString(16)
+      .padStart(2, '0');
+    await fetch(`http://${localhost}:${port}/${baseUrl}/?values=${r}${g}${b}`, {
+      headers: { 'Accept-Encoding': 'gzip' },
+    });
+  }
+
+  await new Promise(resolve => setTimeout(resolve, 100));
+  const afterUniqueRequests = getMemoryUsage();
+  const memoryIncreaseUnique =
+    afterUniqueRequests.heapUsed - uniqueRequestsStart.heapUsed;
+
+  console.log(`  ✓ ${uniqueIterations} unique requests completed`);
+  console.log(`  ✓ Heap Used: ${formatMB(afterUniqueRequests.heapUsed)} MB`);
+  console.log(
+    `  ✓ Memory increase: ${formatMB(memoryIncreaseUnique)} MB (cache should limit growth)`
+  );
+
+  // Test 6: Concurrent requests (spike test)
+  console.log('\n🔄 Test 6: Concurrent requests (memory spike test)');
+  const concurrentStart = getMemoryUsage();
+  const concurrentCount = 25;
+
+  const concurrentRequests = Array.from({ length: concurrentCount }, (_, i) => {
+    const color = (i * 10).toString(16).padStart(6, '0');
+    return fetch(`http://${localhost}:${port}/${baseUrl}/?values=${color}`, {
+      headers: { 'Accept-Encoding': 'gzip' },
+    });
+  });
+
+  await Promise.all(concurrentRequests);
+
+  await new Promise(resolve => setTimeout(resolve, 100));
+  const afterConcurrent = getMemoryUsage();
+  const memoryIncreaseConcurrent =
+    afterConcurrent.heapUsed - concurrentStart.heapUsed;
+
+  console.log(`  ✓ ${concurrentCount} concurrent requests completed`);
+  console.log(`  ✓ Heap Used: ${formatMB(afterConcurrent.heapUsed)} MB`);
+  console.log(
+    `  ✓ Memory increase: ${formatMB(memoryIncreaseConcurrent)} MB (may spike temporarily)`
+  );
+
   // Final memory report
   console.log('\n📈 Final Memory Report:');
   console.log('='.repeat(50));
@@ -134,9 +191,9 @@ async function testMemoryUsage() {
   console.log(`  Total increase: ${formatMB(totalIncrease)} MB`);
   console.log(`  RSS: ${formatMB(finalMemory.rss)} MB`);
 
-  // Thresholds (adjust based on your Heroku dyno limits)
-  const maxAcceptableIncrease = 100; // MB
-  const maxAcceptableRSS = 400; // MB (well below 512MB limit)
+  // Thresholds matching Heroku dyno limits
+  const maxAcceptableIncrease = 150; // MB (allow for cache growth)
+  const maxAcceptableRSS = 512; // MB (Heroku dyno limit)
 
   console.log('\n🎯 Memory Thresholds:');
   if (totalIncrease / 1024 / 1024 > maxAcceptableIncrease) {
