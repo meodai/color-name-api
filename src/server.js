@@ -37,16 +37,32 @@ const APIurl = ''; // subfolder for the API
 const baseUrl = `${APIurl}${currentVersion}/`;
 const baseUrlNames = `${baseUrl}${urlNameSubpath}/`;
 const urlColorSeparator = ',';
-const gzipCacheSize = 500; // Max size of the gzip cache
+const gzipCacheMaxBytes = 50 * 1024 * 1024; // Cap gzip cache by size to avoid OOM
 const ipCacheSize = 1000; // Cache size for IP lookup results
-const fullListCacheSize = 20; // Max number of full list responses to cache
+const fullListCacheMaxBytes = 30 * 1024 * 1024; // Cap full list cache by size
 
 // Declare variables for async loading
 let docsHTML;
 let gzippedDocsHTML; // Cache for gzipped docs
-const gzipCache = new LRUCache({ max: gzipCacheSize });
+const gzipCache = new LRUCache({
+  maxSize: gzipCacheMaxBytes,
+  // Size buffers/strings to keep memory bounded
+  sizeCalculation: value => {
+    if (typeof value === 'string') {
+      return Buffer.byteLength(value);
+    }
+    return value?.length || 0;
+  },
+});
 const ipCache = new LRUCache({ max: ipCacheSize }); // Cache for IP lookups
-const fullListCache = new LRUCache({ max: fullListCacheSize }); // Cache for full list responses (json & gzip)
+const fullListCache = new LRUCache({
+  maxSize: fullListCacheMaxBytes,
+  sizeCalculation: value => {
+    const jsonSize = value?.json ? Buffer.byteLength(value.json) : 0;
+    const gzSize = value?.gzipped?.length || 0;
+    return jsonSize + gzSize;
+  },
+}); // Cache for full list responses (json & gzip)
 
 // OpenAPI spec content via wellKnown module
 let getOpenApiYAMLString;
@@ -58,7 +74,7 @@ let handleWellKnown; // assigned during initialization
 
 const responseHeaderObj = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET',
+  'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
   'Access-Control-Allow-Credentials': false,
   'Access-Control-Max-Age': '86400',
   'Access-Control-Allow-Headers':
@@ -828,6 +844,14 @@ const requestHandler = async (request, response) => {
   // Handle .well-known endpoints centrally
   const handled = await handleWellKnown(request, response);
   if (handled) return;
+
+  // Short-circuit CORS preflight before any heavy work
+  if (request.method === 'OPTIONS') {
+    const preflightHeaders = { ...responseHeaderObj };
+    response.writeHead(204, preflightHeaders);
+    response.end();
+    return;
+  }
 
   const path = requestUrl.pathname;
   const responseHeader = { ...responseHeaderObj };
