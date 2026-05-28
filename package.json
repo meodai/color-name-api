@@ -42,7 +42,7 @@
   "author": "meodai@gmail.com",
   "license": "MIT",
   "engines": {
-    "node": ">=20.11.0",
+    "node": "22.x",
     "npm": ">=10.2.0"
   },
   "bugs": {
@@ -51,7 +51,7 @@
   "homepage": "https://github.com/meodai/color-name-api#readme",
   "dependencies": {
     "@supabase/supabase-js": "^2.47.10",
-    "color-name-list": "^14.37.0",
+    "color-name-list": "^14.38.0",
     "color-name-lists": "^3.33.2",
     "culori": "^4.0.1",
     "dotenv": "^16.4.7",

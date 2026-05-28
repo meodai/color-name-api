@@ -8,7 +8,13 @@ import { colornames as colorsBestOf } from 'color-name-list/bestof';
 import { colornames as colorsShort } from 'color-name-list/short';
 import { Server } from 'socket.io';
 import requestIp from 'request-ip';
-import { lookup } from 'ip-location-api';
+let lookup = null;
+try {
+  const ipLocationApi = await import('ip-location-api');
+  lookup = ipLocationApi.lookup;
+} catch (e) {
+  console.warn('ip-location-api failed to initialize, geolocation disabled:', e.message);
+}
 import * as dotenv from 'dotenv';
 import { LRUCache } from 'lru-cache'; // Import LRUCache
 
@@ -193,7 +199,7 @@ const getClientInfo = request => {
   }
 
   // Look up location and cache the result
-  const clientLocation = lookup(clientIp);
+  const clientLocation = lookup ? lookup(clientIp) : null;
   const result = { clientIp, clientLocation };
   ipCache.set(clientIp, result);
 
