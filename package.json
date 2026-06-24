@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "test": "npm run test:local && npm run test:vptree && npm run test:exhausted && npm run test:compare-api && npm run test:well-known && npm run test:palette-name && npm run test:gzip-headers && npm run test:caching && npm run test:memory",
+    "test:ci": "npm run test:local && npm run test:vptree && npm run test:exhausted && npm run test:well-known && npm run test:palette-name && npm run test:gzip-headers && npm run test:caching",
     "test:local": "node test/test.js",
     "test:vptree": "node test/vptree.test.js",
     "test:palette-name": "node test/generatePaletteName.test.js",

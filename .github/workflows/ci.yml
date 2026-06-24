@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Boot server and run tests
+        env:
+          NODB: "true"
+          PORT: "8080"
+        run: |
+          # Start the API server in the background. No secrets needed: NODB=true
+          # skips Supabase, and ip-location-api tolerates missing country-IP data.
+          npm start &
+          SERVER_PID=$!
+
+          # Wait for the server to answer before running the suite.
+          for i in $(seq 1 30); do
+            if curl -sf http://127.0.0.1:8080/v1/ > /dev/null; then
+              echo "Server is up"
+              break
+            fi
+            if [ "$i" -eq 30 ]; then
+              echo "Server did not start in time"
+              kill $SERVER_PID 2>/dev/null || true
+              exit 1
+            fi
+            echo "Waiting for server... ($i)"
+            sleep 2
+          done
+
+          # Run the full suite except compare-api (which diffs against the live API).
+          # Capture the status without tripping `set -e` so cleanup always runs.
+          STATUS=0
+          npm run test:ci || STATUS=$?
+
+          kill $SERVER_PID 2>/dev/null || true
+          exit $STATUS

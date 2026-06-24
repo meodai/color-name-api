@@ -1,0 +1,19 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    # Only watch the color lists — every other dependency is ignored.
+    allow:
+      - dependency-name: "color-name-list"
+      - dependency-name: "color-name-lists"
+    # Bump both lists in a single PR when either (or both) releases.
+    groups:
+      color-lists:
+        patterns:
+          - "color-name-list"
+          - "color-name-lists"
+    commit-message:
+      prefix: "bump"
