@@ -15,5 +15,12 @@ updates:
         patterns:
           - "color-name-list"
           - "color-name-lists"
+    # Dependabot holds new releases back for 3 days by default; the lists are
+    # our own packages, so pick them up right away.
+    cooldown:
+      default-days: 3
+      exclude:
+        - "color-name-list"
+        - "color-name-lists"
     commit-message:
       prefix: "bump"
