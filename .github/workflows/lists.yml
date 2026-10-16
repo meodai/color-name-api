@@ -1,0 +1,72 @@
+name: Color lists
+
+# Hourly: when color-name-list or color-name-lists has a newer release on npm, take it,
+# run the tests as CI does, and push to main, which deploys the API. Saves triggering
+# Dependabot by hand.
+on:
+  schedule:
+    - cron: "7 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: color-lists
+  cancel-in-progress: false
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: npm
+
+      - name: Newer lists on npm?
+        id: lists
+        run: |
+          behind=""
+          for pkg in color-name-list color-name-lists; do
+            have=$(node -p "require('./package-lock.json').packages['node_modules/$pkg'].version")
+            latest=$(npm view "$pkg" version)
+            echo "$pkg: $have, npm has $latest"
+            [ "$have" != "$latest" ] && behind="$behind $pkg@$latest"
+          done
+          echo "behind=$behind" >> "$GITHUB_OUTPUT"
+
+      - name: Take them
+        if: steps.lists.outputs.behind != ''
+        run: npm install --save-exact=false ${{ steps.lists.outputs.behind }}
+
+      - name: Boot server and run tests
+        if: steps.lists.outputs.behind != ''
+        env:
+          NODB: "true"
+          PORT: "8080"
+        run: |
+          npm start &
+          SERVER_PID=$!
+          for i in $(seq 1 30); do
+            if curl -sf http://127.0.0.1:8080/v1/ > /dev/null; then break; fi
+            if [ "$i" -eq 30 ]; then kill $SERVER_PID 2>/dev/null || true; exit 1; fi
+            sleep 2
+          done
+          STATUS=0
+          npm run test:ci || STATUS=$?
+          kill $SERVER_PID 2>/dev/null || true
+          exit $STATUS
+
+      - name: Push to main
+        if: steps.lists.outputs.behind != ''
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json
+          git commit -m "bump:${{ steps.lists.outputs.behind }}"
+          git push
