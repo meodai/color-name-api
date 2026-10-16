@@ -19,6 +19,9 @@ concurrency:
 jobs:
   bump:
     runs-on: ubuntu-latest
+    env:
+      CF_TOKEN: ${{ secrets.CLOUDFLARE_PURGE_TOKEN }}
+      CF_ZONE: ${{ secrets.CLOUDFLARE_ZONE_ID }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -74,9 +77,6 @@ jobs:
 
       - name: Purge api.color.pizza once the new list is live
         if: steps.lists.outputs.behind != '' && env.CF_TOKEN != ''
-        env:
-          CF_TOKEN: ${{ secrets.CLOUDFLARE_PURGE_TOKEN }}
-          CF_ZONE: ${{ secrets.CLOUDFLARE_ZONE_ID }}
         run: |
           want=$(node -p "require('color-name-list/dist/colornames.json').length")
           for i in $(seq 1 40); do
