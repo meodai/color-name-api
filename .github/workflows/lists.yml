@@ -78,7 +78,7 @@ jobs:
       - name: Purge api.color.pizza once the new list is live
         if: steps.lists.outputs.behind != '' && env.CF_TOKEN != ''
         run: |
-          want=$(node -p "require('color-name-list/dist/colornames.json').length")
+          want=$(node -p "JSON.parse(require('fs').readFileSync('node_modules/color-name-list/dist/colornames.json','utf8')).length")
           for i in $(seq 1 40); do
             have=$(curl -s "https://api.color.pizza/v1/?list=default&t=$RANDOM$RANDOM" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{console.log(JSON.parse(s).colors.length)}catch{console.log(0)}})")
             echo "live: $have names, the new list: $want"
