@@ -994,6 +994,67 @@ ul.nav-tabs {
     }
   }
 };
+    defs["getApiMetadata_200_response"] = {
+  "type" : "object",
+  "properties" : {
+    "name" : {
+      "type" : "string",
+      "example" : "Color Name API"
+    },
+    "version" : {
+      "type" : "string",
+      "example" : "v1"
+    },
+    "description" : {
+      "type" : "string",
+      "example" : "API for getting human-friendly names for hex colors"
+    },
+    "endpoints" : {
+      "$ref" : "#/components/schemas/getApiMetadata_200_response_endpoints"
+    },
+    "documentation" : {
+      "type" : "string",
+      "example" : "/openapi.yaml"
+    },
+    "source" : {
+      "type" : "string",
+      "example" : "https://github.com/meodai/color-name-api"
+    }
+  }
+};
+    defs["getApiMetadata_200_response_endpoints"] = {
+  "type" : "object",
+  "properties" : {
+    "colors" : {
+      "type" : "string",
+      "example" : "/v1/?values=ff0000,00ff00"
+    },
+    "colorsByPath" : {
+      "type" : "string",
+      "example" : "/v1/ff0000,00ff00"
+    },
+    "names" : {
+      "type" : "string",
+      "example" : "/v1/names/:query"
+    },
+    "lists" : {
+      "type" : "string",
+      "example" : "/v1/lists/"
+    },
+    "swatch" : {
+      "type" : "string",
+      "example" : "/v1/swatch/?color=ff0000&name=Red"
+    },
+    "docs" : {
+      "type" : "string",
+      "example" : "/v1/docs/"
+    },
+    "health" : {
+      "type" : "string",
+      "example" : "/health"
+    }
+  }
+};
     defs["HSL"] = {
   "title" : "HSL",
   "required" : [ "h", "l", "s" ],
@@ -1015,7 +1076,22 @@ ul.nav-tabs {
       "type" : "number"
     }
   },
-  "description" : "HSL values. All percentages are represented as integers (e.g., 50% as `50`)."
+  "description" : "HSL values. Saturation and lightness are percentages on a 0-100 scale (e.g., 50% as `50`)."
+};
+    defs["healthCheck_200_response"] = {
+  "type" : "object",
+  "properties" : {
+    "status" : {
+      "type" : "string",
+      "example" : "ok",
+      "enum" : [ "ok" ]
+    },
+    "timestamp" : {
+      "type" : "string",
+      "format" : "date-time",
+      "example" : "2025-12-08T10:30:00Z"
+    }
+  }
 };
     defs["LAB"] = {
   "title" : "LAB",
@@ -1168,6 +1244,9 @@ ul.nav-tabs {
             <li class="nav-fixed nav-header active" data-group="_"><a href="#api-_">API Summary</a></li>
 
                   <li class="nav-header" data-group="Default"><a href="#api-Default">API Methods - Default</a></li>
+                    <li data-group="Default" data-name="getApiMetadata" class="">
+                      <a href="#api-Default-getApiMetadata">getApiMetadata</a>
+                    </li>
                     <li data-group="Default" data-name="getColorLists" class="">
                       <a href="#api-Default-getColorLists">getColorLists</a>
                     </li>
@@ -1179,6 +1258,9 @@ ul.nav-tabs {
                     </li>
                     <li data-group="Default" data-name="getDocumentation" class="">
                       <a href="#api-Default-getDocumentation">getDocumentation</a>
+                    </li>
+                    <li data-group="Default" data-name="healthCheck" class="">
+                      <a href="#api-Default-healthCheck">healthCheck</a>
                     </li>
                     <li data-group="Default" data-name="searchColorsByName" class="">
                       <a href="#api-Default-searchColorsByName">searchColorsByName</a>
@@ -1215,6 +1297,306 @@ ul.nav-tabs {
         <div id="sections">
                 <section id="api-Default">
                   <h1>Default</h1>
+                    <div id="api-Default-getApiMetadata">
+                      <article id="api-Default-getApiMetadata-0" data-group="User" data-name="getApiMetadata" data-version="0">
+                        <div class="pull-left">
+                          <h1>getApiMetadata</h1>
+                          <p>Get API metadata and discovery information</p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">Returns metadata about the API including available endpoints, version information,
+and links to documentation. This endpoint is useful for API discovery and provides
+a quick overview of all available endpoints.
+</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-Default-getApiMetadata-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-Default-getApiMetadata-0-java">Java</a></li>
+                          <li class=""><a href="#examples-Default-getApiMetadata-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-Default-getApiMetadata-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-Default-getApiMetadata-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-Default-getApiMetadata-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-Default-getApiMetadata-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-Default-getApiMetadata-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-Default-getApiMetadata-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-Default-getApiMetadata-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-Default-getApiMetadata-0-python">Python</a></li>
+                          <li class=""><a href="#examples-Default-getApiMetadata-0-rust">Rust</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-Default-getApiMetadata-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET \
+ -H "Accept: application/json" \
+ "https://api.color.pizza/"
+</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-Default-getApiMetadata-0-java">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.*;
+import org.openapitools.client.auth.*;
+import org.openapitools.client.model.*;
+import org.openapitools.client.api.DefaultApi;
+
+import java.io.File;
+import java.util.*;
+
+public class DefaultApiExample {
+    public static void main(String[] args) {
+
+        // Create an instance of the API class
+        DefaultApi apiInstance = new DefaultApi();
+
+        try {
+            getApiMetadata_200_response result = apiInstance.getApiMetadata();
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DefaultApi#getApiMetadata");
+            e.printStackTrace();
+        }
+    }
+}
+</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-Default-getApiMetadata-0-android">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.api.DefaultApi;
+
+public class DefaultApiExample {
+    public static void main(String[] args) {
+        DefaultApi apiInstance = new DefaultApi();
+
+        try {
+            getApiMetadata_200_response result = apiInstance.getApiMetadata();
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DefaultApi#getApiMetadata");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-Default-getApiMetadata-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-Default-getApiMetadata-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">
+
+// Create an instance of the API class
+DefaultApi *apiInstance = [[DefaultApi alloc] init];
+
+// Get API metadata and discovery information
+[apiInstance getApiMetadataWithCompletionHandler: 
+              ^(getApiMetadata_200_response output, NSError* error) {
+    if (output) {
+        NSLog(@"%@", output);
+    }
+    if (error) {
+        NSLog(@"Error: %@", error);
+    }
+}];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Default-getApiMetadata-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var ColorNameApi = require('color_name_api');
+
+// Create an instance of the API class
+var api = new ColorNameApi.DefaultApi()
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.getApiMetadata(callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-Default-getApiMetadata-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-Default-getApiMetadata-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using Org.OpenAPITools.Api;
+using Org.OpenAPITools.Client;
+using Org.OpenAPITools.Model;
+
+namespace Example
+{
+    public class getApiMetadataExample
+    {
+        public void main()
+        {
+
+            // Create an instance of the API class
+            var apiInstance = new DefaultApi();
+
+            try {
+                // Get API metadata and discovery information
+                getApiMetadata_200_response result = apiInstance.getApiMetadata();
+                Debug.WriteLine(result);
+            } catch (Exception e) {
+                Debug.Print("Exception when calling DefaultApi.getApiMetadata: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Default-getApiMetadata-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+// Create an instance of the API class
+$api_instance = new OpenAPITools\Client\Api\DefaultApi();
+
+try {
+    $result = $api_instance->getApiMetadata();
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling DefaultApi->getApiMetadata: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Default-getApiMetadata-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use WWW::OPenAPIClient::Configuration;
+use WWW::OPenAPIClient::DefaultApi;
+
+# Create an instance of the API class
+my $api_instance = WWW::OPenAPIClient::DefaultApi->new();
+
+eval {
+    my $result = $api_instance->getApiMetadata();
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling DefaultApi->getApiMetadata: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Default-getApiMetadata-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import openapi_client
+from openapi_client.rest import ApiException
+from pprint import pprint
+
+# Create an instance of the API class
+api_instance = openapi_client.DefaultApi()
+
+try:
+    # Get API metadata and discovery information
+    api_response = api_instance.get_api_metadata()
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling DefaultApi->getApiMetadata: %s\n" % e)</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Default-getApiMetadata-0-rust">
+                              <pre class="prettyprint"><code class="language-rust">extern crate DefaultApi;
+
+pub fn main() {
+
+    let mut context = DefaultApi::Context::default();
+    let result = client.getApiMetadata(&context).wait();
+
+    println!("{:?}", result);
+}
+</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Scopes</h2>
+                          <table>
+                            
+                          </table>
+
+                          <h2>Parameters</h2>
+
+
+
+
+
+
+                          <h2>Responses</h2>
+                            <h3 id="examples-Default-getApiMetadata-title-200"></h3>
+                            <p id="examples-Default-getApiMetadata-description-200" class="marked"></p>
+                            <script>
+                              var responseDefault200_description = `OK - Returns API metadata`;
+                              var responseDefault200_description_break = responseDefault200_description.indexOf('\n');
+                              if (responseDefault200_description_break == -1) {
+                                $("#examples-Default-getApiMetadata-title-200").text("Status: 200 - " + responseDefault200_description);
+                              } else {
+                                $("#examples-Default-getApiMetadata-title-200").text("Status: 200 - " + responseDefault200_description.substring(0, responseDefault200_description_break));
+                                $("#examples-Default-getApiMetadata-description-200").html(responseDefault200_description.substring(responseDefault200_description_break));
+                              }
+                            </script>
+
+
+                            <ul id="responses-detail-Default-getApiMetadata-200" class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-Default-getApiMetadata-200-schema">Schema</a>
+                                </li>
+
+
+
+
+                            </ul>
+
+
+                            <div class="tab-content" id="responses-Default-getApiMetadata-200-wrapper" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-Default-getApiMetadata-200-schema">
+                                  <div id="responses-Default-getApiMetadata-schema-200" class="exampleStyle">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = ;
+                                        var schema = findNode('schema',schemaWrapper).schema;
+                                        if (!schema) {
+                                          schema = schemaWrapper.schema;
+                                        }
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                          Object.keys(schema.properties).forEach( (item) => {
+                                            if (schema.properties[item].$ref != null) {
+                                              schema.properties[item] = defsParser.$refs.get(schema.properties[item].$ref);
+                                            }
+                                          });
+                                        } else if (schema.items != null && schema.items.$ref != null) {
+                                            schema.items = defsParser.$refs.get(schema.items.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-Default-getApiMetadata-200-schema-data').val(JSON.stringify(schema));
+                                        var result = $('#responses-Default-getApiMetadata-schema-200');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-Default-getApiMetadata-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+                        </article>
+                      </div>
+                      <hr>
                     <div id="api-Default-getColorLists">
                       <article id="api-Default-getColorLists-0" data-group="User" data-name="getColorLists" data-version="0">
                         <div class="pull-left">
@@ -1230,8 +1612,10 @@ only the description for that list will be returned.
 </p>
                         <p></p>
                         <br />
-                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/lists/</span></code></pre>
-                        <h3>Usage and SDK Samples</h3>
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/v1/lists/</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
                         <ul class="nav nav-tabs nav-tabs-examples">
                           <li class="active"><a href="#examples-Default-getColorLists-0-curl">Curl</a></li>
                           <li class=""><a href="#examples-Default-getColorLists-0-java">Java</a></li>
@@ -1546,7 +1930,7 @@ The name of a specific color name list to retrieve details for
                                       });
                                     </script>
                                   </div>
-                                  <input id='responses-Default-getColorLists-200-schema-data' type='hidden' value=''>
+                                  <input id='responses-Default-getColorLists-200-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
                             <h3 id="examples-Default-getColorLists-title-400"></h3>
@@ -1608,7 +1992,7 @@ The name of a specific color name list to retrieve details for
                                       });
                                     </script>
                                   </div>
-                                  <input id='responses-Default-getColorLists-400-schema-data' type='hidden' value=''>
+                                  <input id='responses-Default-getColorLists-400-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
                             <h3 id="examples-Default-getColorLists-title-404"></h3>
@@ -1670,7 +2054,7 @@ The name of a specific color name list to retrieve details for
                                       });
                                     </script>
                                   </div>
-                                  <input id='responses-Default-getColorLists-404-schema-data' type='hidden' value=''>
+                                  <input id='responses-Default-getColorLists-404-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
                         </article>
@@ -1696,8 +2080,10 @@ with the same response data to all connected socket clients.
 </p>
                         <p></p>
                         <br />
-                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/</span></code></pre>
-                        <h3>Usage and SDK Samples</h3>
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/v1/</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
                         <ul class="nav nav-tabs nav-tabs-examples">
                           <li class="active"><a href="#examples-Default-getColorNames-0-curl">Curl</a></li>
                           <li class=""><a href="#examples-Default-getColorNames-0-java">Java</a></li>
@@ -2166,13 +2552,13 @@ When true, uses the &#39;bestOf&#39; list automatically
                                       });
                                     </script>
                                   </div>
-                                  <input id='responses-Default-getColorNames-200-schema-data' type='hidden' value=''>
+                                  <input id='responses-Default-getColorNames-200-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
                             <h3 id="examples-Default-getColorNames-title-400"></h3>
                             <p id="examples-Default-getColorNames-description-400" class="marked"></p>
                             <script>
-                              var responseDefault400_description = `BAD REQUEST`;
+                              var responseDefault400_description = `BAD REQUEST - Invalid list key, invalid hex value or too many colors requested`;
                               var responseDefault400_description_break = responseDefault400_description.indexOf('\n');
                               if (responseDefault400_description_break == -1) {
                                 $("#examples-Default-getColorNames-title-400").text("Status: 400 - " + responseDefault400_description);
@@ -2228,26 +2614,26 @@ When true, uses the &#39;bestOf&#39; list automatically
                                       });
                                     </script>
                                   </div>
-                                  <input id='responses-Default-getColorNames-400-schema-data' type='hidden' value=''>
+                                  <input id='responses-Default-getColorNames-400-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
-                            <h3 id="examples-Default-getColorNames-title-404"></h3>
-                            <p id="examples-Default-getColorNames-description-404" class="marked"></p>
+                            <h3 id="examples-Default-getColorNames-title-422"></h3>
+                            <p id="examples-Default-getColorNames-description-422" class="marked"></p>
                             <script>
-                              var responseDefault404_description = `NOT FOUND`;
-                              var responseDefault404_description_break = responseDefault404_description.indexOf('\n');
-                              if (responseDefault404_description_break == -1) {
-                                $("#examples-Default-getColorNames-title-404").text("Status: 404 - " + responseDefault404_description);
+                              var responseDefault422_description = `UNPROCESSABLE ENTITY - Requested more unique colors than available`;
+                              var responseDefault422_description_break = responseDefault422_description.indexOf('\n');
+                              if (responseDefault422_description_break == -1) {
+                                $("#examples-Default-getColorNames-title-422").text("Status: 422 - " + responseDefault422_description);
                               } else {
-                                $("#examples-Default-getColorNames-title-404").text("Status: 404 - " + responseDefault404_description.substring(0, responseDefault404_description_break));
-                                $("#examples-Default-getColorNames-description-404").html(responseDefault404_description.substring(responseDefault404_description_break));
+                                $("#examples-Default-getColorNames-title-422").text("Status: 422 - " + responseDefault422_description.substring(0, responseDefault422_description_break));
+                                $("#examples-Default-getColorNames-description-422").html(responseDefault422_description.substring(responseDefault422_description_break));
                               }
                             </script>
 
 
-                            <ul id="responses-detail-Default-getColorNames-404" class="nav nav-tabs nav-tabs-examples" >
+                            <ul id="responses-detail-Default-getColorNames-422" class="nav nav-tabs nav-tabs-examples" >
                                 <li class="active">
-                                  <a data-toggle="tab" href="#responses-Default-getColorNames-404-schema">Schema</a>
+                                  <a data-toggle="tab" href="#responses-Default-getColorNames-422-schema">Schema</a>
                                 </li>
 
 
@@ -2256,9 +2642,9 @@ When true, uses the &#39;bestOf&#39; list automatically
                             </ul>
 
 
-                            <div class="tab-content" id="responses-Default-getColorNames-404-wrapper" style='margin-bottom: 10px;'>
-                                <div class="tab-pane active" id="responses-Default-getColorNames-404-schema">
-                                  <div id="responses-Default-getColorNames-schema-404" class="exampleStyle">
+                            <div class="tab-content" id="responses-Default-getColorNames-422-wrapper" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-Default-getColorNames-422-schema">
+                                  <div id="responses-Default-getColorNames-schema-422" class="exampleStyle">
                                     <script>
                                       $(document).ready(function() {
                                         var schemaWrapper = ;
@@ -2283,76 +2669,14 @@ When true, uses the &#39;bestOf&#39; list automatically
                                         }
 
                                         var view = new JSONSchemaView(schema, 3);
-                                        $('#responses-Default-getColorNames-404-schema-data').val(JSON.stringify(schema));
-                                        var result = $('#responses-Default-getColorNames-schema-404');
+                                        $('#responses-Default-getColorNames-422-schema-data').val(JSON.stringify(schema));
+                                        var result = $('#responses-Default-getColorNames-schema-422');
                                         result.empty();
                                         result.append(view.render());
                                       });
                                     </script>
                                   </div>
-                                  <input id='responses-Default-getColorNames-404-schema-data' type='hidden' value=''>
-                                </div>
-                            </div>
-                            <h3 id="examples-Default-getColorNames-title-409"></h3>
-                            <p id="examples-Default-getColorNames-description-409" class="marked"></p>
-                            <script>
-                              var responseDefault409_description = `CONFLICT - Requested more unique colors than available`;
-                              var responseDefault409_description_break = responseDefault409_description.indexOf('\n');
-                              if (responseDefault409_description_break == -1) {
-                                $("#examples-Default-getColorNames-title-409").text("Status: 409 - " + responseDefault409_description);
-                              } else {
-                                $("#examples-Default-getColorNames-title-409").text("Status: 409 - " + responseDefault409_description.substring(0, responseDefault409_description_break));
-                                $("#examples-Default-getColorNames-description-409").html(responseDefault409_description.substring(responseDefault409_description_break));
-                              }
-                            </script>
-
-
-                            <ul id="responses-detail-Default-getColorNames-409" class="nav nav-tabs nav-tabs-examples" >
-                                <li class="active">
-                                  <a data-toggle="tab" href="#responses-Default-getColorNames-409-schema">Schema</a>
-                                </li>
-
-
-
-
-                            </ul>
-
-
-                            <div class="tab-content" id="responses-Default-getColorNames-409-wrapper" style='margin-bottom: 10px;'>
-                                <div class="tab-pane active" id="responses-Default-getColorNames-409-schema">
-                                  <div id="responses-Default-getColorNames-schema-409" class="exampleStyle">
-                                    <script>
-                                      $(document).ready(function() {
-                                        var schemaWrapper = ;
-                                        var schema = findNode('schema',schemaWrapper).schema;
-                                        if (!schema) {
-                                          schema = schemaWrapper.schema;
-                                        }
-                                        if (schema.$ref != null) {
-                                          schema = defsParser.$refs.get(schema.$ref);
-                                          Object.keys(schema.properties).forEach( (item) => {
-                                            if (schema.properties[item].$ref != null) {
-                                              schema.properties[item] = defsParser.$refs.get(schema.properties[item].$ref);
-                                            }
-                                          });
-                                        } else if (schema.items != null && schema.items.$ref != null) {
-                                            schema.items = defsParser.$refs.get(schema.items.$ref);
-                                        } else {
-                                          schemaWrapper.definitions = Object.assign({}, defs);
-                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
-                                            console.log(err);
-                                          });
-                                        }
-
-                                        var view = new JSONSchemaView(schema, 3);
-                                        $('#responses-Default-getColorNames-409-schema-data').val(JSON.stringify(schema));
-                                        var result = $('#responses-Default-getColorNames-schema-409');
-                                        result.empty();
-                                        result.append(view.render());
-                                      });
-                                    </script>
-                                  </div>
-                                  <input id='responses-Default-getColorNames-409-schema-data' type='hidden' value=''>
+                                  <input id='responses-Default-getColorNames-422-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
                         </article>
@@ -2373,8 +2697,10 @@ and readable across different backgrounds.
 </p>
                         <p></p>
                         <br />
-                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/swatch/</span></code></pre>
-                        <h3>Usage and SDK Samples</h3>
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/v1/swatch/</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
                         <ul class="nav nav-tabs nav-tabs-examples">
                           <li class="active"><a href="#examples-Default-getColorSwatch-0-curl">Curl</a></li>
                           <li class=""><a href="#examples-Default-getColorSwatch-0-java">Java</a></li>
@@ -2722,7 +3048,7 @@ The name of the color to display on the swatch
                                       });
                                     </script>
                                   </div>
-                                  <input id='responses-Default-getColorSwatch-200-schema-data' type='hidden' value=''>
+                                  <input id='responses-Default-getColorSwatch-200-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
                             <h3 id="examples-Default-getColorSwatch-title-400"></h3>
@@ -2784,7 +3110,7 @@ The name of the color to display on the swatch
                                       });
                                     </script>
                                   </div>
-                                  <input id='responses-Default-getColorSwatch-400-schema-data' type='hidden' value=''>
+                                  <input id='responses-Default-getColorSwatch-400-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
                         </article>
@@ -2802,8 +3128,10 @@ The name of the color to display on the swatch
                         <p class="marked">Serves the static HTML documentation page for the API.</p>
                         <p></p>
                         <br />
-                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/docs/</span></code></pre>
-                        <h3>Usage and SDK Samples</h3>
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/v1/docs/</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
                         <ul class="nav nav-tabs nav-tabs-examples">
                           <li class="active"><a href="#examples-Default-getDocumentation-0-curl">Curl</a></li>
                           <li class=""><a href="#examples-Default-getDocumentation-0-java">Java</a></li>
@@ -3079,7 +3407,307 @@ pub fn main() {
                                       });
                                     </script>
                                   </div>
-                                  <input id='responses-Default-getDocumentation-200-schema-data' type='hidden' value=''>
+                                  <input id='responses-Default-getDocumentation-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-Default-healthCheck">
+                      <article id="api-Default-healthCheck-0" data-group="User" data-name="healthCheck" data-version="0">
+                        <div class="pull-left">
+                          <h1>healthCheck</h1>
+                          <p>Health check endpoint</p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">Returns the health status of the API. This endpoint is useful for monitoring,
+uptime checks, and load balancer health checks. Always returns a 200 status
+when the API is operational.
+</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/health</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-Default-healthCheck-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-Default-healthCheck-0-java">Java</a></li>
+                          <li class=""><a href="#examples-Default-healthCheck-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-Default-healthCheck-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-Default-healthCheck-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-Default-healthCheck-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-Default-healthCheck-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-Default-healthCheck-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-Default-healthCheck-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-Default-healthCheck-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-Default-healthCheck-0-python">Python</a></li>
+                          <li class=""><a href="#examples-Default-healthCheck-0-rust">Rust</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-Default-healthCheck-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET \
+ -H "Accept: application/json" \
+ "https://api.color.pizza/health"
+</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-Default-healthCheck-0-java">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.*;
+import org.openapitools.client.auth.*;
+import org.openapitools.client.model.*;
+import org.openapitools.client.api.DefaultApi;
+
+import java.io.File;
+import java.util.*;
+
+public class DefaultApiExample {
+    public static void main(String[] args) {
+
+        // Create an instance of the API class
+        DefaultApi apiInstance = new DefaultApi();
+
+        try {
+            healthCheck_200_response result = apiInstance.healthCheck();
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DefaultApi#healthCheck");
+            e.printStackTrace();
+        }
+    }
+}
+</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-Default-healthCheck-0-android">
+                            <pre class="prettyprint"><code class="language-java">import org.openapitools.client.api.DefaultApi;
+
+public class DefaultApiExample {
+    public static void main(String[] args) {
+        DefaultApi apiInstance = new DefaultApi();
+
+        try {
+            healthCheck_200_response result = apiInstance.healthCheck();
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DefaultApi#healthCheck");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-Default-healthCheck-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-Default-healthCheck-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">
+
+// Create an instance of the API class
+DefaultApi *apiInstance = [[DefaultApi alloc] init];
+
+// Health check endpoint
+[apiInstance healthCheckWithCompletionHandler: 
+              ^(healthCheck_200_response output, NSError* error) {
+    if (output) {
+        NSLog(@"%@", output);
+    }
+    if (error) {
+        NSLog(@"Error: %@", error);
+    }
+}];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Default-healthCheck-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var ColorNameApi = require('color_name_api');
+
+// Create an instance of the API class
+var api = new ColorNameApi.DefaultApi()
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.healthCheck(callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-Default-healthCheck-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-Default-healthCheck-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using Org.OpenAPITools.Api;
+using Org.OpenAPITools.Client;
+using Org.OpenAPITools.Model;
+
+namespace Example
+{
+    public class healthCheckExample
+    {
+        public void main()
+        {
+
+            // Create an instance of the API class
+            var apiInstance = new DefaultApi();
+
+            try {
+                // Health check endpoint
+                healthCheck_200_response result = apiInstance.healthCheck();
+                Debug.WriteLine(result);
+            } catch (Exception e) {
+                Debug.Print("Exception when calling DefaultApi.healthCheck: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Default-healthCheck-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+// Create an instance of the API class
+$api_instance = new OpenAPITools\Client\Api\DefaultApi();
+
+try {
+    $result = $api_instance->healthCheck();
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling DefaultApi->healthCheck: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Default-healthCheck-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use WWW::OPenAPIClient::Configuration;
+use WWW::OPenAPIClient::DefaultApi;
+
+# Create an instance of the API class
+my $api_instance = WWW::OPenAPIClient::DefaultApi->new();
+
+eval {
+    my $result = $api_instance->healthCheck();
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling DefaultApi->healthCheck: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Default-healthCheck-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import openapi_client
+from openapi_client.rest import ApiException
+from pprint import pprint
+
+# Create an instance of the API class
+api_instance = openapi_client.DefaultApi()
+
+try:
+    # Health check endpoint
+    api_response = api_instance.health_check()
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling DefaultApi->healthCheck: %s\n" % e)</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Default-healthCheck-0-rust">
+                              <pre class="prettyprint"><code class="language-rust">extern crate DefaultApi;
+
+pub fn main() {
+
+    let mut context = DefaultApi::Context::default();
+    let result = client.healthCheck(&context).wait();
+
+    println!("{:?}", result);
+}
+</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Scopes</h2>
+                          <table>
+                            
+                          </table>
+
+                          <h2>Parameters</h2>
+
+
+
+
+
+
+                          <h2>Responses</h2>
+                            <h3 id="examples-Default-healthCheck-title-200"></h3>
+                            <p id="examples-Default-healthCheck-description-200" class="marked"></p>
+                            <script>
+                              var responseDefault200_description = `OK - API is healthy and operational`;
+                              var responseDefault200_description_break = responseDefault200_description.indexOf('\n');
+                              if (responseDefault200_description_break == -1) {
+                                $("#examples-Default-healthCheck-title-200").text("Status: 200 - " + responseDefault200_description);
+                              } else {
+                                $("#examples-Default-healthCheck-title-200").text("Status: 200 - " + responseDefault200_description.substring(0, responseDefault200_description_break));
+                                $("#examples-Default-healthCheck-description-200").html(responseDefault200_description.substring(responseDefault200_description_break));
+                              }
+                            </script>
+
+
+                            <ul id="responses-detail-Default-healthCheck-200" class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-Default-healthCheck-200-schema">Schema</a>
+                                </li>
+
+
+
+
+                            </ul>
+
+
+                            <div class="tab-content" id="responses-Default-healthCheck-200-wrapper" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-Default-healthCheck-200-schema">
+                                  <div id="responses-Default-healthCheck-schema-200" class="exampleStyle">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = ;
+                                        var schema = findNode('schema',schemaWrapper).schema;
+                                        if (!schema) {
+                                          schema = schemaWrapper.schema;
+                                        }
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                          Object.keys(schema.properties).forEach( (item) => {
+                                            if (schema.properties[item].$ref != null) {
+                                              schema.properties[item] = defsParser.$refs.get(schema.properties[item].$ref);
+                                            }
+                                          });
+                                        } else if (schema.items != null && schema.items.$ref != null) {
+                                            schema.items = defsParser.$refs.get(schema.items.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-Default-healthCheck-200-schema-data').val(JSON.stringify(schema));
+                                        var result = $('#responses-Default-healthCheck-schema-200');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-Default-healthCheck-200-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
                         </article>
@@ -3099,8 +3727,10 @@ The search string must be at least 3 characters long.
 </p>
                         <p></p>
                         <br />
-                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/names/</span></code></pre>
-                        <h3>Usage and SDK Samples</h3>
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/v1/names/</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
                         <ul class="nav nav-tabs nav-tabs-examples">
                           <li class="active"><a href="#examples-Default-searchColorsByName-0-curl">Curl</a></li>
                           <li class=""><a href="#examples-Default-searchColorsByName-0-java">Java</a></li>
@@ -3445,26 +4075,26 @@ The name of the color name list to search in
                                       });
                                     </script>
                                   </div>
-                                  <input id='responses-Default-searchColorsByName-200-schema-data' type='hidden' value=''>
+                                  <input id='responses-Default-searchColorsByName-200-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
-                            <h3 id="examples-Default-searchColorsByName-title-404"></h3>
-                            <p id="examples-Default-searchColorsByName-description-404" class="marked"></p>
+                            <h3 id="examples-Default-searchColorsByName-title-400"></h3>
+                            <p id="examples-Default-searchColorsByName-description-400" class="marked"></p>
                             <script>
-                              var responseDefault404_description = `NOT FOUND`;
-                              var responseDefault404_description_break = responseDefault404_description.indexOf('\n');
-                              if (responseDefault404_description_break == -1) {
-                                $("#examples-Default-searchColorsByName-title-404").text("Status: 404 - " + responseDefault404_description);
+                              var responseDefault400_description = `BAD REQUEST - Search term shorter than 3 characters`;
+                              var responseDefault400_description_break = responseDefault400_description.indexOf('\n');
+                              if (responseDefault400_description_break == -1) {
+                                $("#examples-Default-searchColorsByName-title-400").text("Status: 400 - " + responseDefault400_description);
                               } else {
-                                $("#examples-Default-searchColorsByName-title-404").text("Status: 404 - " + responseDefault404_description.substring(0, responseDefault404_description_break));
-                                $("#examples-Default-searchColorsByName-description-404").html(responseDefault404_description.substring(responseDefault404_description_break));
+                                $("#examples-Default-searchColorsByName-title-400").text("Status: 400 - " + responseDefault400_description.substring(0, responseDefault400_description_break));
+                                $("#examples-Default-searchColorsByName-description-400").html(responseDefault400_description.substring(responseDefault400_description_break));
                               }
                             </script>
 
 
-                            <ul id="responses-detail-Default-searchColorsByName-404" class="nav nav-tabs nav-tabs-examples" >
+                            <ul id="responses-detail-Default-searchColorsByName-400" class="nav nav-tabs nav-tabs-examples" >
                                 <li class="active">
-                                  <a data-toggle="tab" href="#responses-Default-searchColorsByName-404-schema">Schema</a>
+                                  <a data-toggle="tab" href="#responses-Default-searchColorsByName-400-schema">Schema</a>
                                 </li>
 
 
@@ -3473,9 +4103,9 @@ The name of the color name list to search in
                             </ul>
 
 
-                            <div class="tab-content" id="responses-Default-searchColorsByName-404-wrapper" style='margin-bottom: 10px;'>
-                                <div class="tab-pane active" id="responses-Default-searchColorsByName-404-schema">
-                                  <div id="responses-Default-searchColorsByName-schema-404" class="exampleStyle">
+                            <div class="tab-content" id="responses-Default-searchColorsByName-400-wrapper" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-Default-searchColorsByName-400-schema">
+                                  <div id="responses-Default-searchColorsByName-schema-400" class="exampleStyle">
                                     <script>
                                       $(document).ready(function() {
                                         var schemaWrapper = ;
@@ -3500,14 +4130,14 @@ The name of the color name list to search in
                                         }
 
                                         var view = new JSONSchemaView(schema, 3);
-                                        $('#responses-Default-searchColorsByName-404-schema-data').val(JSON.stringify(schema));
-                                        var result = $('#responses-Default-searchColorsByName-schema-404');
+                                        $('#responses-Default-searchColorsByName-400-schema-data').val(JSON.stringify(schema));
+                                        var result = $('#responses-Default-searchColorsByName-schema-400');
                                         result.empty();
                                         result.append(view.render());
                                       });
                                     </script>
                                   </div>
-                                  <input id='responses-Default-searchColorsByName-404-schema-data' type='hidden' value=''>
+                                  <input id='responses-Default-searchColorsByName-400-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
                         </article>
@@ -3517,9 +4147,10 @@ The name of the color name list to search in
           </div>
           <div id="footer">
             <div id="api-_footer">
-              <div>Suggestions, contact, support and error reporting;</div>
+              <p>Suggestions, contact, support and error reporting;
                   <div class="app-desc">Information URL: <a href="https://elastiq.ch/">https://elastiq.ch/</a></div>
                   <div class="app-desc">Contact Info: <a href="color-name-api@elastiq.click">color-name-api@elastiq.click</a></div>
+              </p>
                 <div class="license-info">MIT</div>
                 <div class="license-url">https://github.com/meodai/color-name-api/blob/main/LICENSE</div>
             </div>
