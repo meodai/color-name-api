@@ -945,13 +945,6 @@ const requestHandler = async (request, response) => {
     console.info('request from', from);
   }
 
-  // Get client info once, log it here but could be reused elsewhere
-  const { clientIp, clientLocation } = getClientInfo(request);
-  if (clientIp) {
-    console.info('client ip', clientIp);
-    console.log('client location', clientLocation);
-  }
-
   if (route.cacheControl) {
     responseHeader['Cache-Control'] = route.cacheControl;
   }
