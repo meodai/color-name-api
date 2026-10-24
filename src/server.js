@@ -76,6 +76,8 @@ let io;
 let hasDb = false;
 let handleWellKnown; // assigned during initialization
 
+const allowedMethods = ['GET', 'HEAD', 'OPTIONS'];
+
 // Cache-Control values per route, data only changes when color-name-list is bumped
 const cacheShort = 'public, max-age=3600';
 const cacheLong = 'public, max-age=604800';
@@ -83,8 +85,7 @@ const cacheNone = 'no-store';
 
 const responseHeaderObj = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
-  'Access-Control-Allow-Credentials': false,
+  'Access-Control-Allow-Methods': allowedMethods.join(', '),
   'Access-Control-Max-Age': '86400',
   'Access-Control-Allow-Headers':
     'X-Requested-With, X-Referrer, X-HTTP-Method-Override, Content-Type, Accept',
@@ -850,7 +851,7 @@ const getRouteForPath = path => {
  * /v1/                   => all colors
  * /v1/212121             => array with one color
  * /v1/212121,222,f02f123 => array with 3 colors
- * /v1/names/             => all colors
+ * /v1/names/             => error, a search term of at least 3 characters is required
  * /v1/names/red          => all colors containing the word red
  * /v1/lists/             => all available lists
  * /v1/swatch/?color=212121&name=red => svg with color and name
@@ -862,9 +863,6 @@ const getRouteForPath = path => {
 const requestHandler = async (request, response) => {
   // Make requestHandler async
   const requestUrl = new URL(request.url, 'http://localhost');
-  // Handle .well-known endpoints centrally
-  const handled = await handleWellKnown(request, response);
-  if (handled) return;
 
   // Short-circuit CORS preflight before any heavy work
   if (request.method === 'OPTIONS') {
@@ -873,6 +871,19 @@ const requestHandler = async (request, response) => {
     response.end();
     return;
   }
+
+  if (!allowedMethods.includes(request.method)) {
+    return await sendError(
+      response,
+      405,
+      `Method ${request.method} not allowed, use ${allowedMethods.join(', ')}`,
+      { ...responseHeaderObj, Allow: allowedMethods.join(', ') }
+    );
+  }
+
+  // Handle .well-known endpoints centrally
+  const handled = await handleWellKnown(request, response);
+  if (handled) return;
 
   const path = requestUrl.pathname;
   const responseHeader = { ...responseHeaderObj };

@@ -93,7 +93,7 @@ components:
         hsl:
           type: object
           title: HSL
-          description: HSL values. All percentages are represented as integers (e.g., 50% as `50`).
+          description: HSL values. Saturation and lightness are percentages on a 0-100 scale (e.g., 50% as `50`).
           required: [h, s, l]
           properties:
             h:
