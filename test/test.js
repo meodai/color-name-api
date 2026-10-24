@@ -281,6 +281,54 @@ const routesToTest = {
         );
       }
     },
+  '/000000?description=true': response => {
+    testBlackColor(response);
+    const color = response.colors[0];
+    if (typeof color.tagline !== 'string' || !color.tagline) {
+      throw new Error('color from the default list does not have a tagline');
+    }
+    const { description } = color;
+    if (typeof description !== 'object') {
+      throw new Error('description=true did not add a description');
+    }
+    for (const key of [
+      'nouns',
+      'adjectives',
+      'meanings',
+      'effects',
+      'usage',
+      'temperature',
+    ]) {
+      if (!hasOwnProperty(description, key)) {
+        throw new Error(`description does not have property ${key}`);
+      }
+    }
+    if (hasOwnProperty(description, 'summary')) {
+      throw new Error('description should not include the summary');
+    }
+  },
+  '/000000?description=false': response => {
+    testBlackColor(response);
+    if (hasOwnProperty(response.colors[0], 'description')) {
+      throw new Error('description added without description=true');
+    }
+  },
+  '/000000?list=wikipedia&description=true': response => {
+    colorResponseBasicTest(response);
+    const color = response.colors[0];
+    if (hasOwnProperty(color, 'tagline')) {
+      throw new Error('taglines are only for default, bestOf and short');
+    }
+    if (typeof color.description !== 'object') {
+      throw new Error('description=true did not add a description');
+    }
+  },
+  '/?list=short&description=true': response => {
+    colorResponseBasicTest(response);
+    if (response.colors.some(color => hasOwnProperty(color, 'description'))) {
+      throw new Error('full lists should not include descriptions');
+    }
+  },
   '/lists/': response => {
     if (typeof response !== 'object') {
       throw new Error('response is not an object');

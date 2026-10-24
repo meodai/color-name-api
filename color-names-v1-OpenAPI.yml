@@ -172,6 +172,64 @@ components:
         distance:
           type: number
           description: The distance between the requested hex value and the closest color (0 = exact match)
+        description:
+          $ref: '#/components/schemas/colorDescription'
+
+    colorDescription:
+      type: object
+      title: ColorDescription
+      description: |
+        Words describing the requested color (`requestedHex`, not the matched name), from
+        [color-description](https://github.com/words/color-description). Only added when
+        `description=true`. The dataset is English, and its meanings, effects and usage
+        are subjective and written from a western perspective.
+      required: [nouns, adjectives, meanings, effects, usage, temperature]
+      properties:
+        nouns:
+          type: array
+          items:
+            type: string
+          description: Color names, best fit first
+          example: [blue, navy]
+        adjectives:
+          type: array
+          items:
+            type: string
+          description: Adjectives, the best fit first; the rest are not ranked
+          example: [deep, rich, dark, dim, somber]
+        meanings:
+          type: array
+          items:
+            type: string
+          description: Symbolic associations
+          example: [trust, responsibility, honesty]
+        effects:
+          type: array
+          items:
+            type: string
+          description: Perceptual or behavioral effects
+          example: [calm, reassure, signal authority]
+        usage:
+          type: array
+          items:
+            type: string
+          description: Contexts, industries and themes the color fits
+          example: [security, finance, technology]
+        temperature:
+          type: object
+          title: ColorTemperature
+          description: The closest correlated color temperature
+          required: [value, descriptive]
+          properties:
+            value:
+              type: number
+              description: Temperature in Kelvin
+              example: 10000
+            descriptive:
+              type: array
+              items:
+                type: string
+              example: [very cool]
 
     color:
       title: Color
@@ -459,6 +517,15 @@ paths:
       - name: goodnamesonly
         in: query
         description: When true, uses the 'bestOf' list automatically
+        schema:
+          type: boolean
+        required: false
+
+      - name: description
+        in: query
+        description: |
+          When true, adds a `description` object with words describing each requested color.
+          Ignored when no `values` are given (full lists).
         schema:
           type: boolean
         required: false

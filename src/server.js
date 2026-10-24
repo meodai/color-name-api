@@ -24,6 +24,7 @@ import { LRUCache } from 'lru-cache'; // Import LRUCache
 import { FindColors, hydrateColor } from './findColors.js';
 import { getPaletteTitle } from './generatePaletteName.js';
 import { svgTemplate } from './colorSwatchSVG.js';
+import { describeColor } from './colorDescription.js';
 import { createColorRecord } from './lib.js';
 import { initDatabase, addResponseToTable } from './database.js';
 import { initWellKnown } from './wellKnown.js';
@@ -427,6 +428,10 @@ const respondValueSearch = async (
     searchParams.has('noduplicates') &&
     searchParams.get('noduplicates') === 'true';
 
+  const describeMode =
+    searchParams.has('description') &&
+    searchParams.get('description') === 'true';
+
   const listKey = getListKey(searchParams);
 
   const colorQuery =
@@ -619,12 +624,22 @@ const respondValueSearch = async (
     addResponseToTable(record);
   }
 
+  // descriptions are only added to lookups, not to full lists, and are kept
+  // out of the socket broadcast and the database record above
+  const responseColors =
+    describeMode && urlColorList[0]
+      ? colorsResponse.map(color => ({
+          ...color,
+          description: describeColor(color.requestedHex),
+        }))
+      : colorsResponse;
+
   // actual http response
   return await httpRespond(
     response,
     {
       paletteTitle,
-      colors: colorsResponse,
+      colors: responseColors,
     },
     200,
     responseHeader
