@@ -201,6 +201,7 @@ $ curl https://api.color.pizza/v1/?values=aaffcc
 ➜        "lab":{"l":93.57729,"a":-34.63514,"b":15.94209},
 ➜        "luminance":159.78151,
 ➜        "luminanceWCAG":0.84426,
+➜        "tagline":"Fresh as a newly unwrapped candy, not the kind made at the mint.",
 ➜        "requestedHex":"#aaffcc",
 ➜        "distance":0
 ➜       }
@@ -300,6 +301,42 @@ The come from a [large collection](https://github.com/meodai/color-names). If fo
 ```shell
 $ curl 'https://api.color.pizza/v1/?values=0d0d0f,f39d91,d4d4d7&list=wikipedia'
 ```
+
+### Taglines and Color Descriptions
+
+Colors from the `default`, `bestOf` and `short` lists come with a `tagline`, a one-line description of the name:
+
+```json
+"name": "Mermaid Blues",
+"tagline": "Dark ocean depths where the siren songs are all minor keys."
+```
+
+Taglines are the same ones shown on [names.color.pizza](https://names.color.pizza/). A few recently added names don't have a tagline yet, and other lists don't have taglines, so treat the field as optional.
+
+Add `description=true` to a lookup to also get words describing each requested color, from [color-description](https://github.com/words/color-description):
+
+```shell
+$ curl 'https://api.color.pizza/v1/?values=0a4a7a&list=bestOf&description=true'
+```
+
+```json
+"description": {
+  "nouns": ["blue", "navy"],
+  "adjectives": ["deep", "rich", "dark", "dim", "somber", "saturated", "cold", "cool", "blueish"],
+  "meanings": ["trust", "responsibility", "honesty", "loyalty", "security", ...],
+  "effects": ["calm", "reassure", "signal authority", "steady"],
+  "usage": ["security", "finance", "technology", "healthcare", ...],
+  "temperature": { "value": 10000, "descriptive": ["very cool"] }
+}
+```
+
+Keep the three apart:
+
+- `name` is the closest named color.
+- `tagline` describes that name.
+- `description` describes the color you sent (`requestedHex`), which can differ slightly from the named color.
+
+`nouns` and `adjectives` are ordered best fit first. The description words are in English, and the meanings, effects and usage are subjective and written from a western perspective. `description=true` is ignored when you request a full list without `values`.
 
 ### Access API Documentation
 
