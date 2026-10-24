@@ -13,7 +13,10 @@ try {
   const ipLocationApi = await import('ip-location-api');
   lookup = ipLocationApi.lookup;
 } catch (e) {
-  console.warn('ip-location-api failed to initialize, geolocation disabled:', e.message);
+  console.warn(
+    'ip-location-api failed to initialize, geolocation disabled:',
+    e.message
+  );
 }
 import * as dotenv from 'dotenv';
 import { LRUCache } from 'lru-cache'; // Import LRUCache
@@ -45,7 +48,7 @@ const baseUrlNames = `${baseUrl}${urlNameSubpath}/`;
 const urlColorSeparator = ',';
 const gzipCacheMaxBytes = 10 * 1024 * 1024; // Cap gzip cache for small responses only
 const ipCacheSize = 1000; // Cache size for IP lookup results
-const fullListCacheMaxBytes = 15 * 1024 * 1024; // Cap full list cache (JSON only, no gzip)
+const fullListCacheMaxBytes = 18 * 1024 * 1024; // Cap full list cache (JSON only, no gzip)
 
 // Declare variables for async loading
 let docsHTML;
@@ -104,11 +107,32 @@ const responseHandlerHTML = {
   'Content-Type': 'text/html; charset=utf-8',
 };
 
+// { name: tagline } for the names in color-name-list, synced by scripts/taglines.js
+let taglines = {};
+try {
+  taglines = JSON.parse(await fs.readFile('./data/taglines.json', 'utf8'));
+} catch (e) {
+  console.warn(
+    'Could not load data/taglines.json, taglines disabled:',
+    e.message
+  );
+}
+
+/**
+ * adds the tagline to each color of a color-name-list list that has one
+ * @param   {array} list [{name: 'red', hex: '#f00'}, ...]
+ * @return  {array}
+ */
+const withTaglines = list =>
+  list.map(color =>
+    taglines[color.name] ? { ...color, tagline: taglines[color.name] } : color
+  );
+
 // [{name: 'red', value: '#f00'}, ...]
 const colorsLists = {
-  default: colors,
-  bestOf: colorsBestOf,
-  short: colorsShort,
+  default: withTaglines(colors),
+  bestOf: withTaglines(colorsBestOf),
+  short: withTaglines(colorsShort),
 };
 
 Object.assign(colorsLists, colorNameLists.lists);

@@ -46,3 +46,6 @@ Thumbs.db
 # IDE files
 .vscode/
 .idea/
+
+# Taglines synced from names.color.pizza
+data/

@@ -138,6 +138,12 @@ components:
           type: string
           description: The best contrasting color ('black' or 'white') for text on this color
           enum: [black, white]
+        tagline:
+          type: string
+          description: |
+            A one-line description of the color name. Only on colors from the `default`, `bestOf`
+            and `short` lists, and only for names that have one. The same taglines are shown on names.color.pizza.
+          example: 'Dark ocean depths where the siren songs are all minor keys.'
         swatchImg:
           type: object
           title: SwatchImage
@@ -385,6 +391,7 @@ paths:
                     luminance: 0.2126
                     luminanceWCAG: 0.2126
                     bestContrast: 'white'
+                    tagline: 'Stop sign, fire engine, Valentine heart: the boldest, most vivid red.'
                     distance: 0
                     requestedHex: '#FF0000'
                     swatchImg:

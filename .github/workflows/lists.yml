@@ -4,6 +4,8 @@ name: Color lists
 # run the tests as CI does, and push to main, which deploys the API. Saves triggering
 # Dependabot by hand. Once the new list is live, api.color.pizza's Cloudflare cache is
 # purged (only that host), if CLOUDFLARE_PURGE_TOKEN and CLOUDFLARE_ZONE_ID are set.
+# The taglines from names.color.pizza are synced the same way, but a tagline-only
+# change doesn't purge: it shows up once the cached responses expire.
 on:
   schedule:
     - cron: "7 * * * *"
@@ -44,12 +46,30 @@ jobs:
           done
           echo "behind=$behind" >> "$GITHUB_OUTPUT"
 
+      - name: Newer taglines on names.color.pizza?
+        id: taglines
+        run: |
+          # a names.color.pizza outage must not hold back the list bumps
+          if ! node scripts/taglines.js; then
+            echo "::warning::Could not sync the taglines, keeping the ones we have"
+            git checkout -- data/taglines.json
+          fi
+          if git diff --quiet -- data/taglines.json; then
+            echo "changed=" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Take them
         if: steps.lists.outputs.behind != ''
         run: npm install --save-exact=false ${{ steps.lists.outputs.behind }}
 
+      - name: Install for a tagline-only change
+        if: steps.lists.outputs.behind == '' && steps.taglines.outputs.changed != ''
+        run: npm ci
+
       - name: Boot server and run tests
-        if: steps.lists.outputs.behind != ''
+        if: steps.lists.outputs.behind != '' || steps.taglines.outputs.changed != ''
         env:
           NODB: "true"
           PORT: "8080"
@@ -67,12 +87,20 @@ jobs:
           exit $STATUS
 
       - name: Push to main
-        if: steps.lists.outputs.behind != ''
+        if: steps.lists.outputs.behind != '' || steps.taglines.outputs.changed != ''
+        env:
+          BEHIND: ${{ steps.lists.outputs.behind }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add package.json package-lock.json
-          git commit -m "bump:${{ steps.lists.outputs.behind }}"
+          git add package.json package-lock.json data/taglines.json
+          if [ -n "$BEHIND" ]; then
+            msg="bump:$BEHIND"
+            git diff --cached --quiet -- data/taglines.json || msg="$msg, taglines"
+          else
+            msg="taglines: sync from names.color.pizza"
+          fi
+          git commit -m "$msg"
           git push
 
       - name: Purge api.color.pizza once the new list is live
