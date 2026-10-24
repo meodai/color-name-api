@@ -769,11 +769,11 @@ const routes = [
       const colorParam = searchParams.get('color');
       const nameParam = searchParams.get('name'); // Optional
 
-      if (!colorParam || !/^[0-9a-fA-F]+$/.test(colorParam)) {
+      if (!colorParam || !validateColor(colorParam)) {
         return await sendError(
           response,
           400,
-          'A valid hex color parameter (without #) is required.',
+          'A valid 3 or 6 digit hex color parameter (without #) is required.',
           responseHeader
         );
       }

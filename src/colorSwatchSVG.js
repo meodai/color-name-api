@@ -1,3 +1,18 @@
+const xmlEntities = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&apos;',
+};
+
+/**
+ * escapes a string for use in XML text or attribute values
+ * @param {string} str
+ * @return {string}
+ */
+const escapeXML = str => str.replace(/[&<>"']/g, char => xmlEntities[char]);
+
 /**
  * @param {string} colorValue color value in a CSS compatible format
  * @param {string} colorName color name
@@ -8,6 +23,9 @@ export const svgTemplate = (colorValue, colorName) => {
   if (colorName && colorName.length > 19) {
     name = `${colorName.substring(0, 19)}…`;
   }
+  // escape after truncating so entities are never cut in half
+  name = name && escapeXML(name);
+  const value = escapeXML(colorValue);
 
   return `
     <svg viewBox="0 0 100 ${colorName ? 127 : 100}" xmlns="http://www.w3.org/2000/svg">
@@ -22,12 +40,12 @@ export const svgTemplate = (colorValue, colorName) => {
           font-weight: normal;
         }
       </style>
-      <rect width="100" height="100" fill="${colorValue}" />
+      <rect width="100" height="100" fill="${value}" />
       ${
         colorName
           ? `
         <rect y="100" x="0" width="100" height="27" fill="#fff" />
-        <text y="113" x="3">${colorValue}</text>
+        <text y="113" x="3">${value}</text>
         <text y="122" x="3" class="val">${name}</text>
       `
           : ''

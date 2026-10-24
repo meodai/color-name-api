@@ -600,7 +600,7 @@ paths:
           description: The hex value of the color to retrieve without '#'
           schema:
             type: string
-            pattern: '^[0-9A-Fa-f]{3,6}$'
+            pattern: '^([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$'
           style: form
           explode: false
           required: true
@@ -629,7 +629,7 @@ paths:
               example:
                 error:
                   status: 400
-                  message: 'A valid hex color parameter (without #) is required.'
+                  message: 'A valid 3 or 6 digit hex color parameter (without #) is required.'
 
 x-socket-io:
   version: '4.x'

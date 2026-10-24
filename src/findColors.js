@@ -64,7 +64,7 @@ export const hydrateColor = colorObj => {
       : 'white';
 
   localColorObj.swatchImg = {
-    svgNamed: `/v1/swatch/?color=${localColorObj.hex.slice(1)}&name=${encodeURI(localColorObj.name)}`,
+    svgNamed: `/v1/swatch/?color=${localColorObj.hex.slice(1)}&name=${encodeURIComponent(localColorObj.name)}`,
     svg: `/v1/swatch/?color=${localColorObj.hex.slice(1)}`,
   };
 
@@ -269,7 +269,7 @@ export class FindColors {
           ...hydrated,
           requestedHex: `#${hex}`,
           swatchImg: {
-            svgNamed: `/v1/swatch/?color=${hex}&name=${encodeURI(color.name)}`,
+            svgNamed: `/v1/swatch/?color=${hex}&name=${encodeURIComponent(color.name)}`,
             svg: `/v1/swatch/?color=${hex}`,
           },
           distance: parseFloat(distanceMetric(parsed, color.hex).toFixed(5)),
