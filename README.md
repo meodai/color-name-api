@@ -390,13 +390,21 @@ In smaller color name lists, this can lead to unexpected results as the algorith
 
 #### Important Note About Color Limits
 
-When using `noduplicates=true`, if you request more colors than are available in the selected list, the API will:
+When using `noduplicates=true`, if you request more colors than there are unique names in the selected list, the API returns an HTTP 422 error instead of a partial result:
 
-- Return as many uniquely named colors as possible (up to the size of the selected list)
-- Drop any additional colors that can't be assigned unique names
-- Return a response with fewer color objects than requested
+```json
+{
+  "error": {
+    "status": 422,
+    "message": "Too many colors requested in unique mode. Requested 30 colors but only 21 are available.",
+    "availableCount": 21,
+    "totalCount": 21,
+    "requestedCount": 30
+  }
+}
+```
 
-For example, if you use the "basic" list (which has only 21 colors) and request 30 colors with `noduplicates=true`, the response will contain only 21 color objects.
+For example, the "basic" list has only 21 colors, so requesting 30 colors from it with `noduplicates=true` fails. Use a larger list or request fewer colors.
 
 This behavior ensures the API maintains its promise of providing truly unique names for each color, even in edge cases. If you need to name a large number of colors uniquely, make sure to use one of the larger color lists mentioned above.
 
@@ -417,6 +425,26 @@ To ensure reliable performance and prevent abuse, the API enforces a maximum num
 ```
 
 If you need to process more colors, please split your requests accordingly.
+
+## Errors
+
+Errors always use the same JSON shape:
+
+```json
+{
+  "error": {
+    "status": 400,
+    "message": "'xyz' is not a valid HEX color"
+  }
+}
+```
+
+| Status | When                                                                                                                                  |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `400`  | Invalid hex value, invalid `list` key, name search shorter than 3 characters, too many colors requested, or an invalid swatch `color` |
+| `404`  | Unknown endpoint                                                                                                                      |
+| `405`  | Method other than `GET`, `HEAD` or `OPTIONS`                                                                                          |
+| `422`  | `noduplicates=true` and the list doesn't have enough unique names                                                                     |
 
 ---
 
@@ -524,7 +552,9 @@ Environment variables:
 - `SECURITY_CONTACT` — Email address used in `security.txt`.
 - `CONTACT_EMAIL` — Contact email in `ai-plugin.json`.
 
-All responses support gzip when the client sends `Accept-Encoding: gzip`.
+All responses support gzip when the client sends `Accept-Encoding: gzip`, and include `Vary: Accept-Encoding`.
+
+Successful responses include a `Cache-Control` header: color, name and list data is cacheable for an hour, swatches for a week, and `/health` is never cached. Errors are not cached.
 
 ### Understanding Distance Values
 

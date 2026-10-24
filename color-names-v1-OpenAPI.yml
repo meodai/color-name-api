@@ -420,7 +420,7 @@ paths:
               example:
                 error:
                   status: 422
-                  message: 'Could not find enough unique color names: exhausted all available names'
+                  message: 'Too many colors requested in unique mode. Requested 1600 colors but only 1500 are available.'
                   availableCount: 1500
                   totalCount: 1500
                   requestedCount: 1600
