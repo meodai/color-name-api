@@ -76,6 +76,11 @@ let io;
 let hasDb = false;
 let handleWellKnown; // assigned during initialization
 
+// Cache-Control values per route, data only changes when color-name-list is bumped
+const cacheShort = 'public, max-age=3600';
+const cacheLong = 'public, max-age=604800';
+const cacheNone = 'no-store';
+
 const responseHeaderObj = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
@@ -84,6 +89,8 @@ const responseHeaderObj = {
   'Access-Control-Allow-Headers':
     'X-Requested-With, X-Referrer, X-HTTP-Method-Override, Content-Type, Accept',
   'Content-Type': 'application/json; charset=utf-8',
+  // responses differ depending on whether the client accepts gzip
+  Vary: 'Accept-Encoding',
 };
 
 const responseHandlerSVG = {
@@ -220,13 +227,17 @@ const sendError = async (
   message,
   responseHeader,
   extra = {}
-) =>
-  httpRespond(
+) => {
+  // errors should never be cached
+  const errorHeader = { ...responseHeader };
+  delete errorHeader['Cache-Control'];
+  return httpRespond(
     response,
     { error: { status, message, ...extra } },
     status,
-    responseHeader
+    errorHeader
   );
+};
 
 /**
  * responds to the client
@@ -630,6 +641,7 @@ const normalizePath = p => (p === '/' ? '/' : p.replace(/\/+$/, ''));
 const routes = [
   {
     path: '/',
+    cacheControl: cacheShort,
     handler: async (
       searchParams,
       requestUrl,
@@ -662,6 +674,7 @@ const routes = [
   },
   {
     path: '/health',
+    cacheControl: cacheNone,
     handler: async (
       searchParams,
       requestUrl,
@@ -682,6 +695,7 @@ const routes = [
   },
   {
     path: `/${baseUrl}docs/`,
+    cacheControl: cacheShort,
     handler: async (
       searchParams,
       requestUrl,
@@ -699,6 +713,7 @@ const routes = [
   },
   {
     path: '/openapi.yaml',
+    cacheControl: cacheShort,
     handler: async (
       searchParams,
       requestUrl,
@@ -729,6 +744,7 @@ const routes = [
   },
   {
     path: '/openapi.json',
+    cacheControl: cacheShort,
     handler: async (
       searchParams,
       requestUrl,
@@ -750,14 +766,17 @@ const routes = [
   },
   {
     path: `/${baseUrl}names/`,
+    cacheControl: cacheShort,
     handler: respondNameSearch,
   },
   {
     path: `/${baseUrl}lists/`,
+    cacheControl: cacheShort,
     handler: respondLists,
   },
   {
     path: `/${baseUrl}swatch/`,
+    cacheControl: cacheLong,
     handler: async (
       searchParams,
       requestUrl,
@@ -792,11 +811,14 @@ const routes = [
   },
   {
     path: `/${baseUrl}`,
+    cacheControl: cacheShort,
     handler: respondValueSearch,
   },
 ];
 
-const getHandlerForPath = path => {
+const colorsRoute = routes.find(route => route.handler === respondValueSearch);
+
+const getRouteForPath = path => {
   const normalizedPath = normalizePath(path);
 
   // Find a matching route with normalized paths
@@ -806,7 +828,7 @@ const getHandlerForPath = path => {
   });
 
   if (matchingRoute) {
-    return matchingRoute.handler;
+    return matchingRoute;
   }
 
   // If no route matches, check if it is a color path under /v1/ (for backwards compatibility)
@@ -814,7 +836,7 @@ const getHandlerForPath = path => {
     path.startsWith(`/${baseUrl}`) &&
     validateColors(path.slice(baseUrl.length + 1))
   ) {
-    return respondValueSearch;
+    return colorsRoute;
   }
 
   return null;
@@ -854,7 +876,7 @@ const requestHandler = async (request, response) => {
 
   const path = requestUrl.pathname;
   const responseHeader = { ...responseHeaderObj };
-  const responseHandler = getHandlerForPath(path);
+  const route = getRouteForPath(path);
   const isSocket = request.headers.upgrade === 'websocket';
 
   // if the request is a socket, we don't want to respond
@@ -872,7 +894,7 @@ const requestHandler = async (request, response) => {
   // const accpets = request.headers['accept-encoding'];
 
   // Check if we have a handler for this path
-  if (responseHandler === null) {
+  if (route === null) {
     return await sendError(
       response,
       404,
@@ -919,7 +941,11 @@ const requestHandler = async (request, response) => {
     console.log('client location', clientLocation);
   }
 
-  return await responseHandler(
+  if (route.cacheControl) {
+    responseHeader['Cache-Control'] = route.cacheControl;
+  }
+
+  return await route.handler(
     searchParams,
     requestUrl,
     request,
