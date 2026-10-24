@@ -392,36 +392,34 @@ paths:
                       svg: '/v1/swatch/?color=ff0000'
 
         '400':
-          description: BAD REQUEST
+          description: BAD REQUEST - Invalid list key, invalid hex value or too many colors requested
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
-              example:
-                error:
-                  status: 400
-                  message: "Invalid or missing list key: 'nonexistent'. Available keys are: default, bestOf, short, ..."
+              examples:
+                invalidList:
+                  summary: Invalid list key
+                  value:
+                    error:
+                      status: 400
+                      message: "Invalid or missing list key: 'nonexistent'. Available keys are: default, bestOf, short, ..."
+                invalidHex:
+                  summary: Invalid hex value
+                  value:
+                    error:
+                      status: 400
+                      message: "'xyz' is not a valid HEX color"
 
-        '404':
-          description: NOT FOUND
+        '422':
+          description: UNPROCESSABLE ENTITY - Requested more unique colors than available
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
               example:
                 error:
-                  status: 404
-                  message: "'xyz' is not a valid HEX color"
-
-        '409':
-          description: CONFLICT - Requested more unique colors than available
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
-              example:
-                error:
-                  status: 409
+                  status: 422
                   message: 'Could not find enough unique color names: exhausted all available names'
                   availableCount: 1500
                   totalCount: 1500
@@ -491,16 +489,16 @@ paths:
                       $ref: '#/components/schemas/colorBasic'
                     description: Array of colors matching the search term
 
-        '404':
-          description: NOT FOUND
+        '400':
+          description: BAD REQUEST - Search term shorter than 3 characters
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
               example:
                 error:
-                  status: 404
-                  message: 'the color name your are looking for must be at least 3 characters long.'
+                  status: 400
+                  message: 'the color name you are looking for must be at least 3 characters long.'
 
     parameters:
       - name: name

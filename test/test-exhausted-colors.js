@@ -57,9 +57,9 @@ async function runTest() {
     const res = await fetch(`http://${localhost}:${port}/${baseUrl}${testUrl}`);
     console.log(`Response status: ${res.status}`);
 
-    // We expect HTTP 409 (Conflict)
-    if (res.status !== 409) {
-      throw new Error(`Expected HTTP status 409 but got ${res.status}`);
+    // We expect HTTP 422 (Unprocessable Entity)
+    if (res.status !== 422) {
+      throw new Error(`Expected HTTP status 422 but got ${res.status}`);
     }
 
     const response = await res.json();

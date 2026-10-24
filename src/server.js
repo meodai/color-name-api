@@ -375,8 +375,8 @@ const respondNameSearch = async (
   if (searchString.length < 3) {
     return await sendError(
       response,
-      404,
-      'the color name your are looking for must be at least 3 characters long.',
+      400,
+      'the color name you are looking for must be at least 3 characters long.',
       responseHeader
     );
   }
@@ -437,7 +437,7 @@ const respondValueSearch = async (
   if (invalidColors.length) {
     return await sendError(
       response,
-      404,
+      400,
       `'${invalidColors.join(', ')}' is not a valid HEX color`,
       responseHeader
     );
@@ -535,7 +535,7 @@ const respondValueSearch = async (
       const exhaustedColor = colorsResponse.find(color => color.error);
       return await sendError(
         response,
-        409,
+        422,
         exhaustedColor.error,
         responseHeader,
         {

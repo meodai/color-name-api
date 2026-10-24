@@ -215,8 +215,8 @@ const routesToTest = {
       }
 
       // Verify correct status code
-      if (response.error.status !== 409) {
-        throw new Error(`Expected status 409 but got ${response.error.status}`);
+      if (response.error.status !== 422) {
+        throw new Error(`Expected status 422 but got ${response.error.status}`);
       }
 
       // The requested count should match the number of colors we requested (22)
