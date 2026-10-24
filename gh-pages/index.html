@@ -106,6 +106,8 @@
       <label id="url-list-container" class="url-interactive"></label>
       <span class="url-part">&noduplicates=</span>
       <label id="url-noduplicates-container" class="url-interactive"></label>
+      <span class="url-part">&description=</span>
+      <label id="url-description-container" class="url-interactive"></label>
     </div>
     <div id="json-viewer"></div>
   </div>
@@ -124,6 +126,19 @@
         <code>noduplicates</code> parameter is set to <code>true</code>, the
         API ensures that every color requested carries a unique name, avoiding
         redundancy and confusion.
+      </p>
+    </div>
+  </aside>
+
+  <aside>
+    <div class="section--right">
+      <h2 data-split>Taglines and Descriptions</h2>
+      <p data-collision=".07 0">
+        Names from the <code>default</code>, <code>bestOf</code> and
+        <code>short</code> lists come with a <code>tagline</code>, a short line
+        about the name. Set <code>description</code> to <code>true</code> to
+        also get words for each color you send: nouns, adjectives, meanings,
+        effects, usage and its color temperature.
       </p>
     </div>
   </aside>
@@ -848,6 +863,12 @@
       <option value="default">Loading lists...</option>
     </select>
     <input type="checkbox" id="noduplicates-checkbox" style="display: none" />
+    <input
+      type="checkbox"
+      id="description-checkbox"
+      style="display: none"
+      checked
+    />
   </div>
 
   <script src="js/main.js" type="module"></script>

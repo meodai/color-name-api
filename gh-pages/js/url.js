@@ -27,25 +27,41 @@ export function initializeUrlInteractiveElements(
   elements.urlListContainer.innerHTML = '';
   elements.urlListContainer.appendChild(urlListSelect);
   elements.urlListContainer.appendChild(urlListLabel);
+  addUrlCheckbox(
+    'url-noduplicates-checkbox',
+    elements.noduplicatesCheckbox,
+    elements.urlNoDuplicatesContainer,
+    updateApiUrlPreview
+  );
+  addUrlCheckbox(
+    'url-description-checkbox',
+    elements.descriptionCheckbox,
+    elements.urlDescriptionContainer,
+    updateApiUrlPreview
+  );
+}
+
+// a true/false toggle in the URL builder, kept in sync with a hidden checkbox
+function addUrlCheckbox(id, hiddenCheckbox, container, updateApiUrlPreview) {
   const checkboxContainer = document.createElement('label');
   checkboxContainer.classList.add('url-checkbox-container');
   const urlCheckbox = document.createElement('input');
   urlCheckbox.type = 'checkbox';
-  urlCheckbox.id = 'url-noduplicates-checkbox';
+  urlCheckbox.id = id;
   urlCheckbox.classList.add('url-checkbox');
-  urlCheckbox.checked = elements.noduplicatesCheckbox.checked;
+  urlCheckbox.checked = hiddenCheckbox.checked;
   const urlCheckboxLabel = document.createElement('span');
   urlCheckboxLabel.classList.add('url-checkbox-label');
-  urlCheckboxLabel.textContent = 'false';
+  urlCheckboxLabel.textContent = hiddenCheckbox.checked ? 'true' : 'false';
   urlCheckbox.addEventListener('change', event => {
-    elements.noduplicatesCheckbox.checked = event.target.checked;
+    hiddenCheckbox.checked = event.target.checked;
     urlCheckboxLabel.textContent = event.target.checked ? 'true' : 'false';
     updateApiUrlPreview();
   });
   checkboxContainer.appendChild(urlCheckbox);
   checkboxContainer.appendChild(urlCheckboxLabel);
-  elements.urlNoDuplicatesContainer.innerHTML = '';
-  elements.urlNoDuplicatesContainer.appendChild(checkboxContainer);
+  container.innerHTML = '';
+  container.appendChild(checkboxContainer);
 }
 
 export function updateApiUrlPreview(
@@ -64,6 +80,9 @@ export function updateApiUrlPreview(
   }
   if (elements.noduplicatesCheckbox.checked) {
     params.push('noduplicates=true');
+  }
+  if (elements.descriptionCheckbox.checked) {
+    params.push('description=true');
   }
   if (params.length > 0) {
     urlString += `?${params.join('&')}`;

@@ -236,6 +236,9 @@ elements.listSelect.addEventListener('change', () => {
 elements.noduplicatesCheckbox.addEventListener('change', () => {
   updateApiUrlPreview(selectedColors, availableLists, isInitialized);
 });
+elements.descriptionCheckbox.addEventListener('change', () => {
+  updateApiUrlPreview(selectedColors, availableLists, isInitialized);
+});
 
 document.addEventListener('visibilitychange', () => {
   const isVisible = document.visibilityState === 'visible';
