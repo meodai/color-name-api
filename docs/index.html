@@ -910,10 +910,66 @@ ul.nav-tabs {
       "description" : "The best contrasting color ('black' or 'white') for text on this color",
       "enum" : [ "black", "white" ]
     },
+    "tagline" : {
+      "type" : "string",
+      "description" : "A one-line description of the color name. Only on colors from the `default`, `bestOf`\nand `short` lists, and only for names that have one. The same taglines are shown on names.color.pizza.\n",
+      "example" : "Dark ocean depths where the siren songs are all minor keys."
+    },
     "swatchImg" : {
       "$ref" : "#/components/schemas/SwatchImage"
     }
   }
+};
+    defs["colorDescription"] = {
+  "title" : "ColorDescription",
+  "required" : [ "adjectives", "effects", "meanings", "nouns", "temperature", "usage" ],
+  "type" : "object",
+  "properties" : {
+    "nouns" : {
+      "type" : "array",
+      "description" : "Color names, best fit first",
+      "example" : [ "blue", "navy" ],
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "adjectives" : {
+      "type" : "array",
+      "description" : "Adjectives, the best fit first; the rest are not ranked",
+      "example" : [ "deep", "rich", "dark", "dim", "somber" ],
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "meanings" : {
+      "type" : "array",
+      "description" : "Symbolic associations",
+      "example" : [ "trust", "responsibility", "honesty" ],
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "effects" : {
+      "type" : "array",
+      "description" : "Perceptual or behavioral effects",
+      "example" : [ "calm", "reassure", "signal authority" ],
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "usage" : {
+      "type" : "array",
+      "description" : "Contexts, industries and themes the color fits",
+      "example" : [ "security", "finance", "technology" ],
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "temperature" : {
+      "$ref" : "#/components/schemas/ColorTemperature"
+    }
+  },
+  "description" : "Words describing the requested color (`requestedHex`, not the matched name), from\n[color-description](https://github.com/words/color-description). Only added when\n`description=true`. The dataset is English, and its meanings, effects and usage\nare subjective and written from a western perspective.\n"
 };
     defs["colorExtension"] = {
   "title" : "ColorExtension",
@@ -927,6 +983,9 @@ ul.nav-tabs {
     "distance" : {
       "type" : "number",
       "description" : "The distance between the requested hex value and the closest color (0 = exact match)"
+    },
+    "description" : {
+      "$ref" : "#/components/schemas/colorDescription"
     }
   }
 };
@@ -966,6 +1025,26 @@ ul.nav-tabs {
       "description" : "A creatively generated name for the color palette when multiple colors are requested"
     }
   }
+};
+    defs["ColorTemperature"] = {
+  "title" : "ColorTemperature",
+  "required" : [ "descriptive", "value" ],
+  "type" : "object",
+  "properties" : {
+    "value" : {
+      "type" : "number",
+      "description" : "Temperature in Kelvin",
+      "example" : 10000
+    },
+    "descriptive" : {
+      "type" : "array",
+      "example" : [ "very cool" ],
+      "items" : {
+        "type" : "string"
+      }
+    }
+  },
+  "description" : "The closest correlated color temperature"
 };
     defs["error"] = {
   "title" : "Error",
@@ -2103,7 +2182,7 @@ with the same response data to all connected socket clients.
                           <div class="tab-pane active" id="examples-Default-getColorNames-0-curl">
                             <pre class="prettyprint"><code class="language-bsh">curl -X GET \
  -H "Accept: application/json" \
- "https://api.color.pizza/v1/?list=&values=values_example&noduplicates=true&goodnamesonly=true"
+ "https://api.color.pizza/v1/?list=&values=values_example&noduplicates=true&goodnamesonly=true&description=true"
 </code></pre>
                           </div>
                           <div class="tab-pane" id="examples-Default-getColorNames-0-java">
@@ -2124,13 +2203,16 @@ public class DefaultApiExample {
         String values = values_example; // String | A comma-separated list of hex values (e.g., `FF0000,00FF00` do not include the `#`)
         Boolean noduplicates = true; // Boolean | When true, ensures each color gets a unique name even when colors are similar
         Boolean goodnamesonly = true; // Boolean | When true, uses the 'bestOf' list automatically
+        Boolean description = true; // Boolean | When true, adds a `description` object with words describing each requested color.
+Ignored when no `values` are given (full lists).
+
         String xReferrer = my-app-name; // String | Custom header for explicit referrer tracking. When provided, this value is used instead of 
 standard referrer headers and is included in socket.io event data. Useful for attribution
 and analytics, especially in environments where standard referrer headers might be stripped.
 
 
         try {
-            ColorResponse result = apiInstance.getColorNames(list, values, noduplicates, goodnamesonly, xReferrer);
+            ColorResponse result = apiInstance.getColorNames(list, values, noduplicates, goodnamesonly, description, xReferrer);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling DefaultApi#getColorNames");
@@ -2151,13 +2233,16 @@ public class DefaultApiExample {
         String values = values_example; // String | A comma-separated list of hex values (e.g., `FF0000,00FF00` do not include the `#`)
         Boolean noduplicates = true; // Boolean | When true, ensures each color gets a unique name even when colors are similar
         Boolean goodnamesonly = true; // Boolean | When true, uses the 'bestOf' list automatically
+        Boolean description = true; // Boolean | When true, adds a `description` object with words describing each requested color.
+Ignored when no `values` are given (full lists).
+
         String xReferrer = my-app-name; // String | Custom header for explicit referrer tracking. When provided, this value is used instead of 
 standard referrer headers and is included in socket.io event data. Useful for attribution
 and analytics, especially in environments where standard referrer headers might be stripped.
 
 
         try {
-            ColorResponse result = apiInstance.getColorNames(list, values, noduplicates, goodnamesonly, xReferrer);
+            ColorResponse result = apiInstance.getColorNames(list, values, noduplicates, goodnamesonly, description, xReferrer);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling DefaultApi#getColorNames");
@@ -2179,6 +2264,9 @@ PossibleLists *list = ; // The name of the color name list to use (case-sensitiv
 String *values = values_example; // A comma-separated list of hex values (e.g., `FF0000,00FF00` do not include the `#`) (optional) (default to null)
 Boolean *noduplicates = true; // When true, ensures each color gets a unique name even when colors are similar (optional) (default to null)
 Boolean *goodnamesonly = true; // When true, uses the 'bestOf' list automatically (optional) (default to null)
+Boolean *description = true; // When true, adds a `description` object with words describing each requested color.
+Ignored when no `values` are given (full lists).
+ (optional) (default to null)
 String *xReferrer = my-app-name; // Custom header for explicit referrer tracking. When provided, this value is used instead of 
 standard referrer headers and is included in socket.io event data. Useful for attribution
 and analytics, especially in environments where standard referrer headers might be stripped.
@@ -2189,6 +2277,7 @@ and analytics, especially in environments where standard referrer headers might 
     values:values
     noduplicates:noduplicates
     goodnamesonly:goodnamesonly
+    description:description
     xReferrer:xReferrer
               completionHandler: ^(ColorResponse output, NSError* error) {
     if (output) {
@@ -2211,6 +2300,9 @@ var opts = {
   'values': values_example, // {String} A comma-separated list of hex values (e.g., `FF0000,00FF00` do not include the `#`)
   'noduplicates': true, // {Boolean} When true, ensures each color gets a unique name even when colors are similar
   'goodnamesonly': true, // {Boolean} When true, uses the 'bestOf' list automatically
+  'description': true, // {Boolean} When true, adds a `description` object with words describing each requested color.
+Ignored when no `values` are given (full lists).
+
   'xReferrer': my-app-name // {String} Custom header for explicit referrer tracking. When provided, this value is used instead of 
 standard referrer headers and is included in socket.io event data. Useful for attribution
 and analytics, especially in environments where standard referrer headers might be stripped.
@@ -2251,6 +2343,9 @@ namespace Example
             var values = values_example;  // String | A comma-separated list of hex values (e.g., `FF0000,00FF00` do not include the `#`) (optional)  (default to null)
             var noduplicates = true;  // Boolean | When true, ensures each color gets a unique name even when colors are similar (optional)  (default to null)
             var goodnamesonly = true;  // Boolean | When true, uses the 'bestOf' list automatically (optional)  (default to null)
+            var description = true;  // Boolean | When true, adds a `description` object with words describing each requested color.
+Ignored when no `values` are given (full lists).
+ (optional)  (default to null)
             var xReferrer = my-app-name;  // String | Custom header for explicit referrer tracking. When provided, this value is used instead of 
 standard referrer headers and is included in socket.io event data. Useful for attribution
 and analytics, especially in environments where standard referrer headers might be stripped.
@@ -2258,7 +2353,7 @@ and analytics, especially in environments where standard referrer headers might 
 
             try {
                 // Get color names for specific hex values
-                ColorResponse result = apiInstance.getColorNames(list, values, noduplicates, goodnamesonly, xReferrer);
+                ColorResponse result = apiInstance.getColorNames(list, values, noduplicates, goodnamesonly, description, xReferrer);
                 Debug.WriteLine(result);
             } catch (Exception e) {
                 Debug.Print("Exception when calling DefaultApi.getColorNames: " + e.Message );
@@ -2279,13 +2374,16 @@ $list = ; // PossibleLists | The name of the color name list to use (case-sensit
 $values = values_example; // String | A comma-separated list of hex values (e.g., `FF0000,00FF00` do not include the `#`)
 $noduplicates = true; // Boolean | When true, ensures each color gets a unique name even when colors are similar
 $goodnamesonly = true; // Boolean | When true, uses the 'bestOf' list automatically
+$description = true; // Boolean | When true, adds a `description` object with words describing each requested color.
+Ignored when no `values` are given (full lists).
+
 $xReferrer = my-app-name; // String | Custom header for explicit referrer tracking. When provided, this value is used instead of 
 standard referrer headers and is included in socket.io event data. Useful for attribution
 and analytics, especially in environments where standard referrer headers might be stripped.
 
 
 try {
-    $result = $api_instance->getColorNames($list, $values, $noduplicates, $goodnamesonly, $xReferrer);
+    $result = $api_instance->getColorNames($list, $values, $noduplicates, $goodnamesonly, $description, $xReferrer);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling DefaultApi->getColorNames: ', $e->getMessage(), PHP_EOL;
@@ -2304,13 +2402,16 @@ my $list = ; # PossibleLists | The name of the color name list to use (case-sens
 my $values = values_example; # String | A comma-separated list of hex values (e.g., `FF0000,00FF00` do not include the `#`)
 my $noduplicates = true; # Boolean | When true, ensures each color gets a unique name even when colors are similar
 my $goodnamesonly = true; # Boolean | When true, uses the 'bestOf' list automatically
+my $description = true; # Boolean | When true, adds a `description` object with words describing each requested color.
+Ignored when no `values` are given (full lists).
+
 my $xReferrer = my-app-name; # String | Custom header for explicit referrer tracking. When provided, this value is used instead of 
 standard referrer headers and is included in socket.io event data. Useful for attribution
 and analytics, especially in environments where standard referrer headers might be stripped.
 
 
 eval {
-    my $result = $api_instance->getColorNames(list => $list, values => $values, noduplicates => $noduplicates, goodnamesonly => $goodnamesonly, xReferrer => $xReferrer);
+    my $result = $api_instance->getColorNames(list => $list, values => $values, noduplicates => $noduplicates, goodnamesonly => $goodnamesonly, description => $description, xReferrer => $xReferrer);
     print Dumper($result);
 };
 if ($@) {
@@ -2331,6 +2432,9 @@ list =  # PossibleLists | The name of the color name list to use (case-sensitive
 values = values_example # String | A comma-separated list of hex values (e.g., `FF0000,00FF00` do not include the `#`) (optional) (default to null)
 noduplicates = true # Boolean | When true, ensures each color gets a unique name even when colors are similar (optional) (default to null)
 goodnamesonly = true # Boolean | When true, uses the 'bestOf' list automatically (optional) (default to null)
+description = true # Boolean | When true, adds a `description` object with words describing each requested color.
+Ignored when no `values` are given (full lists).
+ (optional) (default to null)
 xReferrer = my-app-name # String | Custom header for explicit referrer tracking. When provided, this value is used instead of 
 standard referrer headers and is included in socket.io event data. Useful for attribution
 and analytics, especially in environments where standard referrer headers might be stripped.
@@ -2338,7 +2442,7 @@ and analytics, especially in environments where standard referrer headers might 
 
 try:
     # Get color names for specific hex values
-    api_response = api_instance.get_color_names(list=list, values=values, noduplicates=noduplicates, goodnamesonly=goodnamesonly, xReferrer=xReferrer)
+    api_response = api_instance.get_color_names(list=list, values=values, noduplicates=noduplicates, goodnamesonly=goodnamesonly, description=description, xReferrer=xReferrer)
     pprint(api_response)
 except ApiException as e:
     print("Exception when calling DefaultApi->getColorNames: %s\n" % e)</code></pre>
@@ -2352,10 +2456,11 @@ pub fn main() {
     let values = values_example; // String
     let noduplicates = true; // Boolean
     let goodnamesonly = true; // Boolean
+    let description = true; // Boolean
     let xReferrer = my-app-name; // String
 
     let mut context = DefaultApi::Context::default();
-    let result = client.getColorNames(list, values, noduplicates, goodnamesonly, xReferrer, &context).wait();
+    let result = client.getColorNames(list, values, noduplicates, goodnamesonly, description, xReferrer, &context).wait();
 
     println!("{:?}", result);
 }
@@ -2483,6 +2588,28 @@ When true, ensures each color gets a unique name even when colors are similar
 
                     <div class="inner description marked">
 When true, uses the &#39;bestOf&#39; list automatically
+                    </div>
+            </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                                <tr><td style="width:150px;">description</td>
+<td>
+
+
+    <div id="d2e199_getColorNames_description">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Boolean
+                </span>
+
+                    <div class="inner description marked">
+When true, adds a &#x60;description&#x60; object with words describing each requested color.
+Ignored when no &#x60;values&#x60; are given (full lists).
+
                     </div>
             </div>
         </div>

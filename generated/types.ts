@@ -4,505 +4,680 @@
  */
 
 export interface paths {
-  "/docs/": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * Get API Documentation
-     * @description Serves the static HTML documentation page for the API.
-     */
-    get: operations["getDocumentation"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/": {
-    parameters: {
-      query?: {
-        /** @description The name of the color name list to use (case-sensitive) */
-        list?: components["schemas"]["possibleLists"];
-        /** @description A comma-separated list of hex values (e.g., `FF0000,00FF00` do not include the `#`) */
-        values?: string;
-        /** @description When true, ensures each color gets a unique name even when colors are similar */
-        noduplicates?: boolean;
-        /** @description When true, uses the 'bestOf' list automatically */
-        goodnamesonly?: boolean;
-      };
-      header?: {
+    "/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
         /**
-         * @description Custom header for explicit referrer tracking. When provided, this value is used instead of
-         *     standard referrer headers and is included in socket.io event data. Useful for attribution
-         *     and analytics, especially in environments where standard referrer headers might be stripped.
+         * Get API metadata and discovery information
+         * @description Returns metadata about the API including available endpoints, version information,
+         *     and links to documentation. This endpoint is useful for API discovery and provides
+         *     a quick overview of all available endpoints.
          *
-         * @example my-app-name
          */
-        "X-Referrer"?: string;
-      };
-      path?: never;
-      cookie?: never;
+        get: operations["getApiMetadata"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /**
-     * Get color names for specific hex values
-     * @description Returns an array of colors from the specified list, with distance calculations
-     *     to show how close each match is to the requested colors. When providing multiple
-     *     values, the endpoint will find the closest match for each color.
-     *
-     *     If no colors are provided, returns all colors from the specified list.
-     *
-     *     When the server has socket.io enabled, this endpoint will also emit a 'colors' event
-     *     with the same response data to all connected socket clients.
-     *
-     */
-    get: operations["getColorNames"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/names/": {
-    parameters: {
-      query?: {
-        /** @description The search term to look for in color names (min 3 characters) */
-        name?: string;
-        /** @description The name of the color name list to search in */
-        list?: components["schemas"]["possibleLists"];
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/health": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Health check endpoint
+         * @description Returns the health status of the API. This endpoint is useful for monitoring,
+         *     uptime checks, and load balancer health checks. Always returns a 200 status
+         *     when the API is operational.
+         *
+         */
+        get: operations["healthCheck"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /**
-     * Search for colors by name
-     * @description Returns colors whose names contain the search string. The search is case-insensitive.
-     *     The search string must be at least 3 characters long.
-     *
-     */
-    get: operations["searchColorsByName"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/lists/": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/v1/docs/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get API Documentation
+         * @description Serves the static HTML documentation page for the API.
+         */
+        get: operations["getDocumentation"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /**
-     * Get available color name lists
-     * @description Returns a list of available color name lists with descriptions and URLs to
-     *     the color list endpoints. If a specific list key is provided via the 'list' query parameter,
-     *     only the description for that list will be returned.
-     *
-     */
-    get: operations["getColorLists"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/swatch/": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/v1/": {
+        parameters: {
+            query?: {
+                /** @description The name of the color name list to use (case-sensitive) */
+                list?: components["schemas"]["possibleLists"];
+                /** @description A comma-separated list of hex values (e.g., `FF0000,00FF00` do not include the `#`) */
+                values?: string;
+                /** @description When true, ensures each color gets a unique name even when colors are similar */
+                noduplicates?: boolean;
+                /** @description When true, uses the 'bestOf' list automatically */
+                goodnamesonly?: boolean;
+                /** @description When true, adds a `description` object with words describing each requested color.
+                 *     Ignored when no `values` are given (full lists).
+                 *      */
+                description?: boolean;
+            };
+            header?: {
+                /**
+                 * @description Custom header for explicit referrer tracking. When provided, this value is used instead of
+                 *     standard referrer headers and is included in socket.io event data. Useful for attribution
+                 *     and analytics, especially in environments where standard referrer headers might be stripped.
+                 *
+                 * @example my-app-name
+                 */
+                "X-Referrer"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get color names for specific hex values
+         * @description Returns an array of colors from the specified list, with distance calculations
+         *     to show how close each match is to the requested colors. When providing multiple
+         *     values, the endpoint will find the closest match for each color.
+         *
+         *     If no colors are provided, returns all colors from the specified list.
+         *
+         *     When the server has socket.io enabled, this endpoint will also emit a 'colors' event
+         *     with the same response data to all connected socket clients.
+         *
+         */
+        get: operations["getColorNames"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /**
-     * Generate a color swatch for any color
-     * @description Generates an SVG swatch representation of a color. The swatch can include
-     *     the color name if provided. The SVG is designed to be visually appealing
-     *     and readable across different backgrounds.
-     *
-     */
-    get: operations["getColorSwatch"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
+    "/v1/names/": {
+        parameters: {
+            query?: {
+                /** @description The search term to look for in color names (min 3 characters) */
+                name?: string;
+                /** @description The name of the color name list to search in */
+                list?: components["schemas"]["possibleLists"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Search for colors by name
+         * @description Returns colors whose names contain the search string. The search is case-insensitive.
+         *     The search string must be at least 3 characters long.
+         *
+         */
+        get: operations["searchColorsByName"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/lists/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get available color name lists
+         * @description Returns a list of available color name lists with descriptions and URLs to
+         *     the color list endpoints. If a specific list key is provided via the 'list' query parameter,
+         *     only the description for that list will be returned.
+         *
+         */
+        get: operations["getColorLists"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/swatch/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Generate a color swatch for any color
+         * @description Generates an SVG swatch representation of a color. The swatch can include
+         *     the color name if provided. The SVG is designed to be visually appealing
+         *     and readable across different backgrounds.
+         *
+         */
+        get: operations["getColorSwatch"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-  schemas: {
-    listDescription: {
-      /** @description The title of the color name list */
-      title?: string;
-      /** @description A description of the color name list */
-      description?: string;
-      /** @description API endpoint to get the colors of the list */
-      url?: string;
-      /** @description URL to the source of the color name list */
-      source?: string;
-      /** @description Reference key of the color name list in the API */
-      key?: string;
-      /** @description License of the given color name list */
-      license?: string;
-      /** @description Amount of colors in the list */
-      colorCount?: number;
-    };
-    /** ColorBasic */
-    colorBasic: {
-      /** @description Name of the closest color relative to the hex value provided */
-      name: string;
-      /** @description Hex value of the color (can differ from the requested hex value) */
-      hex: string;
-      /**
-       * RGB
-       * @description RGB values
-       */
-      rgb: {
-        r: number;
-        g: number;
-        b: number;
-      };
-      /**
-       * HSL
-       * @description HSL values. All percentages are represented as integers (e.g., 50% as `50`).
-       */
-      hsl: {
-        h: number;
-        s: number;
-        l: number;
-      };
-      /**
-       * LAB
-       * @description LAB values
-       */
-      lab: {
-        l: number;
-        a: number;
-        b: number;
-      };
-      /** @description Luminance value */
-      luminance: number;
-      /** @description Luminance value according to WCAG */
-      luminanceWCAG: number;
-      /**
-       * @description The best contrasting color ('black' or 'white') for text on this color
-       * @enum {string}
-       */
-      bestContrast?: "black" | "white";
-      /**
-       * SwatchImage
-       * @description SVG representation of the color
-       */
-      swatchImg: {
+    schemas: {
+        listDescription: {
+            /** @description The title of the color name list */
+            title?: string;
+            /** @description A description of the color name list */
+            description?: string;
+            /** @description API endpoint to get the colors of the list */
+            url?: string;
+            /** @description URL to the source of the color name list */
+            source?: string;
+            /** @description Reference key of the color name list in the API */
+            key?: string;
+            /** @description License of the given color name list */
+            license?: string;
+            /** @description Amount of colors in the list */
+            colorCount?: number;
+        };
+        /** ColorBasic */
+        colorBasic: {
+            /** @description Name of the closest color relative to the hex value provided */
+            name: string;
+            /** @description Hex value of the color (can differ from the requested hex value) */
+            hex: string;
+            /**
+             * RGB
+             * @description RGB values
+             */
+            rgb: {
+                r: number;
+                g: number;
+                b: number;
+            };
+            /**
+             * HSL
+             * @description HSL values. Saturation and lightness are percentages on a 0-100 scale (e.g., 50% as `50`).
+             */
+            hsl: {
+                h: number;
+                s: number;
+                l: number;
+            };
+            /**
+             * LAB
+             * @description LAB values
+             */
+            lab: {
+                l: number;
+                a: number;
+                b: number;
+            };
+            /** @description Luminance value */
+            luminance: number;
+            /** @description Luminance value according to WCAG */
+            luminanceWCAG: number;
+            /**
+             * @description The best contrasting color ('black' or 'white') for text on this color
+             * @enum {string}
+             */
+            bestContrast?: "black" | "white";
+            /**
+             * @description A one-line description of the color name. Only on colors from the `default`, `bestOf`
+             *     and `short` lists, and only for names that have one. The same taglines are shown on names.color.pizza.
+             *
+             * @example Dark ocean depths where the siren songs are all minor keys.
+             */
+            tagline?: string;
+            /**
+             * SwatchImage
+             * @description SVG representation of the color
+             */
+            swatchImg: {
+                /**
+                 * Format: uri
+                 * @description URL to SVG representation of the color with the name
+                 */
+                svgNamed: string;
+                /**
+                 * Format: uri
+                 * @description URL to SVG representation of the color without the name
+                 */
+                svg: string;
+            };
+        };
+        /** ColorExtension */
+        colorExtension: {
+            /** @description The hex value that was requested by the user */
+            requestedHex: string;
+            /** @description The distance between the requested hex value and the closest color (0 = exact match) */
+            distance: number;
+            description?: components["schemas"]["colorDescription"];
+        };
         /**
-         * Format: uri
-         * @description URL to SVG representation of the color with the name
+         * ColorDescription
+         * @description Words describing the requested color (`requestedHex`, not the matched name), from
+         *     [color-description](https://github.com/words/color-description). Only added when
+         *     `description=true`. The dataset is English, and its meanings, effects and usage
+         *     are subjective and written from a western perspective.
+         *
          */
-        svgNamed: string;
+        colorDescription: {
+            /**
+             * @description Color names, best fit first
+             * @example [
+             *       "blue",
+             *       "navy"
+             *     ]
+             */
+            nouns: string[];
+            /**
+             * @description Adjectives, the best fit first; the rest are not ranked
+             * @example [
+             *       "deep",
+             *       "rich",
+             *       "dark",
+             *       "dim",
+             *       "somber"
+             *     ]
+             */
+            adjectives: string[];
+            /**
+             * @description Symbolic associations
+             * @example [
+             *       "trust",
+             *       "responsibility",
+             *       "honesty"
+             *     ]
+             */
+            meanings: string[];
+            /**
+             * @description Perceptual or behavioral effects
+             * @example [
+             *       "calm",
+             *       "reassure",
+             *       "signal authority"
+             *     ]
+             */
+            effects: string[];
+            /**
+             * @description Contexts, industries and themes the color fits
+             * @example [
+             *       "security",
+             *       "finance",
+             *       "technology"
+             *     ]
+             */
+            usage: string[];
+            /**
+             * ColorTemperature
+             * @description The closest correlated color temperature
+             */
+            temperature: {
+                /**
+                 * @description Temperature in Kelvin
+                 * @example 10000
+                 */
+                value: number;
+                /** @example [
+                 *       "very cool"
+                 *     ] */
+                descriptive: string[];
+            };
+        };
+        /** Color */
+        color: components["schemas"]["colorBasic"] & components["schemas"]["colorExtension"];
         /**
-         * Format: uri
-         * @description URL to SVG representation of the color without the name
+         * @description Predefined color lists. Names are case-sensitive.
+         * @enum {string}
          */
-        svg: string;
-      };
+        possibleLists: "default" | "bestOf" | "short" | "wikipedia" | "french" | "spanish" | "german" | "ridgway" | "risograph" | "basic" | "chineseTraditional" | "html" | "japaneseTraditional" | "leCorbusier" | "nbsIscc" | "ntc" | "osxcrayons" | "ral" | "sanzoWadaI" | "thesaurus" | "werner" | "windows" | "x11" | "xkcd";
+        socketColorResponse: {
+            paletteTitle?: string;
+            list?: components["schemas"]["possibleLists"];
+            colors?: components["schemas"]["colorBasic"][];
+        };
+        /**
+         * Error
+         * @example {
+         *       "error": {
+         *         "status": 404,
+         *         "message": "Not Found"
+         *       }
+         *     }
+         */
+        error: {
+            /** ErrorDetails */
+            error?: {
+                status?: number;
+                message?: string;
+            };
+        };
     };
-    /** ColorExtension */
-    colorExtension: {
-      /** @description The hex value that was requested by the user */
-      requestedHex: string;
-      /** @description The distance between the requested hex value and the closest color (0 = exact match) */
-      distance: number;
-    };
-    /** Color */
-    color: components["schemas"]["colorBasic"] &
-      components["schemas"]["colorExtension"];
-    /**
-     * @description Predefined color lists. Names are case-sensitive.
-     * @enum {string}
-     */
-    possibleLists:
-      | "default"
-      | "bestOf"
-      | "short"
-      | "wikipedia"
-      | "french"
-      | "spanish"
-      | "german"
-      | "ridgway"
-      | "risograph"
-      | "basic"
-      | "chineseTraditional"
-      | "html"
-      | "japaneseTraditional"
-      | "leCorbusier"
-      | "nbsIscc"
-      | "ntc"
-      | "osxcrayons"
-      | "ral"
-      | "sanzoWadaI"
-      | "thesaurus"
-      | "werner"
-      | "windows"
-      | "x11"
-      | "xkcd";
-    socketColorResponse: {
-      paletteTitle?: string;
-      list?: components["schemas"]["possibleLists"];
-      colors?: components["schemas"]["colorBasic"][];
-    };
-    /**
-     * Error
-     * @example {
-     *       "error": {
-     *         "status": 404,
-     *         "message": "Not Found"
-     *       }
-     *     }
-     */
-    error: {
-      /** ErrorDetails */
-      error?: {
-        status?: number;
-        message?: string;
-      };
-    };
-  };
-  responses: never;
-  parameters: never;
-  requestBodies: never;
-  headers: never;
-  pathItems: never;
+    responses: never;
+    parameters: never;
+    requestBodies: never;
+    headers: never;
+    pathItems: never;
 }
 export type $defs = Record<string, never>;
 export interface operations {
-  getDocumentation: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK - Returns the HTML documentation page. */
-      200: {
-        headers: {
-          [name: string]: unknown;
+    getApiMetadata: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-        content: {
-          "text/html": string;
-        };
-      };
-    };
-  };
-  getColorNames: {
-    parameters: {
-      query?: {
-        /** @description The name of the color name list to use (case-sensitive) */
-        list?: components["schemas"]["possibleLists"];
-        /** @description A comma-separated list of hex values (e.g., `FF0000,00FF00` do not include the `#`) */
-        values?: string;
-        /** @description When true, ensures each color gets a unique name even when colors are similar */
-        noduplicates?: boolean;
-        /** @description When true, uses the 'bestOf' list automatically */
-        goodnamesonly?: boolean;
-      };
-      header?: {
-        /**
-         * @description Custom header for explicit referrer tracking. When provided, this value is used instead of
-         *     standard referrer headers and is included in socket.io event data. Useful for attribution
-         *     and analytics, especially in environments where standard referrer headers might be stripped.
-         *
-         * @example my-app-name
-         */
-        "X-Referrer"?: string;
-      };
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": {
-            colors?: components["schemas"]["color"][];
-            /** @description A creatively generated name for the color palette when multiple colors are requested */
-            paletteTitle?: string;
-          };
-        };
-      };
-      /** @description BAD REQUEST */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["error"];
-        };
-      };
-      /** @description NOT FOUND */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["error"];
-        };
-      };
-      /** @description CONFLICT - Requested more unique colors than available */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["error"];
-        };
-      };
-    };
-  };
-  searchColorsByName: {
-    parameters: {
-      query?: {
-        /** @description The search term to look for in color names (min 3 characters) */
-        name?: string;
-        /** @description The name of the color name list to search in */
-        list?: components["schemas"]["possibleLists"];
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": {
-            /** @description Array of colors matching the search term */
-            colors?: components["schemas"]["colorBasic"][];
-          };
-        };
-      };
-      /** @description NOT FOUND */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["error"];
-        };
-      };
-    };
-  };
-  getColorLists: {
-    parameters: {
-      query?: {
-        /** @description The name of a specific color name list to retrieve details for */
-        list?: components["schemas"]["possibleLists"];
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json":
-            | {
-                /** @description Array of all available list keys */
-                availableColorNameLists?: string[];
-                /**
-                 * ListDescriptions
-                 * @description Object containing descriptions for each list
-                 */
-                listDescriptions?: {
-                  default?: components["schemas"]["listDescription"];
-                  bestOf?: components["schemas"]["listDescription"];
+        requestBody?: never;
+        responses: {
+            /** @description OK - Returns API metadata */
+            200: {
+                headers: {
+                    [name: string]: unknown;
                 };
-              }
-            | components["schemas"]["listDescription"];
+                content: {
+                    "application/json": {
+                        /** @example Color Name API */
+                        name?: string;
+                        /** @example v1 */
+                        version?: string;
+                        /** @example API for getting human-friendly names for hex colors */
+                        description?: string;
+                        endpoints?: {
+                            /** @example /v1/?values=ff0000,00ff00 */
+                            colors?: string;
+                            /** @example /v1/ff0000,00ff00 */
+                            colorsByPath?: string;
+                            /** @example /v1/names/:query */
+                            names?: string;
+                            /** @example /v1/lists/ */
+                            lists?: string;
+                            /** @example /v1/swatch/?color=ff0000&name=Red */
+                            swatch?: string;
+                            /** @example /v1/docs/ */
+                            docs?: string;
+                            /** @example /health */
+                            health?: string;
+                        };
+                        /** @example /openapi.yaml */
+                        documentation?: string;
+                        /** @example https://github.com/meodai/color-name-api */
+                        source?: string;
+                    };
+                };
+            };
         };
-      };
-      /** @description BAD REQUEST */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["error"];
-        };
-      };
-      /** @description NOT FOUND */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["error"];
-        };
-      };
     };
-  };
-  getColorSwatch: {
-    parameters: {
-      query: {
-        /** @description The hex value of the color to retrieve without '#' */
-        color: string;
-        /** @description The name of the color to display on the swatch */
-        name?: string;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
+    healthCheck: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK - API is healthy and operational */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @example ok
+                         * @enum {string}
+                         */
+                        status?: "ok";
+                        /**
+                         * Format: date-time
+                         * @example 2025-12-08T10:30:00.000Z
+                         */
+                        timestamp?: string;
+                    };
+                };
+            };
+        };
     };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
+    getDocumentation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-        content: {
-          "image/svg+xml": string;
+        requestBody?: never;
+        responses: {
+            /** @description OK - Returns the HTML documentation page. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/html": string;
+                };
+            };
         };
-      };
-      /** @description BAD REQUEST */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["error"];
-        };
-      };
     };
-  };
+    getColorNames: {
+        parameters: {
+            query?: {
+                /** @description The name of the color name list to use (case-sensitive) */
+                list?: components["schemas"]["possibleLists"];
+                /** @description A comma-separated list of hex values (e.g., `FF0000,00FF00` do not include the `#`) */
+                values?: string;
+                /** @description When true, ensures each color gets a unique name even when colors are similar */
+                noduplicates?: boolean;
+                /** @description When true, uses the 'bestOf' list automatically */
+                goodnamesonly?: boolean;
+                /** @description When true, adds a `description` object with words describing each requested color.
+                 *     Ignored when no `values` are given (full lists).
+                 *      */
+                description?: boolean;
+            };
+            header?: {
+                /**
+                 * @description Custom header for explicit referrer tracking. When provided, this value is used instead of
+                 *     standard referrer headers and is included in socket.io event data. Useful for attribution
+                 *     and analytics, especially in environments where standard referrer headers might be stripped.
+                 *
+                 * @example my-app-name
+                 */
+                "X-Referrer"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        colors?: components["schemas"]["color"][];
+                        /** @description A creatively generated name for the color palette when multiple colors are requested */
+                        paletteTitle?: string;
+                    };
+                };
+            };
+            /** @description BAD REQUEST - Invalid list key, invalid hex value or too many colors requested */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+            /** @description UNPROCESSABLE ENTITY - Requested more unique colors than available */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    searchColorsByName: {
+        parameters: {
+            query?: {
+                /** @description The search term to look for in color names (min 3 characters) */
+                name?: string;
+                /** @description The name of the color name list to search in */
+                list?: components["schemas"]["possibleLists"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description Array of colors matching the search term */
+                        colors?: components["schemas"]["colorBasic"][];
+                    };
+                };
+            };
+            /** @description BAD REQUEST - Search term shorter than 3 characters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    getColorLists: {
+        parameters: {
+            query?: {
+                /** @description The name of a specific color name list to retrieve details for */
+                list?: components["schemas"]["possibleLists"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description Array of all available list keys */
+                        availableColorNameLists?: string[];
+                        /**
+                         * ListDescriptions
+                         * @description Object containing descriptions for each list
+                         */
+                        listDescriptions?: {
+                            default?: components["schemas"]["listDescription"];
+                            bestOf?: components["schemas"]["listDescription"];
+                        };
+                    } | components["schemas"]["listDescription"];
+                };
+            };
+            /** @description BAD REQUEST */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+            /** @description NOT FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
+    getColorSwatch: {
+        parameters: {
+            query: {
+                /** @description The hex value of the color to retrieve without '#' */
+                color: string;
+                /** @description The name of the color to display on the swatch */
+                name?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/svg+xml": string;
+                };
+            };
+            /** @description BAD REQUEST */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["error"];
+                };
+            };
+        };
+    };
 }
